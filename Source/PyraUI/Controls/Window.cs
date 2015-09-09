@@ -6,12 +6,6 @@
         {
             Width = 512;
             Height = 256;
-
-            MaxWidth = 2048;
-            MaxHeight = 2048;
-
-            MinWidth = 128;
-            MinHeight = 128;
         }
     }
 }

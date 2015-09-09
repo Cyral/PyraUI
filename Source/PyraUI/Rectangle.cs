@@ -110,8 +110,22 @@ namespace PyraUI
                ",Width=" + Width.ToString(CultureInfo.CurrentCulture) +
                ",Height=" + Height.ToString(CultureInfo.CurrentCulture) + "}";
 
+        /// <summary>
+        /// Extend the rectangle dimensions by the specified size.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public Rectangle Extend(Size size) => new Rectangle(X, Y, Width + size.Width, Height + size.Height);
 
+        /// <summary>
+        /// Offset the rectangle by the specified point. (Add to the X and Y)
+        /// </summary>
         public Rectangle Offset(Point position) => new Rectangle(X + position.X, Y + position.Y, Width, Height);
+
+        /// <summary>
+        /// Extend the size to include the specified thickness.
+        /// </summary>
+        public Rectangle Extend(Thickness thickness)
+            => new Rectangle(0, 0, thickness.Right + thickness.Left + Width, thickness.Bottom + thickness.Top + Height);
     }
 }

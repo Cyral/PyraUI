@@ -57,14 +57,14 @@ namespace Pyratron.UI.Controls
         /// <param name="delta">Elapsed seconds since the last frame.</param>
         public virtual void Draw(float delta)
         {
-            Manager.Renderer.DrawRectangle(ExtendedBounds, Color.Red);
-            Manager.Renderer.DrawRectangle(BorderBounds, Color.Blue);
+            Manager.Renderer.DrawRectangle(ExtendedArea, Color.Red);
+            Manager.Renderer.DrawRectangle(BorderArea, Color.Blue);
             var boxColor = Color.White;
             if (Box == Box.Block)
                 boxColor = new Color(255, 255, 172);
             if (Box == Box.Inline)
                 boxColor = new Color(172, 255, 255);
-            Manager.Renderer.DrawRectangle(ContentBounds, boxColor);
+            Manager.Renderer.DrawRectangle(ContentArea, boxColor);
 
             DrawChildren(delta);
         }

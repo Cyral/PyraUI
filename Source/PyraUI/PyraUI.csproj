@@ -45,8 +45,11 @@
     <Compile Include="Controls\Component.cs" />
     <Compile Include="Controls\Control.cs" />
     <Compile Include="Controls\Element.cs" />
+    <Compile Include="Controls\Panel.cs" />
+    <Compile Include="Controls\StackPanel.cs" />
     <Compile Include="Controls\Visual.cs" />
     <Compile Include="Controls\Window.cs" />
+    <Compile Include="Dimension.cs" />
     <Compile Include="States\Box.cs" />
     <Compile Include="States\Visibility.cs" />
     <Compile Include="Thickness.cs" />

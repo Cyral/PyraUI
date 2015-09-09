@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Pyratron.UI.Controls;
 using Pyratron.UI.States;
 using PyraUI;
@@ -21,30 +22,13 @@ namespace Pyratron.UI
         {
             //Add an initial window.
             var window = new Window(this) { Box = Box.Overlap, Height = 512};
-            var control = new Control(this) { Width = 200};
-            var control2 = new Control(this) { Width = 100, Height = 32 };
-            var control3 = new Control(this) { Width = 110, Height = 32 };
-            var control4 = new Control(this) { Width = 100, Height = 32 };
-            var control5 = new Control(this) { Width = 120, Box = Box.Block };
-            var control6 = new Control(this) { Width = 16, Height = 16, Margin = 1, Padding = 1};
-            var control7 = new Control(this) { Width = 24, Height =32, Margin = 1, Padding = 1 };
-            var control8 = new Control(this) { Width = 128, Height = 8, Margin = 1, Padding = 1, Box = Box.Block };
-            var control9 = new Control(this) { Width = 400, Height = 32 };
-            var control10 = new Control(this) { Width = 400, Height = 64 };
-            var control11 = new Control(this) { Width = 120, Box = Box.Block };
-            var control12 = new Control(this) { Width = 400, Height = 32 };
-            window.Add(control);
-            window.Add(control2);
-            window.Add(control3);
-            window.Add(control4);
-            window.Add(control5);
-            window.Add(control6);
-            window.Add(control7);
-            window.Add(control8);
-            window.Add(control9);
-            window.Add(control10);
-            window.Add(control11);
-            window.Add(control12);
+            var panel = new StackPanel(this) { Height =100};
+            window.Add(panel);
+            panel.Add(new Control(this) { Height = 100 });
+            panel.Add(new Control(this) { Height = 75 });
+            panel.Add(new Control(this) { Height = 24,});
+            panel.Add(new Control(this) { Height = 75, });
+            panel.Add(new Control(this) {Height = 100, Margin = 24});
             Elements.Add(window);
         }
 

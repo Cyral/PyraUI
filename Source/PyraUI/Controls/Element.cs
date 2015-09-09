@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
+using System.Runtime.InteropServices;
 using Pyratron.UI.States;
 using PyraUI;
 
@@ -13,6 +11,8 @@ namespace Pyratron.UI.Controls
     /// </summary>
     public class Element : Component
     {
+        public override int MaxChildren => 1;
+
         /// <summary>
         /// The area inside the border.
         /// </summary>
@@ -28,64 +28,8 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Box Box { get; set; }
 
-        /// <summary>
-        /// The minimum width.
-        /// </summary>
-        public int MinWidth
-        {
-            get { return minWidth; }
-            set
-            {
-                minWidth = value;
-                if (Width < minWidth)
-                    Width = minWidth;
-            }
-        }
-
-        /// <summary>
-        /// The minimum height.
-        /// </summary>
-        public int MinHeight
-        {
-            get { return minHeight; }
-            set
-            {
-                minHeight = value;
-                if (Height < minHeight)
-                    Height = minHeight;
-            }
-        }
-
-        /// <summary>
-        /// The maximum width.
-        /// </summary>
-        public int MaxWidth
-        {
-            get { return maxWidth; }
-            set
-            {
-                maxWidth = value;
-                if (Width > maxWidth)
-                    Width = maxWidth;
-            }
-        }
-
-        /// <summary>
-        /// The maximum height.
-        /// </summary>
-        public int MaxHeight
-        {
-            get { return maxHeight; }
-            set
-            {
-                maxHeight = value;
-                if (Height > maxHeight)
-                    Height = maxHeight;
-            }
-        }
-
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public Dimension Width { get; set; }
+        public Dimension Height { get; set; }
 
         /// <summary>
         /// Element's parent. Null if root.
@@ -95,7 +39,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// List of child elements.
         /// </summary>
-        public List<Element> Elements { get; set; } 
+        public List<Element> Elements { get; set; }
 
         /// <summary>
         /// Control bounds (width and height), without position or margin/padding.
@@ -105,92 +49,44 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// The position of the content area of the element.
         /// </summary>
-        public Point Position
-        {
-            get
-            {
-                var initial = Parent?.Position + Margin + Padding ?? Margin + Padding;
-                return initial;
-            }
-        }
-
-        /// <summary>
-        /// The position of the content area of the parent. (The top left corner of the margin.)
-        /// </summary>
-        public Point BasePosition
-        {
-            get
-            {
-                var initial = Parent?.Position ?? Point.Zero;
-                if (Box == Box.Overlap || Parent == null)
-                    return initial;
-                if (Box == Box.Inline)
-                {
-                    var x = 0;
-                    var max = 0;
-                    foreach (var element in Parent.Elements.TakeWhile(element => element != this))
-                    {
-                        if (element.Box == Box.Inline)
-                        {
-                            x += element.ExtendedBounds.Width;
-                        }
-                        else
-                           x = 0;
-                        max = Math.Max(max, element.ContentBounds.Bottom);
-                    }
-                    var index = Parent.Elements.IndexOf(this);
-                    if (index > 0 && Parent.Elements[index - 1].Box == Box.Block)
-                        return new Point(initial.X + x, initial.Y + max);
-                    return x + Width > Parent.ContentBounds.Width ?
-                        new Point(initial.X, initial.Y + max) : 
-                        index <= 0 ? new Point(initial.X + x, initial.Y)
-                        : new Point(initial.X + x, initial.Y + Parent.Elements[index - 1].ExtendedBounds.Top - Parent.Elements[index - 1].Parent.Position.Y);
-                }
-                if (Box == Box.Block)
-                {
-                    var max = Parent.Elements.TakeWhile(element => element != this)
-                        .Select(element => element.ExtendedBounds.Bottom - element.Parent.Position.Y).Max();
-                    return new Point(initial.X, initial.Y + max);
-                }
-                return initial;
-            }
-        }
+        public Point Position { get; set; }
 
         /// <summary>
         /// Rectangular region of the content area (inside the padding).
         /// </summary>
-        public Rectangle ContentBounds
+        public Rectangle ContentArea
         {
-            get { return (Padding.Offset(Margin) + Size).Offset(BasePosition); }
+            get
+            {
+                return
+                    new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
+                        Size.Width - Padding.Left - Padding.Bottom, Size.Height - Padding.Right - Padding.Left).Offset(
+                            Position - Margin - Padding);
+            }
         }
 
         /// <summary>
         /// Rectangular region of the element.
         /// </summary>
-        public Rectangle BorderBounds
+        public Rectangle BorderArea
         {
-            get { return Size.Offset(Margin).Offset(BasePosition); }
+            get { return Size.Combine(Margin).Offset(Position - Margin - Padding); }
         }
 
         /// <summary>
         /// Rectangular region of the element plus the margin area.
         /// </summary>
-        public Rectangle ExtendedBounds
+        public Rectangle ExtendedArea
         {
-            get { return Size.Extend(Margin).Offset(BasePosition); }
+            get { return Size.Extend(Margin).Offset(Position - Margin - Padding); }
         }
-
-        private int minWidth, minHeight, maxWidth, maxHeight;
 
         public Element(Manager manager) : base(manager)
         {
             Elements = new List<Element>();
 
-            Width = 100;
-            Height = 50;
-
-            MaxWidth = 200;
-            MaxHeight = 100;
+            Width = new Dimension(64, 96, 1024);
+            Height = new Dimension(64, 96, 1024);
 
             Box = Box.Inline;
             Margin = 8;
@@ -198,11 +94,76 @@ namespace Pyratron.UI.Controls
         }
 
         /// <summary>
+        /// Calculate the layout of the element.
+        /// </summary>
+        /// <param name="down">
+        /// True if child controls will be recursively arranged, false if parent controls will be arranged.
+        /// (Width must be from first to last, while height must be from last to first)
+        /// </param>
+        public virtual void Arrange(bool down = true)
+        {
+            // If width is set to auto, fill the container horizontally.
+            if (Width.Auto && Parent != null)
+                Width.Value = Parent.ContentArea.Width - Margin.Left - Margin.Right;
+            // If the height of the parent is too small to contain this control, extend it.
+            if (Parent != null && ExtendedArea.Height + Position.Y > Parent.ContentArea.Height && Parent.Height.Auto)
+            {
+                Parent.Height.Value = Parent.FindChildHeight() + Parent.Padding.Top + Parent.Padding.Bottom;
+                // Arrange parent controls now that the height has been set.
+                Parent.Arrange(false);
+            }
+
+            if (down)
+            {
+                // The position is equal to the parent's position, plus the margin and padding, plus the height of the previous child controls.
+                var pos = Parent?.Position + Margin + Padding ?? Margin + Padding;
+                var extra = 0;
+                if (Parent != null)
+                {
+                    for (var i = 0; i < Parent.Elements.Count; i++)
+                    {
+                        // Until we hit this control, add the total height of child controls before this one.
+                        if (Parent.Elements[i] == this) break;
+                        extra += Parent.Elements[i].ExtendedArea.Height;
+                    }
+                }
+                Position = new Point(pos.X, pos.Y + extra);
+                for (var i = 0; i < Elements.Count; i++)
+                {
+                    var child = Elements[i];
+                    // Arrange child controls now that the width and position have been calculated.
+                    child.Arrange();
+                }
+            }
+            else
+            {
+                Parent?.Arrange(false);
+            }
+        }
+
+        /// <summary>
+        /// Returns the height of all the child controls.
+        /// </summary>
+        public virtual int FindChildHeight()
+        {
+            var height = 0;
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                var child = Elements[i];
+                height += child.ExtendedArea.Height;
+            }
+            return height;
+        }
+
+        /// <summary>
         /// Adds a child element to this element.
         /// </summary>
         /// <param name="element">The element to add.</param>
-        public void Add(Element element)
+        public virtual void Add(Element element)
         {
+            if (Elements.Count >= MaxChildren)
+                throw new InvalidOperationException("This element may not have any more children. (Maximum: " +
+                                                    MaxChildren + ") Try placing it inside a panel.");
             if (element != null)
             {
                 // If this control doesn't already contain the element.
@@ -218,6 +179,7 @@ namespace Pyratron.UI.Controls
                     // Add element to master list.
                     if (!Manager.Elements.Contains(element))
                         Manager.Elements.Add(element);
+                    Arrange();
                 }
             }
         }
@@ -227,7 +189,7 @@ namespace Pyratron.UI.Controls
         /// </summary>
         /// <param name="element">The element to remove.</param>
         /// <param name="dispose">Should the control be disposed and destroyed?</param>
-        public void Remove(Element element, bool dispose = true)
+        public virtual void Remove(Element element, bool dispose = true)
         {
             if (element != null)
             {
@@ -238,6 +200,7 @@ namespace Pyratron.UI.Controls
                     element.Parent = null;
                     if (dispose)
                         element.Dispose();
+                    Arrange();
                 }
             }
         }
@@ -245,7 +208,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Releases resources used by the element, removes itself from its parent, and disposes of all children.
         /// </summary>
-        private void Dispose()
+        protected virtual void Dispose()
         {
             Parent.Remove(this, false);
             Parent = null;

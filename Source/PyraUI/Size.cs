@@ -39,10 +39,24 @@ namespace PyraUI
         public override string ToString() => "{Width=" + Width.ToString(CultureInfo.CurrentCulture) + ",Height=" +
                                              Height.ToString(CultureInfo.CurrentCulture) + "}";
 
-        public Rectangle Offset(Thickness margin) => new Rectangle(margin.Left, margin.Top, Width, Height);
+        /// <summary>
+        /// Combines the left and top of a thickness with the width and height of a size to produce a rectangle.
+        /// </summary>
+        public Rectangle Combine(Thickness thickness) => new Rectangle(thickness.Left, thickness.Top, Width, Height);
 
-        public Rectangle Offset(Point point) => new Rectangle(point.X, point.Y, Width, Height);
+        /// <summary>
+        /// Combines the X and Y of a point with the width and height of a size to produce a rectangle.
+        /// </summary>
+        public Rectangle Combine(Point point) => new Rectangle(point.X, point.Y, Width, Height);
 
-        public Rectangle Extend(Thickness margin) => new Rectangle(0, 0, margin.Right + margin.Left + Width, margin.Bottom + margin.Top + Height);
+        /// <summary>
+        /// Extend the size to include the specified thickness.
+        /// </summary>
+        public Rectangle Extend(Thickness thickness) => new Rectangle(0, 0, thickness.Right + thickness.Left + Width, thickness.Bottom + thickness.Top + Height);
+
+        /// <summary>
+        /// Remove the specified thickness from the size.
+        /// </summary>
+        public Size Remove(Thickness thickness) => new Size(Width - thickness.Left - thickness.Right, Height - thickness.Top - thickness.Bottom);
     }
 }

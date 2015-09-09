@@ -3,8 +3,10 @@
     /// <summary>
     /// The most basic form of a UI component.
     /// </summary>
-    public class Component
+    public abstract class Component
     {
+        public abstract int MaxChildren { get; }
+
         public Component(Manager manager)
         {
             Manager = manager;
