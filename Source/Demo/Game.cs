@@ -19,8 +19,8 @@ namespace Pyratron.UI.Demo
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferHeight = 768,
-                PreferredBackBufferWidth = 1280
+                PreferredBackBufferHeight = 512,
+                PreferredBackBufferWidth = 1024
             };
             graphics.ApplyChanges();
             UI = new Monogame.Manager();

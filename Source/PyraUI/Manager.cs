@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Xml;
 using Pyratron.UI.Controls;
-using Pyratron.UI.States;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI
@@ -20,51 +23,26 @@ namespace Pyratron.UI
 
         public virtual void Init()
         {
-            //Add an initial window.
-            var window = new Window(this) {Box = Box.Overlap, Height = 700, Width = 900};
-            Elements.Add(window);
-            var panelMain = new StackPanel(this) { Orientation = Orientation.Vertical};
-            window.Add(panelMain);
-     
-            var panel = new StackPanel(this) { Orientation = Orientation.Vertical};
-            panelMain.Add(panel);
-            var panel2 = new StackPanel(this) { Orientation = Orientation.Horizontal};
-            panelMain.Add(panel2);
-  
-            var button = new Button(this);
-            panel.Add(button);
-            button.Add(new Label(this));
+            LoadFromXML(File.ReadAllText("window.xml"), null);
+        }
 
-            var button2 = new Button(this);
-            panel.Add(button2);
-            button2.Add(new Label(this));
+        public virtual void LoadFromXML(string xml, Element parent)
+        {
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+            var nodes = doc.ChildNodes;
+            LoadNode(nodes, parent);
+        }
 
-            var button3 = new Button(this);
-            panel2.Add(button3);
-            button3.Add(new Label(this));
-
-            var panel3 = new StackPanel(this) { Orientation = Orientation.Vertical };
-            panel2.Add(panel3);
-            panel3.Width.Value = 500;
-            panel3.Width.Auto = false;
-
-            var button4 = new Button(this);
-            panel3.Add(button4);
-            button4.Add(new Label(this) { Text  = "PyraUI"});
-
-            var button5 = new Button(this);
-            panel3.Add(button5);
-            button5.Add(new Label(this));
-
-            var button6 = new Button(this);
-            panelMain.Add(button6);
-            var button7 = new Button(this);
-            panelMain.Add(button7);
-            var panel5 = new StackPanel(this) {Orientation = Orientation.Horizontal };
-            panel5.Width.Max = 200;
-            var label = new Label(this) {Text = "Testing", VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Left };
-            panelMain.Add(panel5);
-            panel5.Add(label);
+        /// <summary>
+        /// Create an instance of an element by its name.
+        /// </summary>
+        public Element CreateControlInstance(XmlNode node)
+        {
+            if (node.Name.StartsWith("#text"))
+                return new Label(this) {Text = node.Value};
+            var t = Type.GetType(typeof (Control).Namespace + '.' + node.Name);
+            return (Element) Activator.CreateInstance(t, this);
         }
 
         public virtual void Load()
@@ -108,6 +86,48 @@ namespace Pyratron.UI
             {
                 var element = Elements[i];
                 element.Update(delta);
+            }
+        }
+
+        private void LoadNode(XmlNodeList nodes, Element parent)
+        {
+            foreach (XmlNode node in nodes)
+            {
+                var control = CreateControlInstance(node);
+                if (control == null) continue;
+
+                var props = TypeDescriptor.GetProperties(control.GetType());
+
+                // Set attributes.
+                if (node.Attributes != null)
+                {
+                    foreach (XmlAttribute xmlProperty in node.Attributes)
+                    {
+                        var propertyName = xmlProperty.Name;
+                        var propertyDescriptor = props[propertyName];
+
+                        if (propertyDescriptor != null)
+                        {
+                            object value;
+                            if (propertyDescriptor.PropertyType.IsEnum)
+                                value = Enum.Parse(propertyDescriptor.PropertyType, xmlProperty.Value);
+                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof (Dimension))
+                                value = (Dimension) xmlProperty.Value;
+                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof (Thickness))
+                                value = (Thickness) xmlProperty.Value;
+                            else
+                                value = Convert.ChangeType(xmlProperty.Value, propertyDescriptor.PropertyType);
+                            propertyDescriptor.SetValue(control, value);
+                        }
+                    }
+                }
+
+                // Add element to parent or set as root element.
+                if (parent == null)
+                    Elements.Add(control);
+                else
+                    parent.Add(control);
+                LoadNode(node.ChildNodes, control);
             }
         }
     }

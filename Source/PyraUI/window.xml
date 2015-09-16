@@ -1,0 +1,23 @@
+﻿<Window
+  Title="MainWindow"
+  Height="450"
+  Width="900">
+  <StackPanel Height="350" Width="600">
+    <StackPanel Margin="1">
+      <Button>Label Text</Button>
+      <Button>Label Text</Button>
+    </StackPanel>
+    <StackPanel Margin="1" Orientation="Horizontal">
+      <Button>Label Text</Button>
+      <Button>Label Text</Button>
+      <Button>Label Text</Button>
+      <StackPanel Width="256">
+        <Button>Label Text</Button>
+        <Button>Label Text</Button>
+        <Button>Label Text 2</Button>
+        <Button>Label Text 3</Button>
+        <Button>Label Text 4</Button>
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+</Window>

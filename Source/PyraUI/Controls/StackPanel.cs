@@ -10,9 +10,15 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Orientation Orientation { get; set; }
 
-        public StackPanel(Manager manager, Orientation orientation = Orientation.Vertical) : base(manager)
+        public StackPanel(Manager manager, Orientation orientation) : base(manager)
         {
             Orientation = orientation;
+        }
+
+        // ReSharper disable once IntroduceOptionalParameters.Global
+        public StackPanel(Manager manager) : this(manager, Orientation.Vertical)
+        {
+            
         }
 
         public override int FindChildHeight()

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Globalization;
+using System.Windows.Markup;
 
 namespace Pyratron.UI.Types
 {
@@ -94,5 +96,20 @@ namespace Pyratron.UI.Types
                 Top.ToString(CultureInfo.CurrentCulture) +
                 ",Left=" + Right.ToString(CultureInfo.CurrentCulture) +
                 ",Right=" + Bottom.ToString(CultureInfo.CurrentCulture) + "}";
+
+        public static explicit operator Thickness(string value)
+        {
+            var parts = value.Split(',');
+            switch (parts.Length)
+            {
+                case 1:
+                    return new Thickness(int.Parse(value));
+                case 2:
+                    return new Thickness(int.Parse(parts[0]), int.Parse(parts[1]));
+                case 4:
+                    return new Thickness(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
+            }
+            throw new ArgumentException();
+        }
     }
 }
