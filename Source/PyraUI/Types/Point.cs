@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 
-namespace PyraUI
+namespace Pyratron.UI.Types
 {
     public struct Point
     {

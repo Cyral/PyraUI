@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Pyratron.UI
+namespace Pyratron.UI.Types
 {
     /// <summary>
     /// Represents a dimension of an element. (width or height).
@@ -26,9 +22,18 @@ namespace Pyratron.UI
             {
                 if (value < 0)
                     throw new ArgumentOutOfRangeException("Minimum must be greater than zero.");
-                min = value;
-                if (Value < min)
-                    Value = min;
+                if (value != min)
+                {
+                    if (target < min && value < min)
+                    {
+                        min = value;
+                        Value = Math.Max(target, min);
+                    }
+                    else
+                        min = value;
+                    if (Value < min)
+                        Value = min;
+                }
             }
         }
 
@@ -42,9 +47,18 @@ namespace Pyratron.UI
             {
                 if (value < 0)
                     throw new ArgumentOutOfRangeException("Maximum must be greater than zero.");
-                max = value;
-                if (Value < max)
-                    Value = max;
+                if (value != max)
+                {
+                    if (target > max && value > max)
+                    {
+                        max = value;
+                        Value = Math.Min(target, max);
+                    }
+                    else
+                        max = value;
+                    if (Value < max)
+                        Value = max;
+                }
             }
         }
 
@@ -54,11 +68,12 @@ namespace Pyratron.UI
             set
             {
                 // Check bounds.
+                target = value;
                 this.value = Auto ? value : Math.Max(min, Math.Min(value, max));
             }
         }
 
-        private int value, min, max;
+        private int value, min, max, target;
 
         public Dimension(int value, bool auto = true)
         {

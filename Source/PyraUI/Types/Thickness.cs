@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 
-namespace PyraUI
+namespace Pyratron.UI.Types
 {
     /// <summary>
     /// The thickness around a Thickness. (Such as margin and padding).
@@ -16,6 +16,12 @@ namespace PyraUI
             Top = top;
             Right = right;
             Bottom = bottom;
+        }
+
+        public Thickness(int veritical, int horizontal)
+        {
+            Top = Bottom = veritical;
+            Left = Right = horizontal;
         }
 
         public Thickness(int value)

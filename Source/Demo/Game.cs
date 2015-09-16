@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,12 +9,11 @@ namespace Pyratron.UI.Demo
     /// </summary>
     public class Game : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private Monogame.Manager UI { get; }
 
-        Monogame.Manager UI { get; set; }
-
-        SpriteFont Font { get; set; }
+        private SpriteFont Font { get; set; }
+        private readonly GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
 
         public Game()
         {
@@ -41,20 +39,20 @@ namespace Pyratron.UI.Demo
             UI.Content = Content;
             UI.SpriteBatch = spriteBatch;
             UI.Font = Font;
-            UI.Init();
             UI.Load();
+            UI.Init(); 
         }
 
         protected override void UnloadContent()
         {
-            
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            UI.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+            UI.Update((float) gameTime.ElapsedGameTime.TotalSeconds);
             base.Update(gameTime);
         }
 
@@ -64,8 +62,8 @@ namespace Pyratron.UI.Demo
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.White);
-            UI.Draw((float)gameTime.ElapsedGameTime.TotalSeconds);
+            GraphicsDevice.Clear(Color.White);
+            UI.Draw((float) gameTime.ElapsedGameTime.TotalSeconds);
             base.Draw(gameTime);
         }
     }

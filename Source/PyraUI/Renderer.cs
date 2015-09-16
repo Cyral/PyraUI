@@ -1,6 +1,6 @@
-﻿using Pyratron.UI;
+﻿using Pyratron.UI.Types;
 
-namespace PyraUI
+namespace Pyratron.UI
 {
     public abstract class Renderer
     {
@@ -12,5 +12,7 @@ namespace PyraUI
         public abstract void DrawString(string text, Point point, Color color);
         public abstract void DrawString(string text, Point point, float pt);
         public abstract void DrawRectangle(Rectangle bounds, Color color);
+
+        public abstract Size MeasureText(string text);
     }
 }

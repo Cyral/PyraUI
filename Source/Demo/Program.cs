@@ -1,7 +1,6 @@
 ﻿using System;
-using Pyratron.UI.Demo;
 
-namespace Demo
+namespace Pyratron.UI.Demo
 {
 #if WINDOWS || LINUX
     /// <summary>
@@ -13,7 +12,7 @@ namespace Demo
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             using (var game = new Game())
                 game.Run();

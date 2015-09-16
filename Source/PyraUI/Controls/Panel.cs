@@ -1,4 +1,6 @@
-﻿namespace Pyratron.UI.Controls
+﻿using Pyratron.UI.Types;
+
+namespace Pyratron.UI.Controls
 {
     public class Panel : Visual //TODO: A visual for now just to show the outline.
     {
@@ -6,6 +8,10 @@
 
         public Panel(Manager manager) : base(manager)
         {
+            Padding = Margin = 1;
+
+            HorizontalAlignment = HorizontalAlignment.Stretch;
+            VerticalAlignment = VerticalAlignment.Stretch;
         }
     }
 }

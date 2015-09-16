@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using Pyratron.UI.States;
-using PyraUI;
+using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
@@ -57,14 +57,20 @@ namespace Pyratron.UI.Controls
         /// <param name="delta">Elapsed seconds since the last frame.</param>
         public virtual void Draw(float delta)
         {
-            Manager.Renderer.DrawRectangle(ExtendedArea, Color.Red);
-            Manager.Renderer.DrawRectangle(BorderArea, Color.Blue);
-            var boxColor = Color.White;
-            if (Box == Box.Block)
-                boxColor = new Color(255, 255, 172);
-            if (Box == Box.Inline)
-                boxColor = new Color(172, 255, 255);
-            Manager.Renderer.DrawRectangle(ContentArea, boxColor);
+            if (Manager.DrawDebug)
+            {
+                Manager.Renderer.DrawRectangle(ExtendedArea, new Color(225, 225, 225));
+                Manager.Renderer.DrawRectangle(BorderArea, new Color(240, 240, 240));
+                var boxColor = Color.White;
+                if (Box == Box.Block)
+                    boxColor = new Color(255, 255, 240);
+                if (Box == Box.Inline)
+                    boxColor = new Color(240, 255, 255);
+                if (this is Label)
+                    boxColor = new Color(255, 240, 255);
+                Manager.Renderer.DrawRectangle(ContentArea, boxColor);
+                //Manager.Renderer.DrawString(FindChildHeight().ToString(), Position);
+            }
 
             DrawChildren(delta);
         }

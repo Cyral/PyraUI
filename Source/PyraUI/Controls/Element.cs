@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Pyratron.UI.States;
-using PyraUI;
+using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
@@ -22,6 +22,10 @@ namespace Pyratron.UI.Controls
         /// The area outside the border.
         /// </summary>
         public Thickness Margin { get; set; }
+
+        public HorizontalAlignment HorizontalAlignment { get; set; }
+
+        public VerticalAlignment VerticalAlignment { get; set; }
 
         /// <summary>
         /// The type of display box.
@@ -60,7 +64,7 @@ namespace Pyratron.UI.Controls
             {
                 return
                     new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
-                        Size.Width - Padding.Left - Padding.Bottom, Size.Height - Padding.Right - Padding.Left).Offset(
+                        Size.Width - Padding.Left - Padding.Right, Size.Height - Padding.Bottom - Padding.Top).Offset(
                             Position - Margin - Padding);
             }
         }
@@ -85,12 +89,16 @@ namespace Pyratron.UI.Controls
         {
             Elements = new List<Element>();
 
-            Width = new Dimension(64, 96, 1024);
-            Height = new Dimension(64, 96, 1024);
+            Width = new Dimension(128, 0, int.MaxValue);
+            Height = new Dimension(32, 0, int.MaxValue);
 
             Box = Box.Inline;
-            Margin = 8;
-            Padding = 4;
+
+            HorizontalAlignment = HorizontalAlignment.Left;
+            VerticalAlignment = VerticalAlignment.Top;
+
+            Margin = 4;
+            Padding = 2;
         }
 
         /// <summary>
@@ -102,43 +110,117 @@ namespace Pyratron.UI.Controls
         /// </param>
         public virtual void Arrange(bool down = true)
         {
-            // If width is set to auto, fill the container horizontally.
-            if (Width.Auto && Parent != null)
-                Width.Value = Parent.ContentArea.Width - Margin.Left - Margin.Right;
-            // If the height of the parent is too small to contain this control, extend it.
-            if (Parent != null && ExtendedArea.Height + Position.Y > Parent.ContentArea.Height && Parent.Height.Auto)
+            if (Parent != null)
             {
-                Parent.Height.Value = Parent.FindChildHeight() + Parent.Padding.Top + Parent.Padding.Bottom;
-                // Arrange parent controls now that the height has been set.
-                Parent.Arrange(false);
+                Width.Value = Parent.CalcChildWidth(this);
+                Height.Value = Parent.CalcChildHeight(this);
             }
 
             if (down)
             {
                 // The position is equal to the parent's position, plus the margin and padding, plus the height of the previous child controls.
-                var pos = Parent?.Position + Margin + Padding ?? Margin + Padding;
-                var extra = 0;
-                if (Parent != null)
+                if (Parent == null)
                 {
-                    for (var i = 0; i < Parent.Elements.Count; i++)
-                    {
-                        // Until we hit this control, add the total height of child controls before this one.
-                        if (Parent.Elements[i] == this) break;
-                        extra += Parent.Elements[i].ExtendedArea.Height;
-                    }
+                    Position = Margin + Padding;
                 }
-                Position = new Point(pos.X, pos.Y + extra);
-                for (var i = 0; i < Elements.Count; i++)
+                else
                 {
-                    var child = Elements[i];
-                    // Arrange child controls now that the width and position have been calculated.
-                    child.Arrange();
+                    var pos = Parent.Position + Margin + Padding;
+                    Position = Parent.AlignChild(pos, this);
+
+                    for (var i = 0; i < Elements.Count; i++)
+                    {
+                        var child = Elements[i];
+                        // Arrange child controls now that the width and position have been calculated.
+                        child.Arrange();
+                    }
                 }
             }
             else
             {
                 Parent?.Arrange(false);
             }
+        }
+
+        /// <summary>
+        /// Change the height of a child element based on the layout of the parent.
+        /// </summary>
+        internal virtual int CalcChildHeight(Element element)
+        {
+            // If the height of the parent is too small to contain this control, extend it (if possible).
+            if ((element.ExtendedArea.Height + element.Position.Y > ContentArea.Height) || (FindChildHeight() > ContentArea.Height) && Height.Auto)
+            {
+                Height.Value = Math.Min(Height.Max, FindChildHeight() + Padding.Top + Padding.Bottom);
+                // Arrange controls now that the height has been set.
+                Arrange(false);
+            }
+            // If vertical align is stretch, fill the container vertically.
+            if ((element.VerticalAlignment == VerticalAlignment.Stretch))
+                return ContentArea.Height - element.Margin.Top - element.Margin.Bottom;
+            return element.Height;
+        }
+
+        /// <summary>
+        /// Change the width of a child element based on the layout of the parent.
+        /// </summary>
+        internal virtual int CalcChildWidth(Element element)
+        {
+            // If the width of the parent is too small to contain this control, extend it (If possible).
+            if ((element.ExtendedArea.Width + element.Position.X > ContentArea.Width) || (FindChildWidth() > ContentArea.Width) && Width.Auto)
+            {
+                Width.Value = Math.Min(Width.Max, FindChildWidth() + Padding.Right + Padding.Left);
+                // Arrange controls now that the width has been set.
+                Arrange(false);
+            }
+            // If horizontal align is stretch, fill the container horizontally.
+            if ((element.HorizontalAlignment == HorizontalAlignment.Stretch))
+                return ContentArea.Width - element.Margin.Left - element.Margin.Right;
+            return element.Width;
+        }
+
+        /// <summary>
+        /// Change the position of a child element based on the layout of the parent.
+        /// </summary>
+        /// <param name="pos">Original position (Parent's position + Margin + Padding by default).</param>
+        /// <param name="element">The child element.</param>
+        /// <returns>New position</returns>
+        internal virtual Point AlignChild(Point pos, Element element)
+        {
+            if (Parent != null)
+            {
+                var center = new Point((ContentArea.Width / 2) - (element.ExtendedArea.Width / 2),
+                    (ContentArea.Height / 2) - (element.ExtendedArea.Height / 2));
+                var x = pos.X;
+                var y = pos.Y;
+
+                // Apply horizontal alignment.
+                switch (element.HorizontalAlignment)
+                {
+                    case HorizontalAlignment.Left:
+                        break;
+                    case HorizontalAlignment.Center:
+                        x += center.X;
+                        break;
+                    case HorizontalAlignment.Right:
+                        x = ContentArea.Width - element.ExtendedArea.Width;
+                        break;
+                }
+
+                // Apply vertical alignment.
+                switch (element.VerticalAlignment)
+                {
+                    case VerticalAlignment.Top:
+                        break;
+                    case VerticalAlignment.Center:
+                        y += center.Y;
+                        break;
+                    case VerticalAlignment.Bottom:
+                        y = ContentArea.Height - element.ExtendedArea.Height;
+                        break;
+                }
+                return new Point(x, y);
+            }
+            return pos;
         }
 
         /// <summary>
@@ -153,6 +235,20 @@ namespace Pyratron.UI.Controls
                 height += child.ExtendedArea.Height;
             }
             return height;
+        }
+
+        /// <summary>
+        /// Returns the width of all the child controls.
+        /// </summary>
+        public virtual int FindChildWidth()
+        {
+            var width = 0;
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                var child = Elements[i];
+                width += child.ExtendedArea.Width;
+            }
+            return width;
         }
 
         /// <summary>

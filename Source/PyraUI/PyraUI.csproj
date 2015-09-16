@@ -41,24 +41,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Color.cs" />
+    <Compile Include="Controls\Grid.cs" />
+    <Compile Include="Types\Alignment.cs" />
+    <Compile Include="Types\Color.cs" />
+    <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Component.cs" />
     <Compile Include="Controls\Control.cs" />
     <Compile Include="Controls\Element.cs" />
+    <Compile Include="Controls\Label.cs" />
     <Compile Include="Controls\Panel.cs" />
     <Compile Include="Controls\StackPanel.cs" />
     <Compile Include="Controls\Visual.cs" />
     <Compile Include="Controls\Window.cs" />
-    <Compile Include="Dimension.cs" />
+    <Compile Include="Types\Dimension.cs" />
     <Compile Include="States\Box.cs" />
     <Compile Include="States\Visibility.cs" />
-    <Compile Include="Thickness.cs" />
+    <Compile Include="Types\Orientation.cs" />
+    <Compile Include="Types\Thickness.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="Manager.cs" />
-    <Compile Include="Size.cs" />
-    <Compile Include="Point.cs" />
+    <Compile Include="Types\Size.cs" />
+    <Compile Include="Types\Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rectangle.cs" />
+    <Compile Include="Types\Rectangle.cs" />
     <Compile Include="Skin.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

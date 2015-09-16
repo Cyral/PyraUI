@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 
-namespace PyraUI
+namespace Pyratron.UI.Types
 {
     public struct Rectangle
     {
@@ -62,6 +62,21 @@ namespace PyraUI
 
         [Browsable(false)]
         public bool IsEmpty => Height == 0 && Width == 0 && X == 0 && Y == 0;
+
+        [Browsable(false)]
+        public Point TopLeft => new Point(Left, Top);
+
+
+        [Browsable(false)]
+        public Point BottomLeft => new Point(Left, Bottom);
+
+
+        [Browsable(false)]
+        public Point TopRight => new Point(Right, Top);
+
+
+        [Browsable(false)]
+        public Point BottomRight => new Point(Right, Bottom);
 
         public override bool Equals(object obj)
         {

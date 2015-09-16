@@ -1,7 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 
-namespace Pyratron.UI
+namespace Pyratron.UI.Types
 {
     public struct Color
     {
