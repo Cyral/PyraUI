@@ -19,9 +19,12 @@ namespace Pyratron.UI.Demo
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferHeight = 512,
+                PreferredBackBufferHeight = 768,
                 PreferredBackBufferWidth = 1024
             };
+            IsMouseVisible = true;
+            IsFixedTimeStep = false;
+            graphics.SynchronizeWithVerticalRetrace = false;
             graphics.ApplyChanges();
             UI = new Monogame.Manager();
             Content.RootDirectory = "Content";

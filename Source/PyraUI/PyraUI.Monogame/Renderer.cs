@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Pyratron.UI.Types;
@@ -39,7 +40,7 @@ namespace Pyratron.UI.Monogame
 
         public override void DrawTexture(string name, Rectangle rectangle, Color color)
         {
-            var rect = new Microsoft.Xna.Framework.Rectangle(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+            var rect = new Microsoft.Xna.Framework.Rectangle((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
             var texture = GetTexture(name);
             var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
             manager.SpriteBatch.Draw(texture, rect, col * (color.A / 255f));
@@ -52,33 +53,42 @@ namespace Pyratron.UI.Monogame
 
         public override void DrawString(string text, Point point, Color color)
         {
-            var pos = new Vector2(point.X, point.Y - 5); //TODO: 5 is due to spacing.
-            var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
-            manager.SpriteBatch.DrawString(GetFont("default"), text, pos, col * (color.A / 255f), 0,
-                Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
+            DrawString(text, point, color, defaultSize);
         }
 
         public override void DrawString(string text, Point point, float pt)
         {
-            // TODO: Use multiple spritefonts.
-            var pos = new Vector2(point.X, point.Y - 5);
-            var scale = Vector2.One * (pt / 10);
-            manager.SpriteBatch.DrawString(GetFont("default"), text, pos, Microsoft.Xna.Framework.Color.Black, 0,
-                Vector2.Zero, scale, SpriteEffects.None, 0);
+            DrawString(text, point, Color.Black, pt);
+        }
+
+        public override void DrawString(string text, Point point, Color color, float pt)
+        {
+            var pos = new Vector2((int)point.X, (int)point.Y - 4);
+            var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
+            manager.SpriteBatch.DrawString(GetFont("default" + GetClosestFontSize(pt)), text, pos, col * (color.A / 255f), 0,
+                Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
         }
 
         public override void DrawRectangle(Rectangle bounds, Color color)
         {
-            var rect = new Microsoft.Xna.Framework.Rectangle(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+            var rect = new Microsoft.Xna.Framework.Rectangle((int)bounds.X, (int)bounds.Y, (int)bounds.Width, (int)bounds.Height);
             var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
             manager.SpriteBatch.Draw(pixel, rect, col);
         }
 
         public override Size MeasureText(string text)
         {
-            var size = GetFont("default").MeasureString(text);
-            return new Size((int)(Math.Round(size.X)), (int)(Math.Round(size.Y - 5))); //TODO: 5 is due to spacing.
+            return MeasureText(text, defaultSize);
         }
+
+        public override Size MeasureText(string text, float pt)
+        {
+            var size = GetFont("default" + GetClosestFontSize(pt)).MeasureString(text);
+            return new Size((int)(Math.Round(size.X)), (int)(Math.Round(size.Y - 4))); //TODO: 5 is due to spacing.
+        }
+
+        private readonly int defaultSize = 10;
+        private int GetClosestFontSize(float pt) => manager.FontSizes.OrderBy(x => Math.Abs(x - pt)).First();
 
         private Texture2D GetTexture(string name) => manager.Skin.Textures[name] as Texture2D;
         private SpriteFont GetFont(string name) => manager.Skin.Fonts[name] as SpriteFont;

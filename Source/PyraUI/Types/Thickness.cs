@@ -90,6 +90,8 @@ namespace Pyratron.UI.Types
         public static implicit operator Thickness(int value) => new Thickness(value);
         public static implicit operator Point(Thickness thickness) => new Point(thickness.Left, thickness.Top);
 
+        public static Size operator +(Size size, Thickness thickness) => new Size(size.Width + thickness.Left + thickness.Right, size.Height + thickness.Top + thickness.Bottom);
+
         public override string ToString()
             =>
                 "{Top=" + Left.ToString(CultureInfo.CurrentCulture) + ",Bottom=" +

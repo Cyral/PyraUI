@@ -6,9 +6,6 @@
 
         public Window(Manager manager) : base(manager)
         {
-            Width = 512;
-            Height = 256;
-
             Title = "Window";
         }
     }

@@ -9,6 +9,11 @@ namespace Pyratron.UI.Controls
 
         public Alignment TextAlignment { get; set; }
 
+        public Label(Manager manager, string text) : this(manager)
+        {
+            Text = text;
+        }
+
         public Label(Manager manager) : base(manager)
         {
             Text = "Label Text";
@@ -19,27 +24,17 @@ namespace Pyratron.UI.Controls
             VerticalAlignment = VerticalAlignment.Center;
 
             Padding = Margin = 0;
-
-            Height.Min = 6;
-            Height.Max = 64;
-            Height.Value = 12;
-
-            Width.Value = 96;
         }
 
-        public override void Arrange(bool down = true)
+        public override void AddContent(string content)
         {
-            var textsize = Manager.Renderer.MeasureText(Text);
-            Width.Value = textsize.Width;
-            Height = textsize.Height;
-
-            base.Arrange(down);
+            Text = content;
         }
 
-        internal override Point AlignChild(Point pos, Element element)
+        public override Size MeasureOverride(Size availableSize)
         {
-            Console.WriteLine(element.Width);
-            return base.AlignChild(pos, element);
+            return Manager.Renderer.MeasureText(Text, FontSize);
+            //return base.MeasureOverride(availableSize);
         }
 
         public override void Draw(float delta)
@@ -47,12 +42,12 @@ namespace Pyratron.UI.Controls
             base.Draw(delta);
 
             // Get size of text.
-            var textsize = Manager.Renderer.MeasureText(Text);
+            var textsize = Manager.Renderer.MeasureText(Text, FontSize);
             // Calculate center for each axis.
             var center = new Point((ContentArea.Width / 2) - (textsize.Width / 2),
                 (ContentArea.Height / 2) - (textsize.Height / 2));
-            var x = ContentArea.Left;
-            var y = ContentArea.Top;
+            var x = 0d;
+            var y = 0d;
 
             switch (TextAlignment)
             {
@@ -90,7 +85,7 @@ namespace Pyratron.UI.Controls
                     x = center.X;
                     break;
             }
-            Manager.Renderer.DrawString(Text, Position + new Point(x, y));
+            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize);
         }
     }
 }

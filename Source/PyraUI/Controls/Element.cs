@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Pyratron.UI.States;
 using Pyratron.UI.Types;
 
@@ -12,6 +11,8 @@ namespace Pyratron.UI.Controls
     public class Element : Component
     {
         public override int MaxChildren => 1;
+
+        public string Name { get; set; }
 
         /// <summary>
         /// The area inside the border.
@@ -32,8 +33,141 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Box Box { get; set; }
 
-        public Dimension Width { get; set; }
-        public Dimension Height { get; set; }
+        public bool IsWidthAuto => double.IsPositiveInfinity(Width);
+
+        public bool IsHeightAuto => double.IsPositiveInfinity(Height);
+
+        public int FontSize
+        {
+            get { return fontSizeSet || Parent == null ? fontSize : Parent.FontSize; }
+            set
+            {
+                fontSize = value;
+                fontSizeSet = true;
+            }
+        }
+
+        public Color TextColor
+        {
+            get { return textColorSet || Parent == null ? textColor : Parent.TextColor; }
+            set
+            {
+                textColor = value;
+                textColorSet = true;
+            }
+        }
+
+        /// <summary>
+        /// The minimum width.
+        /// </summary>
+        public double MinWidth
+        {
+            get { return minWidth; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Minimum width must be greater than zero.");
+                if (!Equals(value, minWidth))
+                {
+                    minWidth = value;
+                    LayoutInvalidated = true;
+                    if (Width < minWidth)
+                        Width = minWidth;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The maximum width.
+        /// </summary>
+        public double MaxWidth
+        {
+            get { return maxWidth; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Maximum width must be greater than zero.");
+                if (!Equals(value, maxWidth))
+                {
+                    maxWidth = value;
+                    LayoutInvalidated = true;
+                    if (Width > maxWidth)
+                        Width = maxWidth;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The target width.
+        /// </summary>
+        public double Width
+        {
+            get { return width; }
+            set
+            {
+                width = Math.Max(minWidth, Math.Min(value, maxWidth));
+                LayoutInvalidated = true;
+            }
+        }
+
+        /// <summary>
+        /// The minimum height.
+        /// </summary>
+        public double MinHeight
+        {
+            get { return minHeight; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Minimum height must be greater than zero.");
+                if (!Equals(value, minHeight))
+                {
+                    minHeight = value;
+                    LayoutInvalidated = true;
+                    if (Height < minHeight)
+                        Height = minHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The maximum height.
+        /// </summary>
+        public double MaxHeight
+        {
+            get { return maxHeight; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Maximum height must be greater than zero.");
+                if (!Equals(value, maxHeight))
+                {
+                    maxHeight = value;
+                    LayoutInvalidated = true;
+                    if (Height > maxHeight)
+                        Height = maxHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The target height.
+        /// </summary>
+        public double Height
+        {
+            get { return height; }
+            set
+            {
+                height = Math.Max(minHeight, Math.Min(value, maxHeight));
+                LayoutInvalidated = true;
+            }
+        }
+
+        public bool LayoutInvalidated { get; set; }
+
+        public double ActualWidth { get; set; }
+
+        public double ActualHeight { get; set; }
 
         /// <summary>
         /// Element's parent. Null if root.
@@ -45,10 +179,27 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public List<Element> Elements { get; set; }
 
-        /// <summary>
-        /// Control bounds (width and height), without position or margin/padding.
-        /// </summary>
-        public Size Size => new Size(Width, Height);
+        public Size Size => new Size((int) Math.Round(Width), (int) Math.Round(Height));
+
+        public Size ChildSize => new Size(GetChildWidth(), GetChildHeight());
+
+        public Size ActualSize
+        {
+            get { return new Size((int) Math.Round(ActualWidth), (int) Math.Round(ActualHeight)); }
+            set
+            {
+                if (!Equals(value.Width, ActualWidth))
+                {
+                    ActualWidth = value.Width;
+                    LayoutInvalidated = true;
+                }
+                if (!Equals(value.Height, ActualHeight))
+                {
+                    ActualHeight = value.Height;
+                    LayoutInvalidated = true;
+                }
+            }
+        }
 
         /// <summary>
         /// The position of the content area of the element.
@@ -64,7 +215,8 @@ namespace Pyratron.UI.Controls
             {
                 return
                     new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
-                        Size.Width - Padding.Left - Padding.Right, Size.Height - Padding.Bottom - Padding.Top).Offset(
+                        (int) ActualSize.Width - Padding.Left - Padding.Right,
+                        (int) ActualSize.Height - Padding.Bottom - Padding.Top).Offset(
                             Position - Margin - Padding);
             }
         }
@@ -74,7 +226,7 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Rectangle BorderArea
         {
-            get { return Size.Combine(Margin).Offset(Position - Margin - Padding); }
+            get { return ActualSize.Combine(Margin).Offset(Position - Margin - Padding); }
         }
 
         /// <summary>
@@ -82,173 +234,123 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Rectangle ExtendedArea
         {
-            get { return Size.Extend(Margin).Offset(Position - Margin - Padding); }
+            get { return ActualSize.Extend(Margin).Offset(Position - Margin - Padding); }
         }
+
+        private int fontSize;
+
+        // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
+        private bool fontSizeSet, textColorSet;
+
+        private double height, minHeight, maxHeight, width, minWidth, maxWidth;
+        private Color textColor;
 
         public Element(Manager manager) : base(manager)
         {
             Elements = new List<Element>();
 
-            Width = new Dimension(128, 0, int.MaxValue);
-            Height = new Dimension(32, 0, int.MaxValue);
+            MinWidth = MaxWidth = 0;
+            MaxWidth = MaxHeight = double.PositiveInfinity;
+            Width = double.PositiveInfinity;
+            Height = double.PositiveInfinity;
 
             Box = Box.Inline;
 
-            HorizontalAlignment = HorizontalAlignment.Left;
-            VerticalAlignment = VerticalAlignment.Top;
+            HorizontalAlignment = HorizontalAlignment.Stretch;
+            VerticalAlignment = VerticalAlignment.Stretch;
 
-            Margin = 4;
-            Padding = 2;
+            Margin = 10;
+            Padding = 10;
+
+            FontSize = 10;
+            TextColor = Color.Black;
+            textColorSet = fontSizeSet = false;
         }
 
         /// <summary>
-        /// Calculate the layout of the element.
+        /// Handle inline XML content (such as text between the opening and closing tag)
         /// </summary>
-        /// <param name="down">
-        /// True if child controls will be recursively arranged, false if parent controls will be arranged.
-        /// (Width must be from first to last, while height must be from last to first)
-        /// </param>
-        public virtual void Arrange(bool down = true)
+        public virtual void AddContent(string content)
         {
-            if (Parent != null)
+            Add(new Label(Manager, content));
+        }
+
+        public virtual Size MeasureOverride(Size availableSize)
+        {
+            if (Parent == null) return Size;
+            double w = Width, h = Height;
+
+            // If horizontal alignment is stretch and the width is more than the available size, try and fit it.
+            if (HorizontalAlignment == HorizontalAlignment.Stretch)
             {
-                Width.Value = Parent.CalcChildWidth(this);
-                Height.Value = Parent.CalcChildHeight(this);
+                if (Width > availableSize.Width)
+                    w = Math.Max(availableSize.Width, MinWidth);
             }
+            else // If horizontal alignment is not stretch, find the largest child element and use that as the width.
+                w = GetMaxChildWidth() + Padding.Left + Padding.Right;
 
-            if (down)
+            // Repeat same process for vertical alignment.
+            if (VerticalAlignment == VerticalAlignment.Stretch)
             {
-                // The position is equal to the parent's position, plus the margin and padding, plus the height of the previous child controls.
-                if (Parent == null)
-                {
-                    Position = Margin + Padding;
-                }
-                else
-                {
-                    var pos = Parent.Position + Margin + Padding;
-                    Position = Parent.AlignChild(pos, this);
-
-                    for (var i = 0; i < Elements.Count; i++)
-                    {
-                        var child = Elements[i];
-                        // Arrange child controls now that the width and position have been calculated.
-                        child.Arrange();
-                    }
-                }
+                if (Height > availableSize.Height)
+                    h = Math.Max(availableSize.Height, MinHeight);
             }
             else
-            {
-                Parent?.Arrange(false);
-            }
+                h = GetMaxChildHeight() + Padding.Top + Padding.Bottom;
+            return new Size(w, h);
         }
 
-        /// <summary>
-        /// Change the height of a child element based on the layout of the parent.
-        /// </summary>
-        internal virtual int CalcChildHeight(Element element)
-        {
-            // If the height of the parent is too small to contain this control, extend it (if possible).
-            if ((element.ExtendedArea.Height + element.Position.Y > ContentArea.Height) || (FindChildHeight() > ContentArea.Height) && Height.Auto)
-            {
-                Height.Value = Math.Min(Height.Max, FindChildHeight() + Padding.Top + Padding.Bottom);
-                // Arrange controls now that the height has been set.
-                Arrange(false);
-            }
-            // If vertical align is stretch, fill the container vertically.
-            if ((element.VerticalAlignment == VerticalAlignment.Stretch))
-                return ContentArea.Height - element.Margin.Top - element.Margin.Bottom;
-            return element.Height;
-        }
-
-        /// <summary>
-        /// Change the width of a child element based on the layout of the parent.
-        /// </summary>
-        internal virtual int CalcChildWidth(Element element)
-        {
-            // If the width of the parent is too small to contain this control, extend it (If possible).
-            if ((element.ExtendedArea.Width + element.Position.X > ContentArea.Width) || (FindChildWidth() > ContentArea.Width) && Width.Auto)
-            {
-                Width.Value = Math.Min(Width.Max, FindChildWidth() + Padding.Right + Padding.Left);
-                // Arrange controls now that the width has been set.
-                Arrange(false);
-            }
-            // If horizontal align is stretch, fill the container horizontally.
-            if ((element.HorizontalAlignment == HorizontalAlignment.Stretch))
-                return ContentArea.Width - element.Margin.Left - element.Margin.Right;
-            return element.Width;
-        }
-
-        /// <summary>
-        /// Change the position of a child element based on the layout of the parent.
-        /// </summary>
-        /// <param name="pos">Original position (Parent's position + Margin + Padding by default).</param>
-        /// <param name="element">The child element.</param>
-        /// <returns>New position</returns>
-        internal virtual Point AlignChild(Point pos, Element element)
+        public virtual Point ArrangeOverride()
         {
             if (Parent != null)
-            {
-                var center = new Point((ContentArea.Width / 2) - (element.ExtendedArea.Width / 2),
-                    (ContentArea.Height / 2) - (element.ExtendedArea.Height / 2));
-                var x = pos.X;
-                var y = pos.Y;
-
-                // Apply horizontal alignment.
-                switch (element.HorizontalAlignment)
-                {
-                    case HorizontalAlignment.Left:
-                        break;
-                    case HorizontalAlignment.Center:
-                        x += center.X;
-                        break;
-                    case HorizontalAlignment.Right:
-                        x = ContentArea.Width - element.ExtendedArea.Width;
-                        break;
-                }
-
-                // Apply vertical alignment.
-                switch (element.VerticalAlignment)
-                {
-                    case VerticalAlignment.Top:
-                        break;
-                    case VerticalAlignment.Center:
-                        y += center.Y;
-                        break;
-                    case VerticalAlignment.Bottom:
-                        y = ContentArea.Height - element.ExtendedArea.Height;
-                        break;
-                }
-                return new Point(x, y);
-            }
-            return pos;
+                return Parent.AlignChild(this);
+            return Margin + Padding;
         }
 
-        /// <summary>
-        /// Returns the height of all the child controls.
-        /// </summary>
-        public virtual int FindChildHeight()
+        public virtual Point AlignChild(Element child)
         {
-            var height = 0;
+            var center = new Point((ContentArea.Width / 2) - (child.ExtendedArea.Width / 2),
+                (ContentArea.Height / 2) - (child.ExtendedArea.Height / 2));
+            double x = 0, y = 0;
+
+            // Apply horizontal alignment.
+            if (child.HorizontalAlignment == HorizontalAlignment.Center)
+                x += center.X;
+            if (child.HorizontalAlignment == HorizontalAlignment.Right)
+                x = ContentArea.Width - child.ExtendedArea.Width;
+
+            // Apply vertical alignment.
+            if (child.VerticalAlignment == VerticalAlignment.Center)
+                y += center.Y;
+            if (child.VerticalAlignment == VerticalAlignment.Bottom)
+                y = ContentArea.Height - child.ExtendedArea.Height;
+            return Position + new Point(x, y) + child.Margin + child.Padding;
+        }
+
+        public virtual void Measure()
+        {
             for (var i = 0; i < Elements.Count; i++)
             {
                 var child = Elements[i];
-                height += child.ExtendedArea.Height;
+                child.Measure();
             }
-            return height;
+            ActualSize = MeasureOverride(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
         }
 
-        /// <summary>
-        /// Returns the width of all the child controls.
-        /// </summary>
-        public virtual int FindChildWidth()
+        public virtual void Arrange()
         {
-            var width = 0;
             for (var i = 0; i < Elements.Count; i++)
             {
                 var child = Elements[i];
-                width += child.ExtendedArea.Width;
+                child.Arrange();
             }
-            return width;
+            Position = ArrangeOverride();
+        }
+
+        public virtual void UpdateLayout()
+        {
+            Measure();
+            Arrange();
         }
 
         /// <summary>
@@ -275,7 +377,8 @@ namespace Pyratron.UI.Controls
                     // Add element to master list.
                     if (!Manager.Elements.Contains(element))
                         Manager.Elements.Add(element);
-                    Arrange();
+
+                    UpdateLayout();
                 }
             }
         }
@@ -296,9 +399,19 @@ namespace Pyratron.UI.Controls
                     element.Parent = null;
                     if (dispose)
                         element.Dispose();
-                    Arrange();
+                    UpdateLayout();
                 }
             }
+        }
+
+        protected internal override void Update(float delta)
+        {
+            if (LayoutInvalidated)
+            {
+                Parent?.UpdateLayout();
+                LayoutInvalidated = false;
+            }
+            base.Update(delta);
         }
 
         /// <summary>
@@ -312,6 +425,60 @@ namespace Pyratron.UI.Controls
             foreach (var child in Elements)
                 Remove(child);
             Elements.Clear();
+        }
+
+        /// <summary>
+        /// Returns the height of all child elements if they were to be stacked on top of each other.
+        /// </summary>
+        protected virtual double GetChildHeight()
+        {
+            var h = 0d;
+            if (Elements.Count == 0)
+                return BorderArea.Height;
+            for (var i = 0; i < Elements.Count; i++)
+                h += Elements[i].GetChildHeight();
+            return h;
+        }
+
+        /// <summary>
+        /// Returns the width of all child elements if they were to be stacked beside each other.
+        /// </summary>
+        protected virtual double GetChildWidth()
+        {
+            var w = 0d;
+            if (Elements.Count == 0)
+                return BorderArea.Width;
+            for (var i = 0; i < Elements.Count; i++)
+                w += Elements[i].GetChildWidth();
+            return w;
+        }
+
+        /// <summary>
+        /// Returns the extended width of the child element with the greatest width.
+        /// </summary>
+        protected virtual double GetMaxChildWidth()
+        {
+            var w = 0d;
+            if (Elements.Count == 0)
+                return BorderArea.Width;
+            for (var i = 0; i < Elements.Count; i++)
+                w = Math.Max(w,
+                    (double.IsInfinity(Elements[i].Width) ? Elements[i].GetChildWidth() : Elements[i].Width) + Elements[i].Padding.Left + Elements[i].Padding.Right +
+                    Elements[i].Margin.Left + Elements[i].Margin.Right);
+            return w;
+        }
+
+        /// <summary>
+        /// Returns the extended height of the child element with the greatest height.
+        /// </summary>
+        protected virtual double GetMaxChildHeight()
+        {
+            var h = 0d;
+            for (var i = 0; i < Elements.Count; i++)
+                h = Math.Max(h,
+                    (double.IsInfinity(Elements[i].Height) ? Elements[i].GetChildHeight() : Elements[i].Height) + Elements[i].Padding.Top + Elements[i].Padding.Bottom +
+                    Elements[i].Margin.Top + Elements[i].Margin.Bottom);
+            return h;
         }
     }
 }

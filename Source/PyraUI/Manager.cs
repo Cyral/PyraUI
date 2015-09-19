@@ -10,6 +10,8 @@ namespace Pyratron.UI
 {
     public abstract class Manager
     {
+        private static readonly TimeSpan second = TimeSpan.FromSeconds(1);
+
         /// <summary>
         /// Master list of all elements.
         /// </summary>
@@ -21,34 +23,48 @@ namespace Pyratron.UI
 
         public bool DrawDebug { get; set; }
 
+        /// <summary>
+        /// The current FPS.
+        /// </summary>
+        public int FPS { get; private set; }
+
+        private TimeSpan elapsedTime = TimeSpan.Zero;
+        private int totalFrames;
+
+        private string xml;
+        private readonly char[] newlineChars = Environment.NewLine.ToCharArray();
+
         public virtual void Init()
         {
-            LoadFromXML(File.ReadAllText("window.xml"), null);
+            xml = LoadFromXML(File.ReadAllText("window.xml"), null);
         }
 
-        public virtual void LoadFromXML(string xml, Element parent)
+        public virtual string LoadFromXML(string xml, Element parent)
         {
             var doc = new XmlDocument();
             doc.LoadXml(xml);
             var nodes = doc.ChildNodes;
             LoadNode(nodes, parent);
+            return xml;
         }
 
         /// <summary>
         /// Create an instance of an element by its name.
         /// </summary>
-        public Element CreateControlInstance(XmlNode node)
+        public Element CreateControlInstance(XmlNode node, Element parent)
         {
-            if (node.Name.StartsWith("#text"))
-                return new Label(this) {Text = node.Value};
-            var t = Type.GetType(typeof (Control).Namespace + '.' + node.Name);
+            // Add content (inline text) from the XML to a parent element.
+            if (parent != null && node.Name.StartsWith("#text") && node.ParentNode != null)
+                parent.AddContent(node.Value.Trim().TrimStart(newlineChars).TrimEnd(newlineChars));
+            if (node.Name.StartsWith("#")) return null;
+            var t = Type.GetType(typeof(Control).Namespace + '.' + node.Name);
+            // Create a new element.
             return (Element) Activator.CreateInstance(t, this);
         }
 
         public virtual void Load()
         {
             Skin.LoadTextureInternal("button");
-            Skin.LoadFontInternal("default");
         }
 
         /// <summary>
@@ -57,11 +73,9 @@ namespace Pyratron.UI
         /// <param name="delta">Seconds elapsed since last frame.</param>
         public virtual void Draw(float delta)
         {
-            Elements[0].Arrange();
+            Elements[0].UpdateLayout();
             Renderer.BeginDraw();
             //Renderer.DrawTexture("button", new Rectangle(50, 50, 150, 150));
-            //Renderer.DrawString("Hello! Welcome to PyraUI.", new Point(400, 400));
-
             // Render all top level elements. (Those with no parent).
             for (var i = 0; i < Elements.Count; i++)
             {
@@ -73,7 +87,19 @@ namespace Pyratron.UI
                     visual.Draw(delta);
                 }
             }
+            Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}", new Point(8, Elements[0].ExtendedArea.Height + 8), Color.Black,
+                8);
             Renderer.EndDraw();
+
+            // Calculate FPS
+            elapsedTime += TimeSpan.FromSeconds(delta);
+            if (elapsedTime > second)
+            {
+                elapsedTime -= second;
+                FPS = totalFrames;
+                totalFrames = 0;
+            }
+            totalFrames++;
         }
 
         /// <summary>
@@ -93,7 +119,7 @@ namespace Pyratron.UI
         {
             foreach (XmlNode node in nodes)
             {
-                var control = CreateControlInstance(node);
+                var control = CreateControlInstance(node, parent);
                 if (control == null) continue;
 
                 var props = TypeDescriptor.GetProperties(control.GetType());
@@ -109,12 +135,15 @@ namespace Pyratron.UI
                         if (propertyDescriptor != null)
                         {
                             object value;
+                            // Convert the attribute to a value.
                             if (propertyDescriptor.PropertyType.IsEnum)
                                 value = Enum.Parse(propertyDescriptor.PropertyType, xmlProperty.Value);
-                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof (Dimension))
-                                value = (Dimension) xmlProperty.Value;
                             else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof (Thickness))
                                 value = (Thickness) xmlProperty.Value;
+                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof(Color))
+                                value = (Color)xmlProperty.Value;
+                            else if (xmlProperty.Value.Equals("Auto", StringComparison.InvariantCultureIgnoreCase))
+                                value = double.PositiveInfinity;
                             else
                                 value = Convert.ChangeType(xmlProperty.Value, propertyDescriptor.PropertyType);
                             propertyDescriptor.SetValue(control, value);

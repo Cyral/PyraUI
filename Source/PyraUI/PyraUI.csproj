@@ -53,7 +53,6 @@
     <Compile Include="Controls\StackPanel.cs" />
     <Compile Include="Controls\Visual.cs" />
     <Compile Include="Controls\Window.cs" />
-    <Compile Include="Types\Dimension.cs" />
     <Compile Include="States\Box.cs" />
     <Compile Include="States\Visibility.cs" />
     <Compile Include="Types\Orientation.cs" />
@@ -67,6 +66,7 @@
     <Compile Include="Skin.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="old.xml" />
     <Content Include="window.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

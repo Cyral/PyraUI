@@ -27,9 +27,9 @@ namespace Pyratron.UI.Types
             green *= 255;
             blue *= 255;
             A = 255;
-            R = (byte)red;
-            G = (byte)green;
-            B = (byte)blue;
+            R = (byte) red;
+            G = (byte) green;
+            B = (byte) blue;
         }
 
         public Color(float red, float green, float blue, float alpha)
@@ -38,18 +38,18 @@ namespace Pyratron.UI.Types
             green *= 255;
             blue *= 255;
             alpha *= 255;
-            A = (byte)alpha;
-            R = (byte)red;
-            G = (byte)green;
-            B = (byte)blue;
+            A = (byte) alpha;
+            R = (byte) red;
+            G = (byte) green;
+            B = (byte) blue;
         }
 
         public Color(int red, int green, int blue, int alpha = 255)
         {
-            A = (byte)alpha;
-            R = (byte)red;
-            G = (byte)green;
-            B = (byte)blue;
+            A = (byte) alpha;
+            R = (byte) red;
+            G = (byte) green;
+            B = (byte) blue;
         }
 
         public Color(int alpha, Color color) : this(alpha, color.R, color.G, color.B)
@@ -106,5 +106,27 @@ namespace Pyratron.UI.Types
         public static Color Green { get; } = new Color(0, 255, 0, 255);
 
         public static Color Blue { get; } = new Color(0, 0, 255, 255);
+
+        public static explicit operator Color(string value)
+        {
+            var parts = value.Split(',');
+            int a = 0, r = 0, g = 0, b = 0;
+            if (parts.Length == 3)
+            {
+                if (int.TryParse(parts[0], out r) &&
+                    int.TryParse(parts[1], out g) &&
+                    int.TryParse(parts[2], out b))
+                    return new Color(r, g, b);
+            }
+            if (parts.Length == 4)
+            {
+                if (int.TryParse(parts[0], out r) &&
+                    int.TryParse(parts[1], out g) &&
+                    int.TryParse(parts[2], out b) &&
+                    int.TryParse(parts[3], out a))
+                    return new Color(r, g, b, a);
+            }
+            throw new InvalidCastException("Not a valid color in R,G,B or R,G,B,A format.");
+        }
     }
 }

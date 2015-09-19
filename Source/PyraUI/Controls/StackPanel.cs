@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Pyratron.UI.Types;
+﻿using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
@@ -18,116 +17,160 @@ namespace Pyratron.UI.Controls
         // ReSharper disable once IntroduceOptionalParameters.Global
         public StackPanel(Manager manager) : this(manager, Orientation.Vertical)
         {
-            
         }
 
-        public override int FindChildHeight()
+        public override Point AlignChild(Element child)
         {
-            // For horizontal layout, use the maximum height of a child element.
-            if (Orientation == Orientation.Horizontal)
-                return Elements.Select(child => child.ExtendedArea.Height).Max();
-            return base.FindChildHeight();
-        }
+            var center = new Point((ContentArea.Width / 2) - (child.ExtendedArea.Width / 2),
+                (ContentArea.Height / 2) - (child.ExtendedArea.Height / 2));
+            double x = 0, y = 0;
 
-        internal override int CalcChildHeight(Element element)
-        {
-            if (Orientation == Orientation.Horizontal)
+            // Apply horizontal alignment.
+            if (Orientation == Orientation.Vertical)
             {
-                if ((FindChildHeight() > ContentArea.Height) && Height.Auto)
-                {
-                    Height.Value = FindChildHeight() + Padding.Top + Padding.Bottom;
-                    // Force all child elements to fill the area.
-                    foreach (var child in Elements)
-                    {
-                        child.Height.Value = FindChildHeight() - Padding.Top - Padding.Bottom;
-                        child.Arrange(); // TODO: rearrange automatically.
-                    }
-                    Arrange(false);
-                }
-                else if (element.Height.Auto || element.VerticalAlignment == VerticalAlignment.Stretch)
-                {
-                    var val = ContentArea.Height - element.Margin.Top - element.Margin.Bottom;
-                    if (val > Height.Min)
-                        return val;
-                }
-            }
-            else
-            {
-                // If the height of the parent is too small to contain this control, extend it.
-                if ((element.ExtendedArea.Height + element.Position.Y > ContentArea.Height) ||
-                    (FindChildHeight() > ContentArea.Height) && Height.Auto)
-                {
-                    Height.Value = FindChildHeight() + Padding.Top + Padding.Bottom;
-                    // Arrange controls now that the height has been set.
-                    Arrange(false);
-                }
+                if (child.HorizontalAlignment == HorizontalAlignment.Right)
+                    x = ContentArea.Width - child.ExtendedArea.Width;
+                // If Horizontal alignment is stretch and the Width is specified (not auto), make it center.
+                else if (child.HorizontalAlignment == HorizontalAlignment.Center
+                    || (child.HorizontalAlignment == HorizontalAlignment.Stretch
+                    && !double.IsPositiveInfinity(child.Width)))
+                    x += center.X;
             }
 
-            return element.Height;
+            // Apply vertical alignment.
+            if (Orientation == Orientation.Horizontal)
+            {
+                if (child.VerticalAlignment == VerticalAlignment.Bottom)
+                    y = ContentArea.Height - child.ExtendedArea.Height;
+                // If vertical alignment is stretch and the height is specified (not auto), make it center.
+                else if (child.VerticalAlignment == VerticalAlignment.Center 
+                    || (child.VerticalAlignment == VerticalAlignment.Stretch
+                    && !double.IsPositiveInfinity(child.Height)))
+                    y += center.Y;
+            }
+            return Position + new Point(x, y) + child.Margin + child.Padding;
         }
 
-        internal override int CalcChildWidth(Element element)
+        public override Size MeasureOverride(Size availableSize)
         {
             if (Orientation == Orientation.Vertical)
             {
-                // Stretch child controls to fill width.
-                if (element.Width.Auto || element.HorizontalAlignment == HorizontalAlignment.Stretch)
-                {
-                    var val = ContentArea.Width - element.Margin.Left - element.Margin.Right;
-                    if (val > Width.Min)
-                        return val;
-                }
-                // If the width of the parent is too small to contain this control, extend it.
-                if ((FindChildWidth() > ContentArea.Width) && Width.Auto)
-                {
-                    Width.Value = FindChildWidth() + Padding.Left + Padding.Right;
-                    Arrange(false);
+                for (var i = 0; i < Elements.Count; i++)
+                {   // For a vertical stack panel, stretch the child control horizontally if its
+                    // width equals Auto or its HorizontalAlignment equals Stretch.
+                    // If the width is specified, use that and align it based on the HorizontalAlignment.
+                    // If the width is not specified, but the HorizontalAlignment is not Stretch, then use the
+                    // width of the child's children to determine the width of the child, which will then be
+                    // aligned with the standard behavior in AlignChild.
+
+                    double width, height;
+                    // If height is auto, use height of children.
+                    if (double.IsPositiveInfinity(Elements[i].Height))
+                        height = Elements[i].ChildSize.Height;
+                    // If it is specified, use the specified height.
+                    else
+                        height = Elements[i].Height;
+                    height += Elements[i].Padding.Top + Elements[i].Padding.Bottom; // Add padding.
+
+                    // If horizontal alignment is Stretch and height is not specified, fill the panel.
+                    if (Elements[i].HorizontalAlignment == HorizontalAlignment.Stretch && double.IsPositiveInfinity(Elements[i].Width))
+                        width = ContentArea.Width - Elements[i].Margin.Left - Elements[i].Margin.Right;
+                    else
+                    {
+                        // If horizontal alignment is not stretch, find the width (either automatically or specified).
+                        if (double.IsPositiveInfinity(Elements[i].Width))
+                            width = Elements[i].ChildSize.Width;
+                        else
+                            width = Elements[i].Width;
+                        width += Elements[i].Padding.Left + Elements[i].Padding.Right;  // Add padding.
+                    }
+                    Elements[i].ActualSize = new Size(width, height);
                 }
             }
-            else
+            else if (Orientation == Orientation.Horizontal)
             {
-                // If the width of the parent is too small to contain this control, extend it.
-                if ((element.ExtendedArea.Width + element.Position.X > ContentArea.Width) ||
-                    (FindChildWidth() > ContentArea.Width) && Width.Auto)
+                for (var i = 0; i < Elements.Count; i++)
                 {
-                    Width.Value = FindChildWidth() + Padding.Left + Padding.Right;
-                    // Arrange controls now that the width has been set.
-                    Arrange(false);
+                    // For a horizontal stack panel, stretch the child control vertically if its
+                    // height equals Auto or its VerticalAlignment equals Stretch.
+                    // If the height is specified, use that and align it based on the VerticalAlignment.
+                    // If the height is not specified, but the VerticalAlignment is not Stretch, then use the
+                    // height of the child's children to determine the height of the child, which will then be
+                    // aligned with the standard behavior in AlignChild.
+
+                    double width, height;
+                    // If width is auto, use width of children.
+                    if (double.IsPositiveInfinity(Elements[i].Width))
+                        width = Elements[i].ChildSize.Width;
+                    // If it is specified, use the specified width.
+                    else
+                        width = Elements[i].Width;
+                    width += Elements[i].Padding.Left + Elements[i].Padding.Right; // Add padding.
+
+                    // If vertical alignment is Stretch and height is not specified, fill the panel.
+                    if (Elements[i].VerticalAlignment == VerticalAlignment.Stretch && double.IsPositiveInfinity(Elements[i].Height))
+                        height = ContentArea.Height - Elements[i].Margin.Top - Elements[i].Margin.Bottom;
+                    else
+                    {
+                        // If vertical alignment is not stretch, find the height (either automatically or specified).
+                        if (double.IsPositiveInfinity(Elements[i].Height))
+                            height = Elements[i].ChildSize.Height;
+                        else
+                            height = Elements[i].Height;
+                        height += Elements[i].Padding.Top + Elements[i].Padding.Bottom;  // Add padding.
+                    }
+                    Elements[i].ActualSize = new Size(width, height);
                 }
             }
-            return element.Width;
+            return base.MeasureOverride(availableSize);
         }
 
-        internal override Point AlignChild(Point pos, Element element)
+        // Because of the stacking behavior, the two below methods must be overridden.
+        protected override double GetMaxChildWidth()
+        {
+            if (Orientation == Orientation.Horizontal)
+            {
+                var w = 0d;
+                for (var i = 0; i < Elements.Count; i++)
+                    w += Elements[i].ActualWidth + Elements[i].Margin.Left + Elements[i].Margin.Right;
+                return w;
+            }
+            return base.GetMaxChildWidth();
+        }
+
+        protected override double GetMaxChildHeight()
         {
             if (Orientation == Orientation.Vertical)
             {
-                var extra = 0;
-                if (Parent != null)
-                {
-                    for (var i = 0; i < Elements.Count; i++)
-                    {
-                        // Until we hit this control, add the total height of child controls before this one.
-                        if (Elements[i] == element) break;
-                        extra += Elements[i].ExtendedArea.Height;
-                    }
-                }
-                return base.AlignChild(new Point(pos.X, pos.Y + extra), element);
+                var h = 0d;
+                for (var i = 0; i < Elements.Count; i++)
+                    h += Elements[i].ActualHeight + Elements[i].Margin.Top + Elements[i].Margin.Bottom;
+                return h;
             }
-            else
+            return base.GetMaxChildHeight();
+        }
+
+        public override Point ArrangeOverride()
+        {
+            if (Orientation == Orientation.Vertical)
             {
-                var extra = 0;
-                if (Parent != null)
+                double y = 0;
+                for (var i = 0; i < Elements.Count; i++)
                 {
-                    for (var i = 0; i < Elements.Count; i++)
-                    {
-                        // Until we hit this control, add the total width of child controls before this one.
-                        if (Elements[i] == element) break;
-                        extra += Elements[i].ExtendedArea.Width;
-                    }
+                    Elements[i].Position = Elements[i].ArrangeOverride() + new Point(0, y);
+                    y += Elements[i].ExtendedArea.Height;
                 }
-                return base.AlignChild(new Point(pos.X + extra, pos.Y), element);
             }
+            else if (Orientation == Orientation.Horizontal)
+            {
+                double x = 0;
+                for (var i = 0; i < Elements.Count; i++)
+                {
+                    Elements[i].Position = Elements[i].ArrangeOverride() + new Point(x, 0);
+                    x += Elements[i].ExtendedArea.Width;
+                }
+            }
+            return base.ArrangeOverride();
         }
     }
 }

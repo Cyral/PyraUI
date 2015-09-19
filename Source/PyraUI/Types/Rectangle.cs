@@ -7,7 +7,7 @@ namespace Pyratron.UI.Types
     {
         public static readonly Rectangle Empty = new Rectangle();
 
-        public Rectangle(int x, int y, int width, int height)
+        public Rectangle(double x, double y, double width, double height)
         {
             X = x;
             Y = y;
@@ -15,7 +15,7 @@ namespace Pyratron.UI.Types
             Height = height;
         }
 
-        public Rectangle(Point location, int width, int height)
+        public Rectangle(Point location, double width, double height)
         {
             X = location.X;
             Y = location.Y;
@@ -25,40 +25,25 @@ namespace Pyratron.UI.Types
 
         public Size Size => new Size(Width, Height);
 
-        public bool Equals(Rectangle other)
-            => X == other.X && Y == other.Y && Width == other.Width && Height == other.Height;
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = X;
-                hashCode = (hashCode * 397) ^ Y;
-                hashCode = (hashCode * 397) ^ Width;
-                hashCode = (hashCode * 397) ^ Height;
-                return hashCode;
-            }
-        }
-
-        public int X { get; }
-
-        public int Y { get; }
-
-        public int Width { get; }
-
-        public int Height { get; }
+        public double X { get; set; }
+    
+        public double Y { get; set; }
+         
+        public double Width { get; set; }
+    
+        public double Height { get; set; }
 
         [Browsable(false)]
-        public int Left => X;
+        public double Left => X;
 
         [Browsable(false)]
-        public int Top => Y;
+        public double Top => Y;
 
         [Browsable(false)]
-        public int Right => X + Width;
+        public double Right => X + Width;
 
         [Browsable(false)]
-        public int Bottom => Y + Height;
+        public double Bottom => Y + Height;
 
         [Browsable(false)]
         public bool IsEmpty => Height == 0 && Width == 0 && X == 0 && Y == 0;
@@ -78,32 +63,12 @@ namespace Pyratron.UI.Types
         [Browsable(false)]
         public Point BottomRight => new Point(Right, Bottom);
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Rectangle))
-                return false;
-
-            var comp = (Rectangle) obj;
-
-            return (comp.X == X) &&
-                   (comp.Y == Y) &&
-                   (comp.Width == Width) &&
-                   (comp.Height == Height);
-        }
-
-        public static bool operator ==(Rectangle left, Rectangle right) => (left.X == right.X
-                                                                            && left.Y == right.Y
-                                                                            && left.Width == right.Width
-                                                                            && left.Height == right.Height);
-
-        public static bool operator !=(Rectangle left, Rectangle right) => !(left == right);
-
         public static implicit operator Rectangle(Thickness thickness)
             =>
                 new Rectangle(thickness.Left, thickness.Top, thickness.Right - thickness.Left,
                     thickness.Bottom - thickness.Top);
 
-        public bool Contains(int x, int y) => X <= x &&
+        public bool Contains(double x, double y) => X <= x &&
                                               x < X + Width &&
                                               Y <= y &&
                                               y < Y + Height;

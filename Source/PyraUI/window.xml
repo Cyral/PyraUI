@@ -1,23 +1,19 @@
 ﻿<Window
   Title="MainWindow"
-  Height="450"
+  Height="250"
   Width="900">
-  <StackPanel Height="350" Width="600">
-    <StackPanel Margin="1">
-      <Button>Label Text</Button>
-      <Button>Label Text</Button>
-    </StackPanel>
-    <StackPanel Margin="1" Orientation="Horizontal">
-      <Button>Label Text</Button>
-      <Button>Label Text</Button>
-      <Button>Label Text</Button>
-      <StackPanel Width="256">
-        <Button>Label Text</Button>
-        <Button>Label Text</Button>
-        <Button>Label Text 2</Button>
-        <Button>Label Text 3</Button>
-        <Button>Label Text 4</Button>
-      </StackPanel>
-    </StackPanel>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="400">
+    <Button>
+      ABC
+    </Button>
+    <Button FontSize="8" VerticalAlignment="Center" HorizontalAlignment="Center">
+      ABC
+    </Button>
+    <Button FontSize="20" VerticalAlignment="Bottom">
+      Test
+    </Button>
+    <Button FontSize="16" VerticalAlignment="Top">
+      Test
+    </Button>
   </StackPanel>
 </Window>

@@ -11,8 +11,10 @@ namespace Pyratron.UI
         public abstract void DrawString(string text, Point point);
         public abstract void DrawString(string text, Point point, Color color);
         public abstract void DrawString(string text, Point point, float pt);
+        public abstract void DrawString(string text, Point point, Color color, float pt);
         public abstract void DrawRectangle(Rectangle bounds, Color color);
 
         public abstract Size MeasureText(string text);
+        public abstract Size MeasureText(string text, float pt);
     }
 }

@@ -13,10 +13,16 @@ namespace Pyratron.UI.Monogame
         public SpriteBatch SpriteBatch { get; set; }
         public SpriteFont Font { get; set; }
 
+        internal int[] FontSizes = { 6, 7, 8, 9, 10, 12, 14, 16, 20 };
+
         public override void Load()
         {
             Renderer = new Renderer(this);
             Skin = new Skin(this);
+
+            foreach (var size in FontSizes)
+                Skin.LoadFontInternal("default" + size);
+
             base.Load();
         }
 

@@ -61,14 +61,10 @@ namespace Pyratron.UI.Controls
             {
                 Manager.Renderer.DrawRectangle(ExtendedArea, new Color(225, 225, 225));
                 Manager.Renderer.DrawRectangle(BorderArea, new Color(240, 240, 240));
-                var boxColor = Color.White;
-                if (Box == Box.Block)
-                    boxColor = new Color(255, 255, 240);
-                if (Box == Box.Inline)
-                    boxColor = new Color(240, 255, 255);
                 if (this is Label)
-                    boxColor = new Color(255, 240, 255);
-                Manager.Renderer.DrawRectangle(ContentArea, boxColor);
+                    Manager.Renderer.DrawRectangle(ContentArea, new Color(255, 240, 240));
+                else
+                    Manager.Renderer.DrawRectangle(ContentArea, Color.White);
                 //Manager.Renderer.DrawString(FindChildHeight().ToString(), Position);
             }
 
