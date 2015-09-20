@@ -37,6 +37,8 @@ namespace Pyratron.UI
         public virtual void Init()
         {
             xml = LoadFromXML(File.ReadAllText("window.xml"), null);
+            foreach (var element in Elements)
+                element.UpdateLayout();
         }
 
         public virtual string LoadFromXML(string xml, Element parent)
@@ -73,7 +75,7 @@ namespace Pyratron.UI
         /// <param name="delta">Seconds elapsed since last frame.</param>
         public virtual void Draw(float delta)
         {
-            Elements[0].UpdateLayout();
+            //Elements[0].UpdateLayout();
             Renderer.BeginDraw();
             //Renderer.DrawTexture("button", new Rectangle(50, 50, 150, 150));
             // Render all top level elements. (Those with no parent).

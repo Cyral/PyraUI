@@ -4,6 +4,7 @@ namespace Pyratron.UI.Controls
 {
     public class StackPanel : Panel
     {
+
         /// <summary>
         /// The direction controls will stack.
         /// </summary>
@@ -33,7 +34,7 @@ namespace Pyratron.UI.Controls
                 // If Horizontal alignment is stretch and the Width is specified (not auto), make it center.
                 else if (child.HorizontalAlignment == HorizontalAlignment.Center
                     || (child.HorizontalAlignment == HorizontalAlignment.Stretch
-                    && !double.IsPositiveInfinity(child.Width)))
+                    && !child.IsWidthAuto))
                     x += center.X;
             }
 
@@ -45,7 +46,7 @@ namespace Pyratron.UI.Controls
                 // If vertical alignment is stretch and the height is specified (not auto), make it center.
                 else if (child.VerticalAlignment == VerticalAlignment.Center 
                     || (child.VerticalAlignment == VerticalAlignment.Stretch
-                    && !double.IsPositiveInfinity(child.Height)))
+                    && !child.IsHeightAuto))
                     y += center.Y;
             }
             return Position + new Point(x, y) + child.Margin + child.Padding;
@@ -56,7 +57,8 @@ namespace Pyratron.UI.Controls
             if (Orientation == Orientation.Vertical)
             {
                 for (var i = 0; i < Elements.Count; i++)
-                {   // For a vertical stack panel, stretch the child control horizontally if its
+                {  
+                    // For a vertical stack panel, stretch the child control horizontally if its
                     // width equals Auto or its HorizontalAlignment equals Stretch.
                     // If the width is specified, use that and align it based on the HorizontalAlignment.
                     // If the width is not specified, but the HorizontalAlignment is not Stretch, then use the
@@ -65,7 +67,7 @@ namespace Pyratron.UI.Controls
 
                     double width, height;
                     // If height is auto, use height of children.
-                    if (double.IsPositiveInfinity(Elements[i].Height))
+                    if (Elements[i].IsHeightAuto)
                         height = Elements[i].ChildSize.Height;
                     // If it is specified, use the specified height.
                     else
@@ -73,18 +75,24 @@ namespace Pyratron.UI.Controls
                     height += Elements[i].Padding.Top + Elements[i].Padding.Bottom; // Add padding.
 
                     // If horizontal alignment is Stretch and height is not specified, fill the panel.
-                    if (Elements[i].HorizontalAlignment == HorizontalAlignment.Stretch && double.IsPositiveInfinity(Elements[i].Width))
+                    if (Elements[i].HorizontalAlignment == HorizontalAlignment.Stretch && Elements[i].IsWidthAuto)
                         width = ContentArea.Width - Elements[i].Margin.Left - Elements[i].Margin.Right;
                     else
                     {
                         // If horizontal alignment is not stretch, find the width (either automatically or specified).
-                        if (double.IsPositiveInfinity(Elements[i].Width))
+                        if (Elements[i].IsWidthAuto)
                             width = Elements[i].ChildSize.Width;
                         else
                             width = Elements[i].Width;
                         width += Elements[i].Padding.Left + Elements[i].Padding.Right;  // Add padding.
                     }
-                    Elements[i].ActualSize = new Size(width, height);
+                    if (!(Elements[i] is StackPanel))
+                        Elements[i].ActualSize = new Size(width, height);
+                    else if (!Elements[i].IsWidthAuto || Elements[i].HorizontalAlignment != HorizontalAlignment.Stretch)
+                    {
+                        Elements[i].ActualSize = new Size(width, Elements[i].ActualSize.Height);
+                        Elements[i].ArrangeOverride();
+                    }
                 }
             }
             else if (Orientation == Orientation.Horizontal)
@@ -100,7 +108,7 @@ namespace Pyratron.UI.Controls
 
                     double width, height;
                     // If width is auto, use width of children.
-                    if (double.IsPositiveInfinity(Elements[i].Width))
+                    if (Elements[i].IsWidthAuto)
                         width = Elements[i].ChildSize.Width;
                     // If it is specified, use the specified width.
                     else
@@ -108,25 +116,31 @@ namespace Pyratron.UI.Controls
                     width += Elements[i].Padding.Left + Elements[i].Padding.Right; // Add padding.
 
                     // If vertical alignment is Stretch and height is not specified, fill the panel.
-                    if (Elements[i].VerticalAlignment == VerticalAlignment.Stretch && double.IsPositiveInfinity(Elements[i].Height))
+                    if (Elements[i].VerticalAlignment == VerticalAlignment.Stretch && Elements[i].IsHeightAuto)
                         height = ContentArea.Height - Elements[i].Margin.Top - Elements[i].Margin.Bottom;
                     else
                     {
                         // If vertical alignment is not stretch, find the height (either automatically or specified).
-                        if (double.IsPositiveInfinity(Elements[i].Height))
+                        if (Elements[i].IsHeightAuto)
                             height = Elements[i].ChildSize.Height;
                         else
                             height = Elements[i].Height;
-                        height += Elements[i].Padding.Top + Elements[i].Padding.Bottom;  // Add padding.
+                        height += Elements[i].Padding.Top + Elements[i].Padding.Bottom; // Add padding.
                     }
-                    Elements[i].ActualSize = new Size(width, height);
+                    if (!(Elements[i] is StackPanel))
+                        Elements[i].ActualSize = new Size(width, height);
+                    else if (!Elements[i].IsHeightAuto || Elements[i].VerticalAlignment != VerticalAlignment.Stretch)
+                    {
+                        Elements[i].ActualSize = new Size(Elements[i].ActualSize.Width, height);
+                        Elements[i].ArrangeOverride();
+                    }
                 }
             }
             return base.MeasureOverride(availableSize);
         }
 
         // Because of the stacking behavior, the two below methods must be overridden.
-        protected override double GetMaxChildWidth()
+        protected internal override double GetMaxChildWidth()
         {
             if (Orientation == Orientation.Horizontal)
             {
@@ -138,7 +152,7 @@ namespace Pyratron.UI.Controls
             return base.GetMaxChildWidth();
         }
 
-        protected override double GetMaxChildHeight()
+        protected internal override double GetMaxChildHeight()
         {
             if (Orientation == Orientation.Vertical)
             {
@@ -158,6 +172,18 @@ namespace Pyratron.UI.Controls
                 for (var i = 0; i < Elements.Count; i++)
                 {
                     Elements[i].Position = Elements[i].ArrangeOverride() + new Point(0, y);
+                    var panel = Elements[i] as StackPanel;
+                    if (panel != null)
+                    {
+                        panel.Measure();
+                        if (panel.Orientation == Orientation.Vertical)
+                            panel.ActualSize = new Size(ContentArea.Size.Remove(panel.Margin).Width,
+                                Elements[i].GetFullChildHeight());
+                        else if (panel.Orientation == Orientation.Horizontal)
+                            panel.ActualSize = new Size(
+                                ContentArea.Size.Remove(panel.Margin).Width, Elements[i].GetMaxChildHeight());
+                    }
+                    ArrangeChildren(Elements[i]);
                     y += Elements[i].ExtendedArea.Height;
                 }
             }
@@ -167,10 +193,47 @@ namespace Pyratron.UI.Controls
                 for (var i = 0; i < Elements.Count; i++)
                 {
                     Elements[i].Position = Elements[i].ArrangeOverride() + new Point(x, 0);
+                    var panel = Elements[i] as StackPanel;
+                    if (panel != null)
+                    {
+                        if (panel.Orientation == Orientation.Vertical)
+                            panel.ActualSize = new Size(
+                                Elements[i].IsWidthAuto ? panel.GetFullChildWidth() : Elements[i].Width, ContentArea.Size.Remove(panel.Margin).Height);
+                        else if (panel.Orientation == Orientation.Horizontal)
+                            panel.ActualSize = new Size(Elements[i].IsWidthAuto ? Elements[i].GetMaxChildWidth() : Elements[i].Width,
+                                ContentArea.Size.Remove(panel.Margin).Height);
+                    }
+                    ArrangeChildren(Elements[i]);
                     x += Elements[i].ExtendedArea.Width;
                 }
             }
             return base.ArrangeOverride();
+        }
+
+        private void ArrangeChildren(Element element)
+        {
+            for (var i = 0; i < element.Elements.Count; i++)
+            {
+                var child = element.Elements[i];
+                if (!(child.Parent is StackPanel))
+                    child.Arrange();
+            }
+        }
+
+        public override void Measure()
+        {
+            if (Parent != null && !(Parent is StackPanel))
+                ActualSize = MeasureOverride((Size) Parent?.ContentArea.Size.Remove(Margin));
+            else
+            {
+                MeasureOverride(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
+            }
+        }
+
+        public override void Arrange()
+        {
+            if (Parent != null && !(Parent is StackPanel))
+                Position = ArrangeOverride();
         }
     }
 }

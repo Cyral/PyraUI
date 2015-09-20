@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pyratron.UI.States;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
@@ -17,25 +16,52 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// The area inside the border.
         /// </summary>
-        public Thickness Padding { get; set; }
+        public Thickness Padding
+        {
+            get { return padding; }
+            set
+            {
+                padding = value;
+                LayoutInvalidated = true;
+            }
+        }
 
         /// <summary>
         /// The area outside the border.
         /// </summary>
-        public Thickness Margin { get; set; }
+        public Thickness Margin
+        {
+            get { return margin; }
+            set
+            {
+                margin = value;
+                LayoutInvalidated = true;
+            }
+        }
 
-        public HorizontalAlignment HorizontalAlignment { get; set; }
+        public HorizontalAlignment HorizontalAlignment
+        {
+            get { return horizontalAlignment; }
+            set
+            {
+                horizontalAlignment = value;
+                LayoutInvalidated = true;
+            }
+        }
 
-        public VerticalAlignment VerticalAlignment { get; set; }
+        public VerticalAlignment VerticalAlignment
+        {
+            get { return verticalAlignment; }
+            set
+            {
+                verticalAlignment = value;
+                LayoutInvalidated = true;
+            }
+        }
 
-        /// <summary>
-        /// The type of display box.
-        /// </summary>
-        public Box Box { get; set; }
+        public bool IsWidthAuto => double.IsInfinity(Width);
 
-        public bool IsWidthAuto => double.IsPositiveInfinity(Width);
-
-        public bool IsHeightAuto => double.IsPositiveInfinity(Height);
+        public bool IsHeightAuto => double.IsInfinity(Height);
 
         public int FontSize
         {
@@ -44,6 +70,7 @@ namespace Pyratron.UI.Controls
             {
                 fontSize = value;
                 fontSizeSet = true;
+                LayoutInvalidated = true;
             }
         }
 
@@ -54,6 +81,7 @@ namespace Pyratron.UI.Controls
             {
                 textColor = value;
                 textColorSet = true;
+                LayoutInvalidated = true;
             }
         }
 
@@ -71,7 +99,7 @@ namespace Pyratron.UI.Controls
                 {
                     minWidth = value;
                     LayoutInvalidated = true;
-                    if (Width < minWidth)
+                    if (Width < minWidth || IsWidthAuto)
                         Width = minWidth;
                 }
             }
@@ -124,7 +152,7 @@ namespace Pyratron.UI.Controls
                 {
                     minHeight = value;
                     LayoutInvalidated = true;
-                    if (Height < minHeight)
+                    if (Height < minHeight || IsWidthAuto)
                         Height = minHeight;
                 }
             }
@@ -165,9 +193,31 @@ namespace Pyratron.UI.Controls
 
         public bool LayoutInvalidated { get; set; }
 
-        public double ActualWidth { get; set; }
+        public double ActualWidth
+        {
+            get { return actualWidth; }
+            set
+            {
+                if ((int) value != (int) ActualWidth)
+                {
+                    LayoutInvalidated = true;
+                    actualWidth = value;
+                }
+            }
+        }
 
-        public double ActualHeight { get; set; }
+        public double ActualHeight
+        {
+            get { return actualHeight; }
+            set
+            {
+                if ((int) value != (int) ActualHeight)
+                {
+                    LayoutInvalidated = true;
+                    actualHeight = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Element's parent. Null if root.
@@ -188,16 +238,8 @@ namespace Pyratron.UI.Controls
             get { return new Size((int) Math.Round(ActualWidth), (int) Math.Round(ActualHeight)); }
             set
             {
-                if (!Equals(value.Width, ActualWidth))
-                {
-                    ActualWidth = value.Width;
-                    LayoutInvalidated = true;
-                }
-                if (!Equals(value.Height, ActualHeight))
-                {
-                    ActualHeight = value.Height;
-                    LayoutInvalidated = true;
-                }
+                ActualWidth = value.Width;
+                ActualHeight = value.Height;
             }
         }
 
@@ -237,13 +279,20 @@ namespace Pyratron.UI.Controls
             get { return ActualSize.Extend(Margin).Offset(Position - Margin - Padding); }
         }
 
+        private double actualHeight;
+        private double actualWidth;
+
         private int fontSize;
 
         // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
         private bool fontSizeSet, textColorSet;
 
         private double height, minHeight, maxHeight, width, minWidth, maxWidth;
+        private HorizontalAlignment horizontalAlignment;
+        private Thickness margin;
+        private Thickness padding;
         private Color textColor;
+        private VerticalAlignment verticalAlignment;
 
         public Element(Manager manager) : base(manager)
         {
@@ -253,8 +302,6 @@ namespace Pyratron.UI.Controls
             MaxWidth = MaxHeight = double.PositiveInfinity;
             Width = double.PositiveInfinity;
             Height = double.PositiveInfinity;
-
-            Box = Box.Inline;
 
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
@@ -287,7 +334,7 @@ namespace Pyratron.UI.Controls
                     w = Math.Max(availableSize.Width, MinWidth);
             }
             else // If horizontal alignment is not stretch, find the largest child element and use that as the width.
-                w = GetMaxChildWidth() + Padding.Left + Padding.Right;
+                w = (IsWidthAuto ? GetMaxChildWidth() : Width) + Padding.Left + Padding.Right;
 
             // Repeat same process for vertical alignment.
             if (VerticalAlignment == VerticalAlignment.Stretch)
@@ -296,7 +343,7 @@ namespace Pyratron.UI.Controls
                     h = Math.Max(availableSize.Height, MinHeight);
             }
             else
-                h = GetMaxChildHeight() + Padding.Top + Padding.Bottom;
+                h = (IsHeightAuto ? GetMaxChildHeight() : Height) + Padding.Top + Padding.Bottom;
             return new Size(w, h);
         }
 
@@ -349,6 +396,7 @@ namespace Pyratron.UI.Controls
 
         public virtual void UpdateLayout()
         {
+            Parent?.Arrange();
             Measure();
             Arrange();
         }
@@ -377,7 +425,6 @@ namespace Pyratron.UI.Controls
                     // Add element to master list.
                     if (!Manager.Elements.Contains(element))
                         Manager.Elements.Add(element);
-
                     UpdateLayout();
                 }
             }
@@ -417,7 +464,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Releases resources used by the element, removes itself from its parent, and disposes of all children.
         /// </summary>
-        protected virtual void Dispose()
+        protected internal virtual void Dispose()
         {
             Parent.Remove(this, false);
             Parent = null;
@@ -430,24 +477,54 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Returns the height of all child elements if they were to be stacked on top of each other.
         /// </summary>
-        protected virtual double GetChildHeight()
+        protected internal virtual double GetChildHeight()
         {
             var h = 0d;
             if (Elements.Count == 0)
-                return BorderArea.Height;
+                return ExtendedArea.Height;
             for (var i = 0; i < Elements.Count; i++)
                 h += Elements[i].GetChildHeight();
+            return h;
+        }
+
+        protected internal virtual double GetFullChildWidth()
+        {
+            double w = Padding.Left + Padding.Right;
+            if (Elements.Count == 0)
+                return ExtendedArea.Width;
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                if (i == Elements.Count - 1)
+                    Elements[i].ActualWidth = Elements[i].GetChildWidth() + Elements[i].Padding.Left +
+                                              Elements[i].Padding.Right;
+                w += Elements[i].ExtendedArea.Width;
+            }
+            return w;
+        }         
+
+        protected internal virtual double GetFullChildHeight()
+        {
+            double h = Padding.Top + Padding.Bottom;
+            if (Elements.Count == 0)
+                return ExtendedArea.Height;
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                if (i == Elements.Count - 1 && (!(Elements[i] is Panel)))
+                    Elements[i].ActualHeight = Elements[i].GetChildHeight() + Elements[i].Padding.Top +
+                                               Elements[i].Padding.Bottom;
+                h += Elements[i].ExtendedArea.Height;
+            }
             return h;
         }
 
         /// <summary>
         /// Returns the width of all child elements if they were to be stacked beside each other.
         /// </summary>
-        protected virtual double GetChildWidth()
+        protected internal virtual double GetChildWidth()
         {
             var w = 0d;
             if (Elements.Count == 0)
-                return BorderArea.Width;
+                return ExtendedArea.Width;
             for (var i = 0; i < Elements.Count; i++)
                 w += Elements[i].GetChildWidth();
             return w;
@@ -456,14 +533,15 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Returns the extended width of the child element with the greatest width.
         /// </summary>
-        protected virtual double GetMaxChildWidth()
+        protected internal virtual double GetMaxChildWidth()
         {
             var w = 0d;
             if (Elements.Count == 0)
-                return BorderArea.Width;
+                return ExtendedArea.Width;
             for (var i = 0; i < Elements.Count; i++)
                 w = Math.Max(w,
-                    (double.IsInfinity(Elements[i].Width) ? Elements[i].GetChildWidth() : Elements[i].Width) + Elements[i].Padding.Left + Elements[i].Padding.Right +
+                    (double.IsInfinity(Elements[i].Width) ? Elements[i].GetChildWidth() : Elements[i].Width) +
+                    Elements[i].Padding.Left + Elements[i].Padding.Right +
                     Elements[i].Margin.Left + Elements[i].Margin.Right);
             return w;
         }
@@ -471,12 +549,15 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Returns the extended height of the child element with the greatest height.
         /// </summary>
-        protected virtual double GetMaxChildHeight()
+        protected internal virtual double GetMaxChildHeight()
         {
             var h = 0d;
+            if (Elements.Count == 0)
+                return ExtendedArea.Height;
             for (var i = 0; i < Elements.Count; i++)
                 h = Math.Max(h,
-                    (double.IsInfinity(Elements[i].Height) ? Elements[i].GetChildHeight() : Elements[i].Height) + Elements[i].Padding.Top + Elements[i].Padding.Bottom +
+                    (double.IsInfinity(Elements[i].Height) ? Elements[i].GetChildHeight() : Elements[i].Height) +
+                    Elements[i].Padding.Top + Elements[i].Padding.Bottom +
                     Elements[i].Margin.Top + Elements[i].Margin.Bottom);
             return h;
         }
