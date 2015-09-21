@@ -5,7 +5,17 @@ namespace Pyratron.UI.Controls
 {
     public class Label : Control
     {
-        public string Text { get; set; }
+        private string text;
+
+        public string Text
+        {
+            get { return text; }
+            set
+            {
+                text = value.Trim();
+                LayoutInvalidated = true;
+            }
+        }
 
         public Alignment TextAlignment { get; set; }
 
@@ -33,7 +43,7 @@ namespace Pyratron.UI.Controls
 
         public override Size MeasureOverride(Size availableSize)
         {
-            return Manager.Renderer.MeasureText(Text, FontSize);
+            return Manager.Renderer.MeasureText(Text, FontSize, FontStyle);
             //return base.MeasureOverride(availableSize);
         }
 
@@ -42,7 +52,7 @@ namespace Pyratron.UI.Controls
             base.Draw(delta);
 
             // Get size of text.
-            var textsize = Manager.Renderer.MeasureText(Text, FontSize);
+            var textsize = Manager.Renderer.MeasureText(Text, FontSize, FontStyle);
             // Calculate center for each axis.
             var center = new Point((ContentArea.Width / 2) - (textsize.Width / 2),
                 (ContentArea.Height / 2) - (textsize.Height / 2));
@@ -85,7 +95,7 @@ namespace Pyratron.UI.Controls
                     x = center.X;
                     break;
             }
-            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize);
+            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize, FontStyle);
         }
     }
 }

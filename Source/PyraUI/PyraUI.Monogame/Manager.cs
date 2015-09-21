@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework.Content;
+﻿using System;
+using System.IO;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Monogame
 {
@@ -11,9 +14,8 @@ namespace Pyratron.UI.Monogame
     {
         public ContentManager Content { get; set; }
         public SpriteBatch SpriteBatch { get; set; }
-        public SpriteFont Font { get; set; }
 
-        internal int[] FontSizes = { 6, 7, 8, 9, 10, 12, 14, 16, 20 };
+        internal readonly int[] FontSizes = {6, 7, 8, 9, 10, 12, 14, 16, 20, 64};
 
         public override void Load()
         {
@@ -21,7 +23,8 @@ namespace Pyratron.UI.Monogame
             Skin = new Skin(this);
 
             foreach (var size in FontSizes)
-                Skin.LoadFontInternal("default" + size);
+                foreach (var style in Enum.GetValues(typeof (FontStyle)))
+                    Skin.LoadFontInternal(Path.Combine(style.ToString(), size.ToString()));
 
             base.Load();
         }

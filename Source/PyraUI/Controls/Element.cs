@@ -63,11 +63,24 @@ namespace Pyratron.UI.Controls
 
         public bool IsHeightAuto => double.IsInfinity(Height);
 
+        public FontStyle FontStyle
+        {
+            get { return fontStyleSet || Parent == null ? fontStyle : Parent.FontStyle; }
+            set
+            {
+                fontStyle = value;
+                fontStyleSet = true;
+                LayoutInvalidated = true;
+            }
+        }
+
         public int FontSize
         {
             get { return fontSizeSet || Parent == null ? fontSize : Parent.FontSize; }
             set
             {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException("Font size must be more than 0.");
                 fontSize = value;
                 fontSizeSet = true;
                 LayoutInvalidated = true;
@@ -285,7 +298,7 @@ namespace Pyratron.UI.Controls
         private int fontSize;
 
         // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
-        private bool fontSizeSet, textColorSet;
+        private bool fontSizeSet, textColorSet, fontStyleSet;
 
         private double height, minHeight, maxHeight, width, minWidth, maxWidth;
         private HorizontalAlignment horizontalAlignment;
@@ -293,6 +306,7 @@ namespace Pyratron.UI.Controls
         private Thickness padding;
         private Color textColor;
         private VerticalAlignment verticalAlignment;
+        private FontStyle fontStyle;
 
         public Element(Manager manager) : base(manager)
         {
@@ -310,8 +324,10 @@ namespace Pyratron.UI.Controls
             Padding = 10;
 
             FontSize = 10;
+            FontStyle = FontStyle.Regular;
             TextColor = Color.Black;
-            textColorSet = fontSizeSet = false;
+
+            textColorSet = fontSizeSet = fontStyleSet = false;
         }
 
         /// <summary>

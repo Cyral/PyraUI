@@ -53,8 +53,8 @@
     <Compile Include="Controls\StackPanel.cs" />
     <Compile Include="Controls\Visual.cs" />
     <Compile Include="Controls\Window.cs" />
-    <Compile Include="States\Box.cs" />
     <Compile Include="States\Visibility.cs" />
+    <Compile Include="Types\FontStyle.cs" />
     <Compile Include="Types\Orientation.cs" />
     <Compile Include="Types\Thickness.cs" />
     <Compile Include="Renderer.cs" />

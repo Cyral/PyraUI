@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Pyratron.UI.Types
 {
+    [DebuggerDisplay("{X}, {Y}")]
     public struct Point
     {
         public static readonly Point Zero = new Point();
@@ -47,6 +49,6 @@ namespace Pyratron.UI.Types
             }
         }
 
-        public override string ToString() => "{X=" + X.ToString(CultureInfo.CurrentCulture) + ",Y=" + Y.ToString(CultureInfo.CurrentCulture) + "}";
+        public override string ToString() => "X=" + X.ToString(CultureInfo.CurrentCulture) + ",Y=" + Y.ToString(CultureInfo.CurrentCulture);
     }
 }

@@ -24,57 +24,182 @@
 /processorParam:TextureFormat=Color
 /build:Textures/button.png
 
-#begin Fonts/default8.spritefont
+#begin Fonts/Regular/8.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/8.spritefont
+
+#begin Fonts/Regular/6.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/6.spritefont
+
+#begin Fonts/Regular/10.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/10.spritefont
+
+#begin Fonts/Regular/12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/12.spritefont
+
+#begin Fonts/Regular/14.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/14.spritefont
+
+#begin Fonts/Regular/16.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/16.spritefont
+
+#begin Fonts/Regular/20.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/20.spritefont
+
+#begin Fonts/Regular/9.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/9.spritefont
+
+#begin Fonts/Regular/7.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Regular/7.spritefont
+
+#begin Fonts/Regular/64.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:TextureFormat=Compressed
-/build:Fonts/default8.spritefont
+/build:Fonts/Regular/64.spritefont
 
-#begin Fonts/default6.spritefont
+#begin Fonts/Bold/8.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/8.spritefont
+
+#begin Fonts/Bold/6.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/6.spritefont
+
+#begin Fonts/Bold/10.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/10.spritefont
+
+#begin Fonts/Bold/12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/12.spritefont
+
+#begin Fonts/Bold/14.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/14.spritefont
+
+#begin Fonts/Bold/16.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/16.spritefont
+
+#begin Fonts/Bold/20.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/20.spritefont
+
+#begin Fonts/Bold/9.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/9.spritefont
+
+#begin Fonts/Bold/7.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Bold/7.spritefont
+
+#begin Fonts/Bold/64.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:TextureFormat=Compressed
-/build:Fonts/default6.spritefont
+/build:Fonts/Bold/64.spritefont
 
-#begin Fonts/default10.spritefont
+#begin Fonts/Italic/8.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/8.spritefont
+
+#begin Fonts/Italic/6.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/6.spritefont
+
+#begin Fonts/Italic/10.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/10.spritefont
+
+#begin Fonts/Italic/12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/12.spritefont
+
+#begin Fonts/Italic/14.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/14.spritefont
+
+#begin Fonts/Italic/16.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/16.spritefont
+
+#begin Fonts/Italic/20.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/20.spritefont
+
+#begin Fonts/Italic/9.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/9.spritefont
+
+#begin Fonts/Italic/7.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=NoChange
+/build:Fonts/Italic/7.spritefont
+
+#begin Fonts/Italic/64.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:TextureFormat=Compressed
-/build:Fonts/default10.spritefont
-
-#begin Fonts/default12.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default12.spritefont
-
-#begin Fonts/default14.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default14.spritefont
-
-#begin Fonts/default16.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default16.spritefont
-
-#begin Fonts/default20.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default20.spritefont
-
-#begin Fonts/default9.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default9.spritefont
-
-#begin Fonts/default7.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Compressed
-/build:Fonts/default7.spritefont
-
+/build:Fonts/Italic/64.spritefont

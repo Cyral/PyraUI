@@ -2,24 +2,9 @@
   Title="MainWindow"
   Height="550"
   Width="900">
-  <StackPanel>
-    <StackPanel>
-      <Button>Test</Button>
-      <Button>Test</Button>
-      <Button>Test</Button>
-      <Button>Test</Button>
-      <StackPanel Width="200">
-        <Button>Test</Button>
-        <Button>Test</Button>
-        <Button>Test</Button>
-        <Button>Test</Button>
-      </StackPanel>
-    </StackPanel>
-    <StackPanel>
-      <Button HorizontalAlignment="Right">Test</Button>
-      <Button>Test</Button>
-      <Button>Test</Button>
-      <Button>Test</Button>
-    </StackPanel>
+  <StackPanel FontSize="20" TextColor="Orange">
+    <Button FontStyle="Bold">Test</Button>
+    <Button FontStyle="Italic">Test</Button>
+    <Button>Test</Button>
   </StackPanel>
 </Window>

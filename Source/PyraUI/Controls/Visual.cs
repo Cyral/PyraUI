@@ -61,9 +61,9 @@ namespace Pyratron.UI.Controls
             {
                 Manager.Renderer.DrawRectangle(ExtendedArea, new Color(225, 225, 225));
                 Manager.Renderer.DrawRectangle(BorderArea, new Color(240, 240, 240));
-                if (this is Label)
-                    Manager.Renderer.DrawRectangle(ContentArea, new Color(255, 240, 240));
-                else
+               // if (this is Label)
+               //     Manager.Renderer.DrawRectangle(ContentArea, new Color(255, 240, 240));
+               // else
                     Manager.Renderer.DrawRectangle(ContentArea, Color.White);
                 //Manager.Renderer.DrawString(FindChildHeight().ToString(), Position);
             }

@@ -11,13 +11,11 @@ namespace Pyratron.UI.Demo
     {
         private Monogame.Manager UI { get; }
 
-        private SpriteFont Font { get; set; }
-        private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         public Game()
         {
-            graphics = new GraphicsDeviceManager(this)
+            var graphics = new GraphicsDeviceManager(this)
             {
                 PreferredBackBufferHeight = 768,
                 PreferredBackBufferWidth = 1024
@@ -41,7 +39,6 @@ namespace Pyratron.UI.Demo
 
             UI.Content = Content;
             UI.SpriteBatch = spriteBatch;
-            UI.Font = Font;
             UI.Load();
             UI.Init(); 
         }

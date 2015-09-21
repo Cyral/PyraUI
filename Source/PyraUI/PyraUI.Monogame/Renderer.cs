@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -33,11 +34,6 @@ namespace Pyratron.UI.Monogame
             manager.SpriteBatch.End();
         }
 
-        public override void DrawTexture(string name, Rectangle rectangle)
-        {
-            DrawTexture(name, rectangle, Color.White);
-        }
-
         public override void DrawTexture(string name, Rectangle rectangle, Color color)
         {
             var rect = new Microsoft.Xna.Framework.Rectangle((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
@@ -46,27 +42,13 @@ namespace Pyratron.UI.Monogame
             manager.SpriteBatch.Draw(texture, rect, col * (color.A / 255f));
         }
 
-        public override void DrawString(string text, Point point)
+        public override void DrawString(string text, Point point, Color color, int size, FontStyle style)
         {
-            DrawString(text, point, Color.Black);
-        }
-
-        public override void DrawString(string text, Point point, Color color)
-        {
-            DrawString(text, point, color, defaultSize);
-        }
-
-        public override void DrawString(string text, Point point, float pt)
-        {
-            DrawString(text, point, Color.Black, pt);
-        }
-
-        public override void DrawString(string text, Point point, Color color, float pt)
-        {
-            var pos = new Vector2((int)point.X, (int)point.Y - 4);
+            var pos = new Vector2((int)Math.Round(point.X), (int)Math.Round(point.Y) - 4);
             var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
-            manager.SpriteBatch.DrawString(GetFont("default" + GetClosestFontSize(pt)), text, pos, col * (color.A / 255f), 0,
-                Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
+            var closest = GetClosestFontSize(size);
+            manager.SpriteBatch.DrawString(GetFont(Path.Combine(style.ToString(), closest.ToString())), text, pos, col * (color.A / 255f), 0,
+                Vector2.Zero, size / (float)closest, SpriteEffects.None, 0);
         }
 
         public override void DrawRectangle(Rectangle bounds, Color color)
@@ -76,19 +58,33 @@ namespace Pyratron.UI.Monogame
             manager.SpriteBatch.Draw(pixel, rect, col);
         }
 
-        public override Size MeasureText(string text)
+        public override Size MeasureText(string text, int size, FontStyle style)
         {
-            return MeasureText(text, defaultSize);
+            // Remove any extra spaces, possibly created by the space character for invalid characters not included in the spritefont.
+            text = text.Trim();
+            var closest = GetClosestFontSize(size);
+            var scale = size / (float)closest;
+            var measure = GetFont(Path.Combine(style.ToString(), closest.ToString())).MeasureString(text);
+            return new Size((int)(Math.Round(measure.X * scale)), (int)(Math.Round((measure.Y * scale) - 4))); //TODO: 4 is due to spacing.
         }
-
-        public override Size MeasureText(string text, float pt)
+     
+        /// <summary>
+        /// Find the font size that is closest to the specified value.
+        /// </summary>
+        /// <remarks>
+        /// MonoGame does not support vector fonts, so many common font sizes are included with PyraUI.
+        /// If a size is not included, the next highest size will be chosen and scaled down.
+        /// </remarks>
+        private int GetClosestFontSize(int fontsize)
         {
-            var size = GetFont("default" + GetClosestFontSize(pt)).MeasureString(text);
-            return new Size((int)(Math.Round(size.X)), (int)(Math.Round(size.Y - 4))); //TODO: 5 is due to spacing.
+            var ret = manager.FontSizes[manager.FontSizes.Length - 1];
+            foreach (var size in manager.FontSizes.Where(size => size >= fontsize))
+            {
+                ret = size;
+                break;
+            }
+            return ret;
         }
-
-        private readonly int defaultSize = 10;
-        private int GetClosestFontSize(float pt) => manager.FontSizes.OrderBy(x => Math.Abs(x - pt)).First();
 
         private Texture2D GetTexture(string name) => manager.Skin.Textures[name] as Texture2D;
         private SpriteFont GetFont(string name) => manager.Skin.Fonts[name] as SpriteFont;
