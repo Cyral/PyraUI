@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 
 namespace Pyratron.UI.Types
@@ -10,7 +11,7 @@ namespace Pyratron.UI.Types
     public struct Color
     {
         public static ReadOnlyDictionary<string, Color> Colors { get; }
-         
+
         public bool Equals(Color other)
         {
             return A == other.A && R == other.R && G == other.G && B == other.B;
@@ -51,6 +52,14 @@ namespace Pyratron.UI.Types
             B = (byte) blue;
         }
 
+        public Color(int argb)
+        {
+            R = (byte) ((argb >> 16) & 255);
+            G = (byte) ((argb >> 8) & 255);
+            B = (byte) (argb & 255);
+            A = 255;
+        }
+
         public Color(int red, int green, int blue, int alpha = 255)
         {
             A = (byte) alpha;
@@ -67,11 +76,11 @@ namespace Pyratron.UI.Types
         {
             // Use reflection to find the name of the predefined colors.
             var colors = new Dictionary<string, Color>();
-            var props = typeof(Color).GetProperties(BindingFlags.Public | BindingFlags.Static);
+            var props = typeof (Color).GetProperties(BindingFlags.Public | BindingFlags.Static);
             foreach (var prop in props)
             {
                 if (prop.PropertyType != typeof (Color)) continue;
-                var color = (Color)prop.GetValue(null, null);
+                var color = (Color) prop.GetValue(null, null);
                 colors.Add(prop.Name, color);
             }
             Colors = new ReadOnlyDictionary<string, Color>(colors);
@@ -79,7 +88,7 @@ namespace Pyratron.UI.Types
 
         public static bool operator ==(Color left, Color right)
         {
-            return Equals(left, right);
+            return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
         }
 
         public static bool operator !=(Color left, Color right)
@@ -263,14 +272,28 @@ namespace Pyratron.UI.Types
         {
             var parts = value.Split(',');
             int r, g, b;
+            // Handled named (e.g. "Red") colors and hex codes.
             if (parts.Length == 1)
             {
                 if (Colors.ContainsKey(parts[0]))
                     return Colors[parts[0]];
-                else
-                    throw new InvalidCastException("\"" + parts[0] + "\" is not a valid named color.");
+                if (parts[0].StartsWith("#") && parts[0].Length == 7)
+                {
+                    var hex = parts[0].Substring(1);
+                    int argb;
+                    if (int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out argb))
+                    {
+                        return new Color(argb);
+                    }
+                }
+#if DEBUG
+                throw new InvalidCastException("\"" + parts[0] + "\" is not a valid named color.");
+#else
+                return Color.Black;
+#endif
             }
-            else if (parts.Length == 3)
+            // Handle ARGB or RGB colors.
+            if (parts.Length == 3)
             {
                 if (int.TryParse(parts[0], out r) &&
                     int.TryParse(parts[1], out g) &&
@@ -286,7 +309,11 @@ namespace Pyratron.UI.Types
                     int.TryParse(parts[3], out a))
                     return new Color(r, g, b, a);
             }
-            throw new InvalidCastException("Not a named color or a valid color in R,G,B or R,G,B,A format.");
+#if DEBUG
+            throw new InvalidCastException("Not a named color, hex color, or a valid color in R,G,B or R,G,B,A format.");
+#else
+                 return Color.Black;
+#endif
         }
     }
 }

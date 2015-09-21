@@ -26,32 +26,31 @@ namespace Pyratron.UI
         /// </summary>
         public abstract void DrawTexture(string name, Rectangle rectangle, Color color);
 
+        /// <summary>
+        /// Draws a string at the specified point.
+        /// </summary>
+        public void DrawString(string text, Point point, bool ignoreFormatting = false) => DrawString(text, point, Color.Black, defaultSize, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point) => DrawString(text, point, Color.Black, defaultSize);
+        public void DrawString(string text, Point point, Color color, bool ignoreFormatting = false) => DrawString(text, point, color, defaultSize, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, Color color) => DrawString(text, point, color, defaultSize);
+        public void DrawString(string text, Point point, int size, bool ignoreFormatting = false) => DrawString(text, point, Color.Black, size, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, int size) => DrawString(text, point, Color.Black, size);
+        public void DrawString(string text, Point point, Color color, int size, bool ignoreFormatting = false)
+            => DrawString(text, point, color, size, FontStyle.Regular, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, Color color, int size)
-            => DrawString(text, point, color, size, FontStyle.Regular);
-
-        /// <summary>
-        /// Draws a string at the specified point.
-        /// </summary>
-        public abstract void DrawString(string text, Point point, Color color, int size, FontStyle style);
+        public abstract void DrawString(string text, Point point, Color color, int size, FontStyle style, bool ignoreFormatting = false);
 
         /// <summary>
         /// Draws a rectangle within the specified bounds.

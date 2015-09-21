@@ -1,10 +1,16 @@
 ﻿<Window
   Title="MainWindow"
-  Height="550"
-  Width="900">
-  <StackPanel FontSize="20" TextColor="Orange">
-    <Button FontStyle="Bold">Test</Button>
-    <Button FontStyle="Italic">Test</Button>
-    <Button>Test</Button>
+  Height="580"
+  Width="550">
+  <StackPanel FontSize="16">
+    <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
+    <Button FontSize="12">[SteelBlue]Testing[] *formatting* [Green]in[] _PyraUI_</Button>
+    <Button>[Yellow]C[Gold]o[Orange]l[DarkOrange]o[OrangeRed]r[Red]s  *[Gray]PyraUI[]*  C[]o[]l[]o[]r[]s</Button>
+    <Button FontSize="10">[#00c0ff]Hex *colors work too*!</Button>
+    <StackPanel Orientation="Horizontal">
+      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
+      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
+      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
+    </StackPanel>
   </StackPanel>
 </Window>
