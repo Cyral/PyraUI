@@ -1,14 +1,24 @@
-﻿using Pyratron.UI.Types;
+﻿using System;
+using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
     public class StackPanel : Panel
     {
-
         /// <summary>
         /// The direction controls will stack.
         /// </summary>
-        public Orientation Orientation { get; set; }
+        public Orientation Orientation
+        {
+            get { return orientation; }
+            set
+            {
+                orientation = value;
+                InvalidateLayout();
+            }
+        }
+
+        private Orientation orientation;
 
         public StackPanel(Manager manager, Orientation orientation) : base(manager)
         {
@@ -18,6 +28,33 @@ namespace Pyratron.UI.Controls
         // ReSharper disable once IntroduceOptionalParameters.Global
         public StackPanel(Manager manager) : this(manager, Orientation.Vertical)
         {
+        }
+
+        public override Point ArrangeChild(Element child)
+        {
+            double x = 0, y = 0;
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                if (Orientation == Orientation.Vertical)
+                {
+                    if (Elements[i] == child)
+                    {
+                        var pos = base.ArrangeChild(child);
+                        return new Point(pos.X, pos.Y + y);
+                    }
+                    y += Elements[i].ExtendedArea.Height;
+                }
+                if (Orientation == Orientation.Horizontal)
+                {
+                    if (Elements[i] == child)
+                    {
+                        var pos = base.ArrangeChild(child);
+                        return new Point(pos.X + x, pos.Y);
+                    }
+                    x += Elements[i].ExtendedArea.Width;
+                }
+            }
+            return base.ArrangeChild(child);
         }
 
         public override Point AlignChild(Element child)
@@ -32,9 +69,9 @@ namespace Pyratron.UI.Controls
                 if (child.HorizontalAlignment == HorizontalAlignment.Right)
                     x = ContentArea.Width - child.ExtendedArea.Width;
                 // If Horizontal alignment is stretch and the Width is specified (not auto), make it center.
-                else if (child.HorizontalAlignment == HorizontalAlignment.Center
+                if (child.HorizontalAlignment == HorizontalAlignment.Center
                     || (child.HorizontalAlignment == HorizontalAlignment.Stretch
-                    && !child.IsWidthAuto))
+                        && !child.IsWidthAuto))
                     x += center.X;
             }
 
@@ -44,196 +81,77 @@ namespace Pyratron.UI.Controls
                 if (child.VerticalAlignment == VerticalAlignment.Bottom)
                     y = ContentArea.Height - child.ExtendedArea.Height;
                 // If vertical alignment is stretch and the height is specified (not auto), make it center.
-                else if (child.VerticalAlignment == VerticalAlignment.Center 
+                if (child.VerticalAlignment == VerticalAlignment.Center
                     || (child.VerticalAlignment == VerticalAlignment.Stretch
-                    && !child.IsHeightAuto))
+                        && !child.IsHeightAuto))
                     y += center.Y;
             }
-            return Position + new Point(x, y) + child.Margin + child.Padding;
+            return child.Position + new Point(x, y);
         }
 
-        public override Size MeasureOverride(Size availableSize)
+        public override Size MeasureSelf(Size availableSize)
         {
+         
+            double w = Width, h = Height;
             if (Orientation == Orientation.Vertical)
             {
-                for (var i = 0; i < Elements.Count; i++)
-                {  
-                    // For a vertical stack panel, stretch the child control horizontally if its
-                    // width equals Auto or its HorizontalAlignment equals Stretch.
-                    // If the width is specified, use that and align it based on the HorizontalAlignment.
-                    // If the width is not specified, but the HorizontalAlignment is not Stretch, then use the
-                    // width of the child's children to determine the width of the child, which will then be
-                    // aligned with the standard behavior in AlignChild.
+                if (Parent == null) return Size;
+            
 
-                    double width, height;
-                    // If height is auto, use height of children.
-                    if (Elements[i].IsHeightAuto)
-                        height = Elements[i].ChildSize.Height;
-                    // If it is specified, use the specified height.
-                    else
-                        height = Elements[i].Height;
-                    height += Elements[i].Padding.Top + Elements[i].Padding.Bottom; // Add padding.
-
-                    // If horizontal alignment is Stretch and height is not specified, fill the panel.
-                    if (Elements[i].HorizontalAlignment == HorizontalAlignment.Stretch && Elements[i].IsWidthAuto)
-                        width = ContentArea.Width - Elements[i].Margin.Left - Elements[i].Margin.Right;
-                    else
-                    {
-                        // If horizontal alignment is not stretch, find the width (either automatically or specified).
-                        if (Elements[i].IsWidthAuto)
-                            width = Elements[i].ChildSize.Width;
-                        else
-                            width = Elements[i].Width;
-                        width += Elements[i].Padding.Left + Elements[i].Padding.Right;  // Add padding.
-                    }
-                    if (!(Elements[i] is StackPanel))
-                        Elements[i].ActualSize = new Size(width, height);
-                    else if (!Elements[i].IsWidthAuto || Elements[i].HorizontalAlignment != HorizontalAlignment.Stretch)
-                    {
-                        Elements[i].ActualSize = new Size(width, Elements[i].ActualSize.Height);
-                        Elements[i].ArrangeOverride();
-                    }
-                }
-            }
-            else if (Orientation == Orientation.Horizontal)
-            {
-                for (var i = 0; i < Elements.Count; i++)
+                // If horizontal alignment is stretch and the width is more than the available size, try and fit it.
+                if ((!(Parent is StackPanel)) && HorizontalAlignment == HorizontalAlignment.Stretch)
                 {
-                    // For a horizontal stack panel, stretch the child control vertically if its
-                    // height equals Auto or its VerticalAlignment equals Stretch.
-                    // If the height is specified, use that and align it based on the VerticalAlignment.
-                    // If the height is not specified, but the VerticalAlignment is not Stretch, then use the
-                    // height of the child's children to determine the height of the child, which will then be
-                    // aligned with the standard behavior in AlignChild.
-
-                    double width, height;
-                    // If width is auto, use width of children.
-                    if (Elements[i].IsWidthAuto)
-                        width = Elements[i].ChildSize.Width;
-                    // If it is specified, use the specified width.
-                    else
-                        width = Elements[i].Width;
-                    width += Elements[i].Padding.Left + Elements[i].Padding.Right; // Add padding.
-
-                    // If vertical alignment is Stretch and height is not specified, fill the panel.
-                    if (Elements[i].VerticalAlignment == VerticalAlignment.Stretch && Elements[i].IsHeightAuto)
-                        height = ContentArea.Height - Elements[i].Margin.Top - Elements[i].Margin.Bottom;
-                    else
-                    {
-                        // If vertical alignment is not stretch, find the height (either automatically or specified).
-                        if (Elements[i].IsHeightAuto)
-                            height = Elements[i].ChildSize.Height;
-                        else
-                            height = Elements[i].Height;
-                        height += Elements[i].Padding.Top + Elements[i].Padding.Bottom; // Add padding.
-                    }
-                    if (!(Elements[i] is StackPanel))
-                        Elements[i].ActualSize = new Size(width, height);
-                    else if (!Elements[i].IsHeightAuto || Elements[i].VerticalAlignment != VerticalAlignment.Stretch)
-                    {
-                        Elements[i].ActualSize = new Size(Elements[i].ActualSize.Width, height);
-                        Elements[i].ArrangeOverride();
-                    }
+                    if (Width > availableSize.Width)
+                        w = Math.Min(availableSize.Width, Width);
                 }
-            }
-            return base.MeasureOverride(availableSize);
-        }
+                else
+                // If horizontal alignment is not stretch, find the largest child element and use that as the width.
+                    w = (IsWidthAuto ? GetMaxChildWidth() : Width) + Padding.Left + Padding.Right;
 
-        // Because of the stacking behavior, the two below methods must be overridden.
-        protected internal override double GetMaxChildWidth()
-        {
+                // Repeat same process for vertical alignment.
+                if (Height > availableSize.Height)
+                    h = Math.Max(IsHeightAuto ? GetChildHeight() : Height, MinHeight);
+            }
             if (Orientation == Orientation.Horizontal)
             {
-                var w = 0d;
-                for (var i = 0; i < Elements.Count; i++)
-                    w += Elements[i].ActualWidth + Elements[i].Margin.Left + Elements[i].Margin.Right;
-                return w;
-            }
-            return base.GetMaxChildWidth();
-        }
+                if (Parent == null) return Size;
 
-        protected internal override double GetMaxChildHeight()
-        {
+                // If horizontal alignment is stretch and the width is more than the available size, try and fit it.
+                if (VerticalAlignment == VerticalAlignment.Stretch)
+                {
+                    if (Height > availableSize.Height)
+                        h = Math.Min(availableSize.Height, Padding.Height + GetMaxChildHeight());
+                }
+                else
+                    // If horizontal alignment is not stretch, find the largest child element and use that as the width.
+                    h = (IsHeightAuto ? GetMaxChildHeight() : Height) + Padding.Top + Padding.Bottom;
+
+                // Repeat same process for vertical alignment.
+                if (Width> availableSize.Width)
+                    w = Math.Max(GetChildWidth(), MinWidth);
+            }
             if (Orientation == Orientation.Vertical)
             {
-                var h = 0d;
-                for (var i = 0; i < Elements.Count; i++)
-                    h += Elements[i].ActualHeight + Elements[i].Margin.Top + Elements[i].Margin.Bottom;
-                return h;
-            }
-            return base.GetMaxChildHeight();
-        }
-
-        public override Point ArrangeOverride()
-        {
-            if (Orientation == Orientation.Vertical)
-            {
-                double y = 0;
                 for (var i = 0; i < Elements.Count; i++)
                 {
-                    Elements[i].Position = Elements[i].ArrangeOverride() + new Point(0, y);
-                    var panel = Elements[i] as StackPanel;
-                    if (panel != null)
-                    {
-                        panel.Measure();
-                        if (panel.Orientation == Orientation.Vertical)
-                            panel.ActualSize = new Size(ContentArea.Size.Remove(panel.Margin).Width,
-                                Elements[i].GetFullChildHeight());
-                        else if (panel.Orientation == Orientation.Horizontal)
-                            panel.ActualSize = new Size(
-                                ContentArea.Size.Remove(panel.Margin).Width, Elements[i].GetMaxChildHeight());
-                    }
-                    ArrangeChildren(Elements[i]);
-                    y += Elements[i].ExtendedArea.Height;
+                    if (Elements[i].IsWidthAuto)
+                        Elements[i].ActualWidth = ContentArea.Width - Elements[i].Margin.Width;
+                    else
+                        Elements[i].ActualWidth = Math.Min(Elements[i].Width, ContentArea.Width - Elements[i].Margin.Width);
+                    Elements[i].Arrange();
                 }
             }
-            else if (Orientation == Orientation.Horizontal)
+
+            if (Orientation == Orientation.Horizontal)
             {
-                double x = 0;
                 for (var i = 0; i < Elements.Count; i++)
                 {
-                    Elements[i].Position = Elements[i].ArrangeOverride() + new Point(x, 0);
-                    var panel = Elements[i] as StackPanel;
-                    if (panel != null)
-                    {
-                        if (panel.Orientation == Orientation.Vertical)
-                            panel.ActualSize = new Size(
-                                Elements[i].IsWidthAuto ? panel.GetFullChildWidth() : Elements[i].Width, ContentArea.Size.Remove(panel.Margin).Height);
-                        else if (panel.Orientation == Orientation.Horizontal)
-                            panel.ActualSize = new Size(Elements[i].IsWidthAuto ? Elements[i].GetMaxChildWidth() : Elements[i].Width,
-                                ContentArea.Size.Remove(panel.Margin).Height);
-                    }
-                    ArrangeChildren(Elements[i]);
-                    x += Elements[i].ExtendedArea.Width;
+                    Elements[i].ActualHeight = Math.Min(Elements[i].Height,
+                        ContentArea.Height - Elements[i].Margin.Height);
+                    Elements[i].Arrange();
                 }
             }
-            return base.ArrangeOverride();
-        }
-
-        private void ArrangeChildren(Element element)
-        {
-            for (var i = 0; i < element.Elements.Count; i++)
-            {
-                var child = element.Elements[i];
-                if (!(child.Parent is StackPanel))
-                    child.Arrange();
-            }
-        }
-
-        public override void Measure()
-        {
-            if (Parent != null && !(Parent is StackPanel))
-                ActualSize = MeasureOverride((Size) Parent?.ContentArea.Size.Remove(Margin));
-            else
-            {
-                MeasureOverride(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
-            }
-        }
-
-        public override void Arrange()
-        {
-            if (Parent != null && !(Parent is StackPanel))
-                Position = ArrangeOverride();
+            return new Size(w, h);
         }
     }
 }

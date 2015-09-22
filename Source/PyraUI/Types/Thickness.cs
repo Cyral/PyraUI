@@ -83,6 +83,16 @@ namespace Pyratron.UI.Types
                     left.Right + right.Right, left.Bottom + right.Bottom);
 
         /// <summary>
+        /// The combination of the top and bottom thickness.
+        /// </summary>
+        public int Height => Top + Bottom;
+
+        /// <summary>
+        /// The combination of the left and right thickness.
+        /// </summary>
+        public int Width => Left + Right;
+
+        /// <summary>
         /// Add the left and top of the rectangle to the left and top of the thickness.
         /// </summary>
         public Thickness Offset(Thickness rectangle) => new Thickness(rectangle.Left + Left, rectangle.Top + Top, Right, Bottom);

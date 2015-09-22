@@ -6,6 +6,8 @@ namespace Pyratron.UI.Types
     {
         public static readonly Size Zero = new Size();
 
+        public static readonly Size Infinity = new Size(double.PositiveInfinity, double.PositiveInfinity);
+
         public Size(double width, double height)
         {
             Width = width;

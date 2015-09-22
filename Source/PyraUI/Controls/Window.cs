@@ -1,4 +1,7 @@
-﻿namespace Pyratron.UI.Controls
+﻿using System;
+using Pyratron.UI.Types;
+
+namespace Pyratron.UI.Controls
 {
     internal class Window : Control
     {

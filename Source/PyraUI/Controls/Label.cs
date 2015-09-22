@@ -41,9 +41,9 @@ namespace Pyratron.UI.Controls
             Text = content;
         }
 
-        public override Size MeasureOverride(Size availableSize)
+        public override Size MeasureSelf(Size availableSize)
         {
-            return Manager.Renderer.MeasureText(Text, FontSize, FontStyle);
+            return Manager.Renderer.MeasureText(Text, FontSize, FontStyle) + Padding;
             //return base.MeasureOverride(availableSize);
         }
 

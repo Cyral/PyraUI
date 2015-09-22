@@ -1,16 +1,62 @@
 ﻿<Window
   Title="MainWindow"
-  Height="580"
-  Width="550">
-  <StackPanel FontSize="16">
-    <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
-    <Button FontSize="12">[SteelBlue]Testing[] *formatting* [Green]in[] _PyraUI_</Button>
-    <Button>[Yellow]C[Gold]o[Orange]l[DarkOrange]o[OrangeRed]r[Red]s  *[Gray]PyraUI[]*  C[]o[]l[]o[]r[]s</Button>
-    <Button FontSize="10">[#00c0ff]Hex *colors work too*!</Button>
-    <StackPanel Orientation="Horizontal">
-      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
-      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
-      <Button FontStyle="Bold" TextColor="#FF00FF">Foo \n*Bar* [Orange]_Derp_[]</Button>
+  Height="550"
+  Width="600">
+  <StackPanel Orientation="Horizontal">
+    <StackPanel Width="300" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+      <StackPanel>
+        <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
+        <Button FontSize="12">Testing</Button>
+        <StackPanel Width="250" HorizontalAlignment="Right">
+          <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
+          <Button FontSize="10" Width="100" HorizontalAlignment="Center">Foo</Button>
+          <StackPanel>
+            <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
+            <Button FontSize="12">Bar</Button>
+            <StackPanel>
+              <Button FontSize="20">[Orange]Pyra[Gray]UI</Button>
+              <Button FontSize="12">!!!</Button>
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel>
+          <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
+          <Button FontSize="12">
+            <StackPanel>
+              <Button FontSize="10">
+                <StackPanel>
+                  <Button FontSize="14">[Orange]Pyra[Gray]UI</Button>
+                  <Button FontSize="12">!!!</Button>
+                  <StackPanel Orientation="Horizontal">
+                    <StackPanel>
+                      <Button>Test 1!</Button>
+                      <Button TextColor="#FF0000">Test!</Button>
+                    </StackPanel>
+                    <StackPanel>
+                      <Button TextColor="255,0,0">Test!</Button>
+                    </StackPanel>
+                  </StackPanel>
+                </StackPanel>
+              </Button>
+              <Button FontSize="12">[Cyan]Test!</Button>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </StackPanel>
+    <Button FontSize="16">Testing!</Button>
+    <StackPanel Height="200" VerticalAlignment="Bottom">
+      <Button FontSize="12">[Cyan]Test!</Button>
+      <Button FontSize="20">[Orange]Pyra[Gray]UI</Button>
+      <StackPanel Orientation="Horizontal">
+        <StackPanel>
+          <Button>Test 1!</Button>
+          <Button TextColor="#FF0000">Test!</Button>
+        </StackPanel>
+        <StackPanel>
+          <Button TextColor="255,0,0">Test!</Button>
+        </StackPanel>
+      </StackPanel>
     </StackPanel>
   </StackPanel>
 </Window>

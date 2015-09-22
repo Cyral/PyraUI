@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
@@ -9,305 +10,6 @@ namespace Pyratron.UI.Controls
     /// </summary>
     public class Element : Component
     {
-        public override int MaxChildren => 1;
-
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The area inside the border.
-        /// </summary>
-        public Thickness Padding
-        {
-            get { return padding; }
-            set
-            {
-                padding = value;
-                LayoutInvalidated = true;
-            }
-        }
-
-        /// <summary>
-        /// The area outside the border.
-        /// </summary>
-        public Thickness Margin
-        {
-            get { return margin; }
-            set
-            {
-                margin = value;
-                LayoutInvalidated = true;
-            }
-        }
-
-        public HorizontalAlignment HorizontalAlignment
-        {
-            get { return horizontalAlignment; }
-            set
-            {
-                horizontalAlignment = value;
-                LayoutInvalidated = true;
-            }
-        }
-
-        public VerticalAlignment VerticalAlignment
-        {
-            get { return verticalAlignment; }
-            set
-            {
-                verticalAlignment = value;
-                LayoutInvalidated = true;
-            }
-        }
-
-        public bool IsWidthAuto => double.IsInfinity(Width);
-
-        public bool IsHeightAuto => double.IsInfinity(Height);
-
-        public FontStyle FontStyle
-        {
-            get { return fontStyleSet || Parent == null ? fontStyle : Parent.FontStyle; }
-            set
-            {
-                fontStyle = value;
-                fontStyleSet = true;
-                LayoutInvalidated = true;
-            }
-        }
-
-        public int FontSize
-        {
-            get { return fontSizeSet || Parent == null ? fontSize : Parent.FontSize; }
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("Font size must be more than 0.");
-                fontSize = value;
-                fontSizeSet = true;
-                LayoutInvalidated = true;
-            }
-        }
-
-        public Color TextColor
-        {
-            get { return textColorSet || Parent == null ? textColor : Parent.TextColor; }
-            set
-            {
-                textColor = value;
-                textColorSet = true;
-                LayoutInvalidated = true;
-            }
-        }
-
-        /// <summary>
-        /// The minimum width.
-        /// </summary>
-        public double MinWidth
-        {
-            get { return minWidth; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Minimum width must be greater than zero.");
-                if (!Equals(value, minWidth))
-                {
-                    minWidth = value;
-                    LayoutInvalidated = true;
-                    if (Width < minWidth || IsWidthAuto)
-                        Width = minWidth;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The maximum width.
-        /// </summary>
-        public double MaxWidth
-        {
-            get { return maxWidth; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Maximum width must be greater than zero.");
-                if (!Equals(value, maxWidth))
-                {
-                    maxWidth = value;
-                    LayoutInvalidated = true;
-                    if (Width > maxWidth)
-                        Width = maxWidth;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The target width.
-        /// </summary>
-        public double Width
-        {
-            get { return width; }
-            set
-            {
-                width = Math.Max(minWidth, Math.Min(value, maxWidth));
-                LayoutInvalidated = true;
-            }
-        }
-
-        /// <summary>
-        /// The minimum height.
-        /// </summary>
-        public double MinHeight
-        {
-            get { return minHeight; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Minimum height must be greater than zero.");
-                if (!Equals(value, minHeight))
-                {
-                    minHeight = value;
-                    LayoutInvalidated = true;
-                    if (Height < minHeight || IsWidthAuto)
-                        Height = minHeight;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The maximum height.
-        /// </summary>
-        public double MaxHeight
-        {
-            get { return maxHeight; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Maximum height must be greater than zero.");
-                if (!Equals(value, maxHeight))
-                {
-                    maxHeight = value;
-                    LayoutInvalidated = true;
-                    if (Height > maxHeight)
-                        Height = maxHeight;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The target height.
-        /// </summary>
-        public double Height
-        {
-            get { return height; }
-            set
-            {
-                height = Math.Max(minHeight, Math.Min(value, maxHeight));
-                LayoutInvalidated = true;
-            }
-        }
-
-        public bool LayoutInvalidated { get; set; }
-
-        public double ActualWidth
-        {
-            get { return actualWidth; }
-            set
-            {
-                if ((int) value != (int) ActualWidth)
-                {
-                    LayoutInvalidated = true;
-                    actualWidth = value;
-                }
-            }
-        }
-
-        public double ActualHeight
-        {
-            get { return actualHeight; }
-            set
-            {
-                if ((int) value != (int) ActualHeight)
-                {
-                    LayoutInvalidated = true;
-                    actualHeight = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Element's parent. Null if root.
-        /// </summary>
-        public virtual Element Parent { get; set; }
-
-        /// <summary>
-        /// List of child elements.
-        /// </summary>
-        public List<Element> Elements { get; set; }
-
-        public Size Size => new Size((int) Math.Round(Width), (int) Math.Round(Height));
-
-        public Size ChildSize => new Size(GetChildWidth(), GetChildHeight());
-
-        public Size ActualSize
-        {
-            get { return new Size((int) Math.Round(ActualWidth), (int) Math.Round(ActualHeight)); }
-            set
-            {
-                ActualWidth = value.Width;
-                ActualHeight = value.Height;
-            }
-        }
-
-        /// <summary>
-        /// The position of the content area of the element.
-        /// </summary>
-        public Point Position { get; set; }
-
-        /// <summary>
-        /// Rectangular region of the content area (inside the padding).
-        /// </summary>
-        public Rectangle ContentArea
-        {
-            get
-            {
-                return
-                    new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
-                        (int) ActualSize.Width - Padding.Left - Padding.Right,
-                        (int) ActualSize.Height - Padding.Bottom - Padding.Top).Offset(
-                            Position - Margin - Padding);
-            }
-        }
-
-        /// <summary>
-        /// Rectangular region of the element.
-        /// </summary>
-        public Rectangle BorderArea
-        {
-            get { return ActualSize.Combine(Margin).Offset(Position - Margin - Padding); }
-        }
-
-        /// <summary>
-        /// Rectangular region of the element plus the margin area.
-        /// </summary>
-        public Rectangle ExtendedArea
-        {
-            get { return ActualSize.Extend(Margin).Offset(Position - Margin - Padding); }
-        }
-
-        private double actualHeight;
-        private double actualWidth;
-
-        private int fontSize;
-
-        // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
-        private bool fontSizeSet, textColorSet, fontStyleSet;
-
-        private double height, minHeight, maxHeight, width, minWidth, maxWidth;
-        private HorizontalAlignment horizontalAlignment;
-        private Thickness margin;
-        private Thickness padding;
-        private Color textColor;
-        private VerticalAlignment verticalAlignment;
-        private FontStyle fontStyle;
-
         public Element(Manager manager) : base(manager)
         {
             Elements = new List<Element>();
@@ -317,8 +19,8 @@ namespace Pyratron.UI.Controls
             Width = double.PositiveInfinity;
             Height = double.PositiveInfinity;
 
-            HorizontalAlignment = HorizontalAlignment.Stretch;
-            VerticalAlignment = VerticalAlignment.Stretch;
+            HorizontalAlignment = HorizontalAlignment.Left;
+            VerticalAlignment = VerticalAlignment.Top;
 
             Margin = 10;
             Padding = 10;
@@ -331,15 +33,17 @@ namespace Pyratron.UI.Controls
         }
 
         /// <summary>
-        /// Handle inline XML content (such as text between the opening and closing tag)
+        /// Handles inline XML content (such as text between the opening and closing tag).
         /// </summary>
         public virtual void AddContent(string content)
         {
+            // By default, create a label inside this element.
             Add(new Label(Manager, content));
         }
 
-        public virtual Size MeasureOverride(Size availableSize)
+        public virtual Size MeasureSelf(Size availableSize)
         {
+            
             if (Parent == null) return Size;
             double w = Width, h = Height;
 
@@ -363,11 +67,10 @@ namespace Pyratron.UI.Controls
             return new Size(w, h);
         }
 
-        public virtual Point ArrangeOverride()
+        public virtual Point ArrangeChild(Element child)
         {
-            if (Parent != null)
-                return Parent.AlignChild(this);
-            return Margin + Padding;
+            // Position the child element in the upper left corner of this element, taking into account for margin and padding.
+            return Position + child.Margin + child.Padding;
         }
 
         public virtual Point AlignChild(Element child)
@@ -387,32 +90,38 @@ namespace Pyratron.UI.Controls
                 y += center.Y;
             if (child.VerticalAlignment == VerticalAlignment.Bottom)
                 y = ContentArea.Height - child.ExtendedArea.Height;
-            return Position + new Point(x, y) + child.Margin + child.Padding;
+            return child.Position + new Point(x, y);
         }
-
+        
         public virtual void Measure()
         {
+            // Measure child elements (and their children, and so on).
             for (var i = 0; i < Elements.Count; i++)
             {
                 var child = Elements[i];
                 child.Measure();
             }
-            ActualSize = MeasureOverride(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
+            // Then set the size of this element.
+            ActualSize = MeasureSelf(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
         }
 
         public virtual void Arrange()
         {
+            if (Parent == null) // Root elements must be positioned manually from the edge of the window.
+                Position = Margin + Padding;
             for (var i = 0; i < Elements.Count; i++)
             {
                 var child = Elements[i];
+                // Set the child position.
+                child.Position = ArrangeChild(child);
+                // Align it based on Horizontal and Vertical alignment.
+                child.Position = AlignChild(child);
                 child.Arrange();
             }
-            Position = ArrangeOverride();
         }
 
         public virtual void UpdateLayout()
         {
-            Parent?.Arrange();
             Measure();
             Arrange();
         }
@@ -495,41 +204,11 @@ namespace Pyratron.UI.Controls
         /// </summary>
         protected internal virtual double GetChildHeight()
         {
-            var h = 0d;
+            double h = Padding.Height;
             if (Elements.Count == 0)
                 return ExtendedArea.Height;
             for (var i = 0; i < Elements.Count; i++)
-                h += Elements[i].GetChildHeight();
-            return h;
-        }
-
-        protected internal virtual double GetFullChildWidth()
-        {
-            double w = Padding.Left + Padding.Right;
-            if (Elements.Count == 0)
-                return ExtendedArea.Width;
-            for (var i = 0; i < Elements.Count; i++)
-            {
-                if (i == Elements.Count - 1)
-                    Elements[i].ActualWidth = Elements[i].GetChildWidth() + Elements[i].Padding.Left +
-                                              Elements[i].Padding.Right;
-                w += Elements[i].ExtendedArea.Width;
-            }
-            return w;
-        }         
-
-        protected internal virtual double GetFullChildHeight()
-        {
-            double h = Padding.Top + Padding.Bottom;
-            if (Elements.Count == 0)
-                return ExtendedArea.Height;
-            for (var i = 0; i < Elements.Count; i++)
-            {
-                if (i == Elements.Count - 1 && (!(Elements[i] is Panel)))
-                    Elements[i].ActualHeight = Elements[i].GetChildHeight() + Elements[i].Padding.Top +
-                                               Elements[i].Padding.Bottom;
                 h += Elements[i].ExtendedArea.Height;
-            }
             return h;
         }
 
@@ -538,11 +217,11 @@ namespace Pyratron.UI.Controls
         /// </summary>
         protected internal virtual double GetChildWidth()
         {
-            var w = 0d;
+            double w = Padding.Width;
             if (Elements.Count == 0)
                 return ExtendedArea.Width;
             for (var i = 0; i < Elements.Count; i++)
-                w += Elements[i].GetChildWidth();
+                w += Elements[i].ExtendedArea.Width;
             return w;
         }
 
@@ -550,32 +229,320 @@ namespace Pyratron.UI.Controls
         /// Returns the extended width of the child element with the greatest width.
         /// </summary>
         protected internal virtual double GetMaxChildWidth()
-        {
-            var w = 0d;
-            if (Elements.Count == 0)
-                return ExtendedArea.Width;
-            for (var i = 0; i < Elements.Count; i++)
-                w = Math.Max(w,
-                    (double.IsInfinity(Elements[i].Width) ? Elements[i].GetChildWidth() : Elements[i].Width) +
-                    Elements[i].Padding.Left + Elements[i].Padding.Right +
-                    Elements[i].Margin.Left + Elements[i].Margin.Right);
-            return w;
-        }
+            => Elements.Count == 0 ? ExtendedArea.Width : Elements.Select(t => t.ExtendedArea.Width).Max();
 
         /// <summary>
         /// Returns the extended height of the child element with the greatest height.
         /// </summary>
         protected internal virtual double GetMaxChildHeight()
+            => Elements.Count == 0 ? ExtendedArea.Height : Elements.Select(t => t.ExtendedArea.Height).Max();
+
+        /// <summary>
+        /// Mark this element as invalidated, requiring a Measure and Arrange pass.
+        /// </summary>
+        internal virtual void InvalidateLayout() => LayoutInvalidated = true;
+
+        #region Properties
+
+        public override int MaxChildren => 1;
+
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The area inside the border.
+        /// </summary>
+        public Thickness Padding
         {
-            var h = 0d;
-            if (Elements.Count == 0)
-                return ExtendedArea.Height;
-            for (var i = 0; i < Elements.Count; i++)
-                h = Math.Max(h,
-                    (double.IsInfinity(Elements[i].Height) ? Elements[i].GetChildHeight() : Elements[i].Height) +
-                    Elements[i].Padding.Top + Elements[i].Padding.Bottom +
-                    Elements[i].Margin.Top + Elements[i].Margin.Bottom);
-            return h;
+            get { return padding; }
+            set
+            {
+                padding = value;
+                InvalidateLayout();
+            }
         }
+
+        /// <summary>
+        /// The area outside the border.
+        /// </summary>
+        public Thickness Margin
+        {
+            get { return margin; }
+            set
+            {
+                margin = value;
+                InvalidateLayout();
+            }
+        }
+
+        public HorizontalAlignment HorizontalAlignment
+        {
+            get { return horizontalAlignment; }
+            set
+            {
+                horizontalAlignment = value;
+                InvalidateLayout();
+            }
+        }
+
+        public VerticalAlignment VerticalAlignment
+        {
+            get { return verticalAlignment; }
+            set
+            {
+                verticalAlignment = value;
+                InvalidateLayout();
+            }
+        }
+
+        public bool IsWidthAuto => double.IsInfinity(Width);
+
+        public bool IsHeightAuto => double.IsInfinity(Height);
+
+        public FontStyle FontStyle
+        {
+            get { return fontStyleSet || Parent == null ? fontStyle : Parent.FontStyle; }
+            set
+            {
+                fontStyle = value;
+                fontStyleSet = true;
+                InvalidateLayout();
+            }
+        }
+
+        public int FontSize
+        {
+            get { return fontSizeSet || Parent == null ? fontSize : Parent.FontSize; }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException("Font size must be more than 0.");
+                fontSize = value;
+                fontSizeSet = true;
+                InvalidateLayout();
+            }
+        }
+
+        public Color TextColor
+        {
+            get { return textColorSet || Parent == null ? textColor : Parent.TextColor; }
+            set
+            {
+                textColor = value;
+                textColorSet = true;
+                InvalidateLayout();
+            }
+        }
+
+        /// <summary>
+        /// The minimum width.
+        /// </summary>
+        public double MinWidth
+        {
+            get { return minWidth; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Minimum width must be greater than zero.");
+                if (!Equals(value, minWidth))
+                {
+                    minWidth = value;
+                    InvalidateLayout();
+                    if (Width < minWidth || IsWidthAuto)
+                        Width = minWidth;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The maximum width.
+        /// </summary>
+        public double MaxWidth
+        {
+            get { return maxWidth; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Maximum width must be greater than zero.");
+                if (!Equals(value, maxWidth))
+                {
+                    maxWidth = value;
+                    InvalidateLayout();
+                    if (Width > maxWidth)
+                        Width = maxWidth;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The target width.
+        /// </summary>
+        public double Width
+        {
+            get { return width; }
+            set
+            {
+                width = Math.Max(minWidth, Math.Min(value, maxWidth));
+                InvalidateLayout();
+            }
+        }
+
+        /// <summary>
+        /// The minimum height.
+        /// </summary>
+        public double MinHeight
+        {
+            get { return minHeight; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Minimum height must be greater than zero.");
+                if (!Equals(value, minHeight))
+                {
+                    minHeight = value;
+                    InvalidateLayout();
+                    if (Height < minHeight || IsWidthAuto)
+                        Height = minHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The maximum height.
+        /// </summary>
+        public double MaxHeight
+        {
+            get { return maxHeight; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException("Maximum height must be greater than zero.");
+                if (!Equals(value, maxHeight))
+                {
+                    maxHeight = value;
+                    InvalidateLayout();
+                    if (Height > maxHeight)
+                        Height = maxHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The target height.
+        /// </summary>
+        public double Height
+        {
+            get { return height; }
+            set
+            {
+                height = Math.Max(minHeight, Math.Min(value, maxHeight));
+                InvalidateLayout();
+            }
+        }
+
+        internal bool LayoutInvalidated { get; set; }
+
+        public double ActualWidth
+        {
+            get { return actualWidth; }
+            set
+            {
+                if ((int) value != (int) ActualWidth)
+                {
+                    actualWidth = value;
+                }
+            }
+        }
+
+        public double ActualHeight
+        {
+            get { return actualHeight; }
+            set
+            {
+                if ((int) value != (int) ActualHeight)
+                {
+                    actualHeight = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Element's parent. Null if root.
+        /// </summary>
+        public virtual Element Parent { get; set; }
+
+        /// <summary>
+        /// List of child elements.
+        /// </summary>
+        public List<Element> Elements { get; set; }
+
+        public Size Size => new Size((int) Math.Round(Width), (int) Math.Round(Height));
+
+        public Size ChildSize => new Size(GetChildWidth(), GetChildHeight());
+
+        public Size ActualSize
+        {
+            get { return new Size((int) Math.Round(ActualWidth), (int) Math.Round(ActualHeight)); }
+            set
+            {
+                ActualWidth = value.Width;
+                ActualHeight = value.Height;
+            }
+        }
+
+        /// <summary>
+        /// The position of the content area of the element.
+        /// </summary>
+        public Point Position { get; set; }
+
+        /// <summary>
+        /// Rectangular region of the content area (inside the padding).
+        /// </summary>
+        public Rectangle ContentArea
+        {
+            get
+            {
+                return
+                    new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
+                        (int) ActualSize.Width - Padding.Left - Padding.Right,
+                        (int) ActualSize.Height - Padding.Bottom - Padding.Top).Offset(
+                            Position - Margin - Padding);
+            }
+        }
+
+        /// <summary>
+        /// Rectangular region of the element.
+        /// </summary>
+        public Rectangle BorderArea
+        {
+            get { return ActualSize.Combine(Margin).Offset(Position - Margin - Padding); }
+        }
+
+        /// <summary>
+        /// Rectangular region of the element plus the margin area.
+        /// </summary>
+        public Rectangle ExtendedArea
+        {
+            get { return ActualSize.Extend(Margin).Offset(Position - Margin - Padding); }
+        }
+
+        public Size ActualSizePrevious { get; set; }
+
+        private double actualHeight;
+        private double actualWidth;
+
+        private int fontSize;
+
+        // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
+        private bool fontSizeSet, textColorSet, fontStyleSet;
+
+        private double height, minHeight, maxHeight, width, minWidth, maxWidth;
+        private HorizontalAlignment horizontalAlignment;
+        private Thickness margin;
+        private Thickness padding;
+        private Color textColor;
+        private VerticalAlignment verticalAlignment;
+        private FontStyle fontStyle;
+
+        #endregion
     }
 }
