@@ -449,6 +449,9 @@ namespace Pyratron.UI.Controls
                 if ((int) value != (int) ActualWidth)
                 {
                     actualWidth = value;
+                    // Limit width to parent width.
+                    if (Parent != null)
+                        actualWidth = Math.Min(Parent.ContentArea.Width, actualWidth);
                 }
             }
         }
@@ -461,6 +464,9 @@ namespace Pyratron.UI.Controls
                 if ((int) value != (int) ActualHeight)
                 {
                     actualHeight = value;
+                    // Limit height to parent height.
+                    if (Parent != null)
+                        actualHeight = Math.Min(Parent.ContentArea.Height, actualHeight);
                 }
             }
         }
@@ -469,6 +475,8 @@ namespace Pyratron.UI.Controls
         /// Element's parent. Null if root.
         /// </summary>
         public virtual Element Parent { get; set; }
+
+        public Rectangle ParentBounds => Parent?.ContentArea ?? Rectangle.Infinity;
 
         /// <summary>
         /// List of child elements.

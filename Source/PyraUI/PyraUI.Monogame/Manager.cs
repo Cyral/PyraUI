@@ -31,7 +31,7 @@ namespace Pyratron.UI.Monogame
 
         public override void Update(float delta)
         {
-            DrawDebug = Keyboard.GetState().IsKeyUp(Keys.D);
+            DrawDebug = !Keyboard.GetState().IsKeyUp(Keys.D);
             base.Update(delta);
         }
     }

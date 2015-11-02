@@ -48,7 +48,7 @@ namespace Pyratron.UI.Monogame
         public override void DrawString(string text, Point point, Color color, int size, FontStyle style,
             bool ignoreFormatting = false)
         {
-            var pos = new Vector2((int) Math.Round(point.X), (int) Math.Round(point.Y) - 4);
+            var pos = new Vector2((int) Math.Round(point.X), (int) Math.Round(point.Y));
             var closest = GetClosestFontSize(size);
 
             var parts = ParseFormattedText(text, color, style);
@@ -76,12 +76,16 @@ namespace Pyratron.UI.Monogame
             }
         }
 
-        public override void DrawRectangle(Rectangle bounds, Color color)
+        public override void DrawRectangle(Rectangle area, Color color, Rectangle bounds)
         {
-            var rect = new Microsoft.Xna.Framework.Rectangle((int) bounds.X, (int) bounds.Y, (int) bounds.Width,
-                (int) bounds.Height);
-            var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
-            manager.SpriteBatch.Draw(pixel, rect, col);
+            area = area.FitToBounds(bounds);
+            if (area != Rectangle.Empty)
+            {
+                var rect = new Microsoft.Xna.Framework.Rectangle((int) area.X, (int) area.Y, (int) area.Width,
+                    (int) area.Height);
+                var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
+                manager.SpriteBatch.Draw(pixel, rect, col);
+            }
         }
 
         public override Size MeasureText(string text, int size, FontStyle style)
@@ -186,8 +190,7 @@ namespace Pyratron.UI.Monogame
             var closest = GetClosestFontSize(size);
             var scale = size / (float) closest;
             var measure = GetFont(Path.Combine(style.ToString(), closest.ToString())).MeasureString(text);
-            return new Size((int) (Math.Round(measure.X * scale)), (int) (Math.Round((measure.Y * scale) - 4)));
-                //TODO: 4 is due to spacing.
+            return new Size((int) (Math.Round(measure.X * scale)), (int) (Math.Round(measure.Y * scale)));
         }
 
         /// <summary>

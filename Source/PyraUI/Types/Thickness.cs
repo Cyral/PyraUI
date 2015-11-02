@@ -117,7 +117,7 @@ namespace Pyratron.UI.Types
                 case 1:
                     return new Thickness(int.Parse(value));
                 case 2:
-                    return new Thickness(int.Parse(parts[0]), int.Parse(parts[1]));
+                    return new Thickness(int.Parse(parts[1]), int.Parse(parts[0]));
                 case 4:
                     return new Thickness(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
             }

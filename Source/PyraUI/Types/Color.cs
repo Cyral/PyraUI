@@ -277,7 +277,7 @@ namespace Pyratron.UI.Types
             {
                 if (Colors.ContainsKey(parts[0]))
                     return Colors[parts[0]];
-                if (parts[0].StartsWith("#") && parts[0].Length == 7)
+                if (parts[0].StartsWith("#") && (parts[0].Length == 7 || parts[0].Length == 9))
                 {
                     var hex = parts[0].Substring(1);
                     int argb;
@@ -300,7 +300,7 @@ namespace Pyratron.UI.Types
                     int.TryParse(parts[2], out b))
                     return new Color(r, g, b);
             }
-            if (parts.Length == 4)
+            else if (parts.Length == 4)
             {
                 int a;
                 if (int.TryParse(parts[0], out r) &&

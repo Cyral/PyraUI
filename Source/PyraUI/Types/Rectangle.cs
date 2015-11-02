@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace Pyratron.UI.Types
@@ -6,6 +7,7 @@ namespace Pyratron.UI.Types
     public struct Rectangle
     {
         public static readonly Rectangle Empty = new Rectangle();
+        public static readonly Rectangle Infinity = new Rectangle(0, 0, double.PositiveInfinity, double.PositiveInfinity);
 
         public Rectangle(double x, double y, double width, double height)
         {
@@ -26,11 +28,11 @@ namespace Pyratron.UI.Types
         public Size Size => new Size(Width, Height);
 
         public double X { get; set; }
-    
+
         public double Y { get; set; }
-         
+
         public double Width { get; set; }
-    
+
         public double Height { get; set; }
 
         [Browsable(false)]
@@ -69,9 +71,36 @@ namespace Pyratron.UI.Types
                     thickness.Bottom - thickness.Top);
 
         public bool Contains(double x, double y) => X <= x &&
-                                              x < X + Width &&
-                                              Y <= y &&
-                                              y < Y + Height;
+                                                    x < X + Width &&
+                                                    Y <= y &&
+                                                    y < Y + Height;
+
+
+        public static bool operator ==(Rectangle left, Rectangle right) => left.Equals(right);
+
+        public static bool operator !=(Rectangle left, Rectangle right) => !(left == right);
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public bool Equals(Rectangle other)
+        {
+            return X.Equals(other.X) && Y.Equals(other.Y) && Width.Equals(other.Width) && Height.Equals(other.Height);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = X.GetHashCode();
+                hashCode = (hashCode * 397) ^ Y.GetHashCode();
+                hashCode = (hashCode * 397) ^ Width.GetHashCode();
+                hashCode = (hashCode * 397) ^ Height.GetHashCode();
+                return hashCode;
+            }
+        }
 
         public bool Contains(Point pt) => Contains(pt.X, pt.Y);
 
@@ -107,5 +136,22 @@ namespace Pyratron.UI.Types
         /// </summary>
         public Rectangle Extend(Thickness thickness)
             => new Rectangle(0, 0, thickness.Right + thickness.Left + Width, thickness.Bottom + thickness.Top + Height);
+
+        /// <summary>
+        /// Limit the area of this rectangle to the specified bounds.
+        /// </summary>
+        /// <param name="bounds"></param>
+        /// <returns></returns>
+        public Rectangle FitToBounds(Rectangle bounds)
+        {
+            var x1 = Math.Max(X, bounds.X);
+            var x2 = Math.Min(X + Width, bounds.X + bounds.Width);
+            var y1 = Math.Max(Y, bounds.Y);
+            var y2 = Math.Min(Y + Height, bounds.Y + bounds.Height);
+
+            return x2 >= x1 && y2 >= y1
+                ? new Rectangle(x1, y1, x2 - x1, y2 - y1)
+                : Empty;
+        }
     }
 }

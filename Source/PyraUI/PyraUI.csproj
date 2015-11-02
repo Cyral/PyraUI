@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\Border.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Types\Alignment.cs" />
     <Compile Include="Types\Color.cs" />

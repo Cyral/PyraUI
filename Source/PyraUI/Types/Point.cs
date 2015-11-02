@@ -23,7 +23,7 @@ namespace Pyratron.UI.Types
 
         public static Point operator -(Point p1, Point p2) => new Point(p1.X - p2.X, p1.Y - p2.Y);
 
-        public static bool operator ==(Point left, Point right) => Equals(left.X, right.X) && Equals(left.Y, right.Y);
+        public static bool operator ==(Point left, Point right) => left.Equals(right);
 
         public static bool operator !=(Point left, Point right) => !(left == right);
 
@@ -33,7 +33,7 @@ namespace Pyratron.UI.Types
         {
             if (!(obj is Point)) return false;
             var comp = (Point) obj;
-            return Equals(comp.X, X) && Equals(comp.Y, Y);
+            return Equals(comp);
         }
 
         public bool Equals(Point other)

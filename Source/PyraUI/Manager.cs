@@ -90,7 +90,7 @@ namespace Pyratron.UI
                 }
                 element.ActualSizePrevious = element.ActualSize;
             }
-            Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}", new Point(8, Elements[0].ExtendedArea.Height + 8), Color.Black,
+            Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}", new Point(8, Elements[1].ExtendedArea.Height + 8), Color.Black,
                 8, true);
             Renderer.EndDraw();
 

@@ -53,9 +53,9 @@ namespace Pyratron.UI
         public abstract void DrawString(string text, Point point, Color color, int size, FontStyle style, bool ignoreFormatting = false);
 
         /// <summary>
-        /// Draws a rectangle within the specified bounds.
+        /// Draws a rectangle within the specified area.
         /// </summary>
-        public abstract void DrawRectangle(Rectangle bounds, Color color);
+        public abstract void DrawRectangle(Rectangle area, Color color, Rectangle bounds);
 
         /// <summary>
         /// Returns the size the text will use when rendered.

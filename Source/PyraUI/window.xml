@@ -2,61 +2,17 @@
   Title="MainWindow"
   Height="550"
   Width="600">
-  <StackPanel Orientation="Horizontal">
-    <StackPanel Width="300" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-      <StackPanel>
-        <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
-        <Button FontSize="12">Testing</Button>
-        <StackPanel Width="250" HorizontalAlignment="Right">
-          <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
-          <Button FontSize="10" Width="100" HorizontalAlignment="Center">Foo</Button>
-          <StackPanel>
-            <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
-            <Button FontSize="12">Bar</Button>
-            <StackPanel>
-              <Button FontSize="20">[Orange]Pyra[Gray]UI</Button>
-              <Button FontSize="12">!!!</Button>
-            </StackPanel>
-          </StackPanel>
-        </StackPanel>
+  ﻿<Grid>
+    <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Right">
+      <Border Height="50" Background="#FF03A9F4" CornerRadius="2" Margin="2,2,100,2">
         <StackPanel>
-          <Button FontSize="16">[Orange]Pyra[Gray]UI</Button>
-          <Button FontSize="12">
-            <StackPanel>
-              <Button FontSize="10">
-                <StackPanel>
-                  <Button FontSize="14">[Orange]Pyra[Gray]UI</Button>
-                  <Button FontSize="12">!!!</Button>
-                  <StackPanel Orientation="Horizontal">
-                    <StackPanel>
-                      <Button>Test 1!</Button>
-                      <Button TextColor="#FF0000">Test!</Button>
-                    </StackPanel>
-                    <StackPanel>
-                      <Button TextColor="255,0,0">Test!</Button>
-                    </StackPanel>
-                  </StackPanel>
-                </StackPanel>
-              </Button>
-              <Button FontSize="12">[Cyan]Test!</Button>
-            </StackPanel>
-          </Button>
+          <Border Height="51" Background="#FFFF5177" CornerRadius="2" Margin="50,2"/>
+          <Border Height="200" Background="#FF12C700" CornerRadius="2" Margin="100,2,2,2"/>
         </StackPanel>
-      </StackPanel>
+      </Border>
+      <Border Height="50" Background="#FFFFB300" CornerRadius="2" Margin="2" HorizontalAlignment="Left" Width="200"/>
+      <Border Height="50" Background="#FFE040FB" CornerRadius="2" Margin="2" HorizontalAlignment="Center" Width="200"/>
+      <Border Height="50" Background="#FF616161" CornerRadius="2" Margin="2" HorizontalAlignment="Right" Width="200"/>
     </StackPanel>
-    <Button FontSize="16">Testing!</Button>
-    <StackPanel Height="200" VerticalAlignment="Bottom">
-      <Button FontSize="12">[Cyan]Test!</Button>
-      <Button FontSize="20">[Orange]Pyra[Gray]UI</Button>
-      <StackPanel Orientation="Horizontal">
-        <StackPanel>
-          <Button>Test 1!</Button>
-          <Button TextColor="#FF0000">Test!</Button>
-        </StackPanel>
-        <StackPanel>
-          <Button TextColor="255,0,0">Test!</Button>
-        </StackPanel>
-      </StackPanel>
-    </StackPanel>
-  </StackPanel>
+  </Grid>
 </Window>

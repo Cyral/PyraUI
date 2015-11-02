@@ -8,7 +8,7 @@ namespace Pyratron.UI.Controls
 
         public Panel(Manager manager) : base(manager)
         {
-            Padding = Margin = 1;
+            Padding = Margin = 0;
 
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
