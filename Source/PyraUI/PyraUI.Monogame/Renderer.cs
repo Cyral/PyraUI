@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Pyratron.UI.Brushes;
 using Pyratron.UI.Types;
 using Color = Pyratron.UI.Types.Color;
 using Point = Pyratron.UI.Types.Point;
@@ -14,12 +15,15 @@ namespace Pyratron.UI.Monogame
 {
     public class Renderer : UI.Renderer
     {
+        private readonly Primitives primitives;
         private readonly Manager manager;
         private readonly Texture2D pixel;
 
         public Renderer(Manager manager)
         {
             this.manager = manager;
+
+            primitives = new Primitives(manager.SpriteBatch.GraphicsDevice);
 
             // Create 1x1 texture for rendering rectangles.
             pixel = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, 1);
@@ -28,30 +32,33 @@ namespace Pyratron.UI.Monogame
 
         public override void BeginDraw()
         {
-            manager.SpriteBatch.Begin();
+          manager.SpriteBatch.Begin();
         }
 
         public override void EndDraw()
         {
-            manager.SpriteBatch.End();
+          manager.SpriteBatch.End();
         }
 
-        public override void DrawTexture(string name, Rectangle rectangle, Color color)
+        public override void DrawTexture(string name, Rectangle rectangle, ColorBrush brush, Rectangle bounds)
         {
+            
             var rect = new Microsoft.Xna.Framework.Rectangle((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
                 (int) rectangle.Height);
             var texture = GetTexture(name);
-            var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
-            manager.SpriteBatch.Draw(texture, rect, col * (color.A / 255f));
+            var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B);
+            manager.SpriteBatch.Draw(texture, rect, col * (brush.Color.A / 255f));
         }
 
-        public override void DrawString(string text, Point point, Color color, int size, FontStyle style,
+        public override void DrawString(string text, Point point, ColorBrush brush, int size, FontStyle style, Rectangle bounds,
             bool ignoreFormatting = false)
         {
+
+       
             var pos = new Vector2((int) Math.Round(point.X), (int) Math.Round(point.Y));
             var closest = GetClosestFontSize(size);
 
-            var parts = ParseFormattedText(text, color, style);
+            var parts = ParseFormattedText(text, brush.Color, style);
 
             if (!ignoreFormatting)
             {
@@ -61,7 +68,7 @@ namespace Pyratron.UI.Monogame
                     var measure = MeasureTextNoTrim(part.Text, size, part.Style);
                     var col = new Microsoft.Xna.Framework.Color(part.Color.R, part.Color.G, part.Color.B);
                     manager.SpriteBatch.DrawString(font, part.Text, pos,
-                        col * (color.A / 255f), 0,
+                        col * (brush.Color.A / 255f), 0,
                         Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
                     pos = new Vector2(pos.X + (float) measure.Width, pos.Y);
                 }
@@ -69,24 +76,47 @@ namespace Pyratron.UI.Monogame
             else
             {
                 var font = GetFont(Path.Combine(style.ToString(), closest.ToString()));
-                var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
+                var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B);
                 manager.SpriteBatch.DrawString(font, text, pos,
-                    col * (color.A / 255f), 0,
+                    col * (brush.Color.A / 255f), 0,
                     Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
             }
         }
 
-        public override void DrawRectangle(Rectangle area, Color color, Rectangle bounds)
+        public override void DrawRectangle(Rectangle area, Brush brush, double radius, Rectangle bounds)
         {
             area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
                 var rect = new Microsoft.Xna.Framework.Rectangle((int) area.X, (int) area.Y, (int) area.Width,
                     (int) area.Height);
-                var col = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B);
-                manager.SpriteBatch.Draw(pixel, rect, col);
+                var color = brush as ColorBrush;
+                if (color != null)
+                {
+                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B);
+               
+                    primitives.DrawRectangle(rect, col, true, (float)radius);
+                }
             }
         }
+
+        public override void FillRectangle(Rectangle area, Brush brush, double radius, Rectangle bounds)
+        {
+            area = area.FitToBounds(bounds);
+            if (area != Rectangle.Empty)
+            {
+                var rect = new Microsoft.Xna.Framework.Rectangle((int)area.X, (int)area.Y, (int)area.Width,
+                    (int)area.Height);
+                var color = brush as ColorBrush;
+                if (color != null)
+                {
+                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B);
+                    primitives.DrawRectangle(rect, col, true, (float)radius);
+                }
+            }
+        }
+
+      
 
         public override Size MeasureText(string text, int size, FontStyle style)
         {

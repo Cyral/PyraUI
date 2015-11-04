@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Xml;
+using Pyratron.UI.Brushes;
 using Pyratron.UI.Controls;
 using Pyratron.UI.Types;
 
@@ -91,7 +92,7 @@ namespace Pyratron.UI
                 element.ActualSizePrevious = element.ActualSize;
             }
             Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}", new Point(8, Elements[1].ExtendedArea.Height + 8), Color.Black,
-                8, true);
+                8, Rectangle.Infinity, true);
             Renderer.EndDraw();
 
             // Calculate FPS
@@ -147,6 +148,8 @@ namespace Pyratron.UI
                                 value = (Thickness) xmlProperty.Value;
                             else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof(Color))
                                 value = (Color)xmlProperty.Value;
+                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof(Brush))
+                                value = (Brush)xmlProperty.Value;
                             else if (xmlProperty.Value.Equals("Auto", StringComparison.InvariantCultureIgnoreCase))
                                 value = double.PositiveInfinity;
                             else

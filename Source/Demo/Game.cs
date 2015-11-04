@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pyratron.UI.Monogame;
 
 namespace Pyratron.UI.Demo
 {
@@ -13,16 +14,20 @@ namespace Pyratron.UI.Demo
 
         private SpriteBatch spriteBatch;
 
+        private GraphicsDeviceManager graphics;
+
+        private Primitives primitives;
         public Game()
         {
-            var graphics = new GraphicsDeviceManager(this)
+            graphics = new GraphicsDeviceManager(this)
             {
                 PreferredBackBufferHeight = 768,
-                PreferredBackBufferWidth = 1024
+                PreferredBackBufferWidth = 1024,
+                PreferMultiSampling = true,
+                SynchronizeWithVerticalRetrace = false,
             };
             IsMouseVisible = true;
             IsFixedTimeStep = false;
-            graphics.SynchronizeWithVerticalRetrace = false;
             graphics.ApplyChanges();
             UI = new Monogame.Manager();
             Content.RootDirectory = "Content";
@@ -35,7 +40,8 @@ namespace Pyratron.UI.Demo
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
+            primitives = new Primitives(graphics.GraphicsDevice);
 
             UI.Content = Content;
             UI.SpriteBatch = spriteBatch;
@@ -63,8 +69,9 @@ namespace Pyratron.UI.Demo
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            graphics.GraphicsDevice.Clear(Color.White);
             UI.Draw((float) gameTime.ElapsedGameTime.TotalSeconds);
+
             base.Draw(gameTime);
         }
     }

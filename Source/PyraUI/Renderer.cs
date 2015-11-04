@@ -1,4 +1,5 @@
-﻿using Pyratron.UI.Types;
+﻿using Pyratron.UI.Brushes;
+using Pyratron.UI.Types;
 
 namespace Pyratron.UI
 {
@@ -19,43 +20,59 @@ namespace Pyratron.UI
         /// <summary>
         /// Draws a texture loaded by the skin in the specified region.
         /// </summary>
-        public void DrawTexture(string name, Rectangle rectangle) => DrawTexture(name, rectangle, Color.White);
+        public void DrawTexture(string name, Rectangle rectangle, Rectangle bounds) => DrawTexture(name, rectangle, Color.White, bounds);
 
         /// <summary>
         /// Draws a texture loaded by the skin in the specified region with the specified tint.
         /// </summary>
-        public abstract void DrawTexture(string name, Rectangle rectangle, Color color);
+        public abstract void DrawTexture(string name, Rectangle rectangle, ColorBrush color, Rectangle bounds);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, bool ignoreFormatting = false) => DrawString(text, point, Color.Black, defaultSize, ignoreFormatting);
+        public void DrawString(string text, Point point, Rectangle bounds, bool ignoreFormatting = false) => DrawString(text, point, Color.Black, defaultSize, bounds, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, Color color, bool ignoreFormatting = false) => DrawString(text, point, color, defaultSize, ignoreFormatting);
+        public void DrawString(string text, Point point, ColorBrush color, Rectangle bounds, bool ignoreFormatting = false) => DrawString(text, point, color, defaultSize, bounds, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, int size, bool ignoreFormatting = false) => DrawString(text, point, Color.Black, size, ignoreFormatting);
+        public void DrawString(string text, Point point, int size, Rectangle bounds,bool ignoreFormatting = false) => DrawString(text, point, Color.Black, size, bounds, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, Color color, int size, bool ignoreFormatting = false)
-            => DrawString(text, point, color, size, FontStyle.Regular, ignoreFormatting);
+        public void DrawString(string text, Point point, ColorBrush color, int size, Rectangle bounds, bool ignoreFormatting = false)
+            => DrawString(text, point, color, size, FontStyle.Regular, bounds, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public abstract void DrawString(string text, Point point, Color color, int size, FontStyle style, bool ignoreFormatting = false);
+        public abstract void DrawString(string text, Point point, ColorBrush color, int size, FontStyle style, Rectangle bounds,bool ignoreFormatting = false);
 
         /// <summary>
         /// Draws a rectangle within the specified area.
         /// </summary>
-        public abstract void DrawRectangle(Rectangle area, Color color, Rectangle bounds);
+        public void DrawRectangle(Rectangle area, Brush brush, Rectangle bounds) => DrawRectangle(area, brush, 0, bounds);
+
+        /// <summary>
+        /// Draws a rounded rectangle within the specified area.
+        /// </summary>
+        public abstract void DrawRectangle(Rectangle area, Brush brush, double cornerRadius, Rectangle bounds);
+
+
+        /// <summary>
+        /// Draws a filled rectangle within the specified area.
+        /// </summary>
+        public void FillRectangle(Rectangle area, Brush brush, Rectangle bounds) => FillRectangle(area, brush, 0, bounds);
+
+        /// <summary>
+        /// Draws a rounded filled rectangle within the specified area.
+        /// </summary>
+        public abstract void FillRectangle(Rectangle area, Brush brush, double cornerRadius, Rectangle bounds);
 
         /// <summary>
         /// Returns the size the text will use when rendered.

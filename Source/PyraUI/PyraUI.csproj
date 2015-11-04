@@ -41,6 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Brushes\Brush.cs" />
+    <Compile Include="Brushes\ColorBrush.cs" />
+    <Compile Include="Brushes\GradientBrush.cs" />
     <Compile Include="Controls\Border.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Types\Alignment.cs" />

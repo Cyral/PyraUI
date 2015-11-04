@@ -95,7 +95,7 @@ namespace Pyratron.UI.Controls
                     x = center.X;
                     break;
             }
-            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize, FontStyle);
+            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize, FontStyle, ParentBounds);
         }
     }
 }
