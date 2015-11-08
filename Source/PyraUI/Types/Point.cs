@@ -18,9 +18,9 @@ namespace Pyratron.UI.Types
 
         public Point(double x, double y)
         {
-            if (x.IsValid())
+            if (!x.IsValid())
                 throw new ArgumentException(nameof(x), "Value must be a valid number.");
-            if (y.IsValid())
+            if (!y.IsValid())
                 throw new ArgumentException(nameof(y), "Value must be a valid number.");
 
             X = x;

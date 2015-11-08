@@ -11,10 +11,10 @@ namespace Pyratron.UI.Types
 
         public Rectangle(double x, double y, double width, double height)
         {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
+            if (width < 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than or equal to 0.");
+            if (height < 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than or equal to 0.");
             X = x;
             Y = y;
             Width = width;
@@ -23,10 +23,10 @@ namespace Pyratron.UI.Types
 
         public Rectangle(Point location, double width, double height)
         {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
+            if (width < 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than or equal to 0.");
+            if (height < 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than or equal to 0.");
             X = location.X;
             Y = location.Y;
             Width = width;
@@ -56,7 +56,10 @@ namespace Pyratron.UI.Types
         public double Bottom => Y + Height;
 
         [Browsable(false)]
-        public bool IsEmpty => Height == 0 && Width == 0 && X == 0 && Y == 0;
+        public bool IsEmpty => this == Empty;
+
+        [Browsable(false)]
+        public bool IsInfinity => this == Infinity;
 
         [Browsable(false)]
         public Point TopLeft => new Point(Left, Top);

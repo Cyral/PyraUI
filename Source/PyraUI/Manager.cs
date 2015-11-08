@@ -5,6 +5,7 @@ using System.IO;
 using System.Xml;
 using Pyratron.UI.Brushes;
 using Pyratron.UI.Controls;
+using Pyratron.UI.Markup;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI
@@ -22,6 +23,8 @@ namespace Pyratron.UI
 
         public Skin Skin { get; set; }
 
+        public MarkupLoader Markup { get; set; }
+
         public bool DrawDebug { get; set; }
 
         /// <summary>
@@ -33,36 +36,13 @@ namespace Pyratron.UI
         private int totalFrames;
 
         private string xml;
-        private readonly char[] newlineChars = Environment.NewLine.ToCharArray();
-
+     
         public virtual void Init()
         {
-            xml = LoadFromXML(File.ReadAllText("window.xml"), null);
+            Markup = new MarkupLoader(this);
+            xml = Markup.LoadFromXAML(File.ReadAllText("window.xml"), null);
             foreach (var element in Elements)
                 element.UpdateLayout();
-        }
-
-        public virtual string LoadFromXML(string xml, Element parent)
-        {
-            var doc = new XmlDocument();
-            doc.LoadXml(xml);
-            var nodes = doc.ChildNodes;
-            LoadNode(nodes, parent);
-            return xml;
-        }
-
-        /// <summary>
-        /// Create an instance of an element by its name.
-        /// </summary>
-        public Element CreateControlInstance(XmlNode node, Element parent)
-        {
-            // Add content (inline text) from the XML to a parent element.
-            if (parent != null && node.Name.StartsWith("#text") && node.ParentNode != null)
-                parent.AddContent(node.Value.Trim().TrimStart(newlineChars).TrimEnd(newlineChars));
-            if (node.Name.StartsWith("#")) return null;
-            var t = Type.GetType(typeof(Control).Namespace + '.' + node.Name);
-            // Create a new element.
-            return (Element) Activator.CreateInstance(t, this);
         }
 
         public virtual void Load()
@@ -118,53 +98,6 @@ namespace Pyratron.UI
                 if (element.ActualSize != element.ActualSizePrevious)
                     element.InvalidateLayout();
                 element.Update(delta);
-            }
-        }
-
-        private void LoadNode(XmlNodeList nodes, Element parent)
-        {
-            foreach (XmlNode node in nodes)
-            {
-                var control = CreateControlInstance(node, parent);
-                if (control == null) continue;
-
-                var props = TypeDescriptor.GetProperties(control.GetType());
-
-                // Set attributes.
-                if (node.Attributes != null)
-                {
-                    foreach (XmlAttribute xmlProperty in node.Attributes)
-                    {
-                        var propertyName = xmlProperty.Name;
-                        var propertyDescriptor = props[propertyName];
-
-                        if (propertyDescriptor != null)
-                        {
-                            object value;
-                            // Convert the attribute to a value.
-                            if (propertyDescriptor.PropertyType.IsEnum)
-                                value = Enum.Parse(propertyDescriptor.PropertyType, xmlProperty.Value);
-                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof (Thickness))
-                                value = (Thickness) xmlProperty.Value;
-                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof(Color))
-                                value = (Color)xmlProperty.Value;
-                            else if (propertyDescriptor.PropertyType.UnderlyingSystemType == typeof(Brush))
-                                value = (Brush)xmlProperty.Value;
-                            else if (xmlProperty.Value.Equals("Auto", StringComparison.InvariantCultureIgnoreCase))
-                                value = double.PositiveInfinity;
-                            else
-                                value = Convert.ChangeType(xmlProperty.Value, propertyDescriptor.PropertyType);
-                            propertyDescriptor.SetValue(control, value);
-                        }
-                    }
-                }
-
-                // Add element to parent or set as root element.
-                if (parent == null)
-                    Elements.Add(control);
-                else
-                    parent.Add(control);
-                LoadNode(node.ChildNodes, control);
             }
         }
     }

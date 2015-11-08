@@ -43,7 +43,6 @@ namespace Pyratron.UI.Controls
 
         public virtual Size MeasureSelf(Size availableSize)
         {
-            
             if (Parent == null) return Size;
             double w = Width, h = Height;
 
@@ -92,7 +91,7 @@ namespace Pyratron.UI.Controls
                 y = ContentArea.Height - child.ExtendedArea.Height;
             return child.Position + new Point(x, y);
         }
-        
+
         public virtual void Measure()
         {
             // Measure child elements (and their children, and so on).
@@ -483,13 +482,13 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public List<Element> Elements { get; set; }
 
-        public Size Size => new Size((int) Math.Round(Width), (int) Math.Round(Height));
+        public Size Size => new Size(Width, Height);
 
         public Size ChildSize => new Size(GetChildWidth(), GetChildHeight());
 
         public Size ActualSize
         {
-            get { return new Size((int) Math.Round(ActualWidth), (int) Math.Round(ActualHeight)); }
+            get { return new Size(ActualWidth, ActualHeight); }
             set
             {
                 ActualWidth = value.Width;
@@ -510,9 +509,9 @@ namespace Pyratron.UI.Controls
             get
             {
                 return
-                    new Rectangle(Margin.Left + Padding.Left, Margin.Top + Padding.Top,
-                        (int) ActualSize.Width - Padding.Left - Padding.Right,
-                        (int) ActualSize.Height - Padding.Bottom - Padding.Top).Offset(
+                    new Rectangle(Math.Max(0, Margin.Left + Padding.Left), Math.Max(0, Margin.Top + Padding.Top),
+                        Math.Max(0, ActualSize.Width - Padding.Left - Padding.Right),
+                        Math.Max(0, ActualSize.Height - Padding.Bottom - Padding.Top)).Offset(
                             Position - Margin - Padding);
             }
         }

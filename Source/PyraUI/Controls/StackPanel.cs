@@ -59,34 +59,40 @@ namespace Pyratron.UI.Controls
 
         public override Point AlignChild(Element child)
         {
-            var center = new Point((ContentArea.Width / 2) - (child.ExtendedArea.Width / 2),
-                (ContentArea.Height / 2) - (child.ExtendedArea.Height / 2));
-            double x = 0, y = 0;
-
-            // Apply horizontal alignment.
-            if (Orientation == Orientation.Vertical)
+            if (!ContentArea.IsInfinity)
             {
-                if (child.HorizontalAlignment == HorizontalAlignment.Right)
-                    x = ContentArea.Width - child.ExtendedArea.Width;
-                // If Horizontal alignment is stretch and the Width is specified (not auto), make it center.
-                if (child.HorizontalAlignment == HorizontalAlignment.Center
-                    || (child.HorizontalAlignment == HorizontalAlignment.Stretch
-                        && !child.IsWidthAuto))
-                    x += center.X;
-            }
 
-            // Apply vertical alignment.
-            if (Orientation == Orientation.Horizontal)
-            {
-                if (child.VerticalAlignment == VerticalAlignment.Bottom)
-                    y = ContentArea.Height - child.ExtendedArea.Height;
-                // If vertical alignment is stretch and the height is specified (not auto), make it center.
-                if (child.VerticalAlignment == VerticalAlignment.Center
-                    || (child.VerticalAlignment == VerticalAlignment.Stretch
-                        && !child.IsHeightAuto))
-                    y += center.Y;
+                var center = new Point((ContentArea.Width / 2) - (child.ExtendedArea.Width / 2),
+                    (ContentArea.Height / 2) - (child.ExtendedArea.Height / 2));
+                double x = 0, y = 0;
+
+                // Apply horizontal alignment.
+                if (Orientation == Orientation.Vertical)
+                {
+                    if (child.HorizontalAlignment == HorizontalAlignment.Right)
+                        x = ContentArea.Width - child.ExtendedArea.Width;
+                    // If Horizontal alignment is stretch and the Width is specified (not auto), make it center.
+                    if (child.HorizontalAlignment == HorizontalAlignment.Center
+                        || (child.HorizontalAlignment == HorizontalAlignment.Stretch
+                            && !child.IsWidthAuto))
+                        x += center.X;
+                }
+
+                // Apply vertical alignment.
+                if (Orientation == Orientation.Horizontal)
+                {
+                    if (child.VerticalAlignment == VerticalAlignment.Bottom)
+                        y = ContentArea.Height - child.ExtendedArea.Height;
+                    // If vertical alignment is stretch and the height is specified (not auto), make it center.
+                    if (child.VerticalAlignment == VerticalAlignment.Center
+                        || (child.VerticalAlignment == VerticalAlignment.Stretch
+                            && !child.IsHeightAuto))
+                        y += center.Y;
+                }
+                return child.Position + new Point(x, y);
             }
-            return child.Position + new Point(x, y);
+            else
+                return child.Position;
         }
 
         public override Size MeasureSelf(Size availableSize)

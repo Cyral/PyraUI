@@ -2,20 +2,15 @@
   Title="MainWindow"
   Height="550"
   Width="600">
-  ﻿<Grid>
-    <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Right">
-      <Border Height="100" Background="#FF03A9F4" CornerRadius="10" Margin="2,2,100,2" Padding="10">
-        <StackPanel>
-          <Border Height="51" Background="#FFFF5177" CornerRadius="2" Margin="50,2" Padding="5"/>
-          [White]Test
-          <Border Height="200" Background="#FF12C700" CornerRadius="2" Margin="100,2,2,2"/>
-        </StackPanel>
-      </Border>
-      <Border Height="50" Background="#FFFFB300" CornerRadius="2" Margin="2" HorizontalAlignment="Left" Width="200">
-        *Bold*
-      </Border>
-      <Border Height="50" Background="#FFE040FB" CornerRadius="2" Margin="2" HorizontalAlignment="Center" Width="200"/>
-      <Border Height="50" Background="#FF616161" CornerRadius="2" Margin="2" HorizontalAlignment="Right" Width="200"/>
+  ﻿<StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Right">
+        <Border Height="100" Background="#FF03A9F4" CornerRadius="10" Margin="2,2,100,2" Padding="10">
+            <StackPanel>
+                <Border Height="51" Background="#FFFF5177" CornerRadius="2" Margin="50,2" Padding="5" />
+                <Border Height="200" Background="#FF12C700" CornerRadius="2" Margin="100,2,2,2" />
+            </StackPanel>
+        </Border>
+        <Border Height="50" Background="#FFFFB300" CornerRadius="2" Margin="2" HorizontalAlignment="Left" Width="200" />
+        <Border Height="50" Background="#FFE040FB" CornerRadius="2" Margin="2" HorizontalAlignment="Center" Width="200" />
+        <Border Height="50" Background="#FF616161" CornerRadius="2" Margin="2" HorizontalAlignment="Right" Width="200" />
     </StackPanel>
-  </Grid>
 </Window>

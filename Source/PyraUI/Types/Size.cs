@@ -7,7 +7,7 @@ namespace Pyratron.UI.Types
     /// <summary>
     /// Represents a size of a 2D rectangle.
     /// </summary>
-    [DebuggerDisplay("{Width}x{Height}")]
+    [DebuggerDisplay("{Width} x {Height}")]
     public struct Size
     {
         public static readonly Size Zero = new Size();
@@ -16,10 +16,10 @@ namespace Pyratron.UI.Types
 
         public Size(double width, double height)
         {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
+            if (width < 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than or equal to 0.");
+            if (height < 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than or equal to 0.");
             Width = width;
             Height = height;
         }
@@ -84,6 +84,6 @@ namespace Pyratron.UI.Types
         /// Remove the specified thickness from the size.
         /// </summary>
         public Size Remove(Thickness thickness)
-            => new Size(Width - thickness.Left - thickness.Right, Height - thickness.Top - thickness.Bottom);
+            => new Size(Math.Max(0, Width - thickness.Left - thickness.Right), Math.Max(0, Height - thickness.Top - thickness.Bottom));
     }
 }
