@@ -7,65 +7,72 @@ using System.Reflection;
 
 namespace Pyratron.UI.Types
 {
+    /// <summary>
+    /// Represents an RGBA color.
+    /// </summary>
     [DebuggerDisplay("{R}, {G}, {B}, {A}")]
     public struct Color
     {
+        /// <summary>
+        /// Collection of defined named colors. (Red, Green, etc.)
+        /// </summary>
         public static ReadOnlyDictionary<string, Color> Colors { get; }
 
-        public bool Equals(Color other)
+        internal long Value { get; }
+
+        public byte A => (byte) (Value >> 24);
+
+        public byte R => (byte) (Value >> 16);
+
+        public byte G => (byte) (Value >> 8);
+
+        public byte B => (byte) Value;
+
+        public Color(float red, float green, float blue) : this(red, green, blue, 1f)
         {
-            return A == other.A && R == other.R && G == other.G && B == other.B;
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = A.GetHashCode();
-                hashCode = (hashCode * 397) ^ R.GetHashCode();
-                hashCode = (hashCode * 397) ^ G.GetHashCode();
-                hashCode = (hashCode * 397) ^ B.GetHashCode();
-                return hashCode;
-            }
-        }
-
-        public Color(float red, float green, float blue)
-        {
-            red *= 255;
-            green *= 255;
-            blue *= 255;
-            A = 255;
-            R = (byte) red;
-            G = (byte) green;
-            B = (byte) blue;
-        }
-
+        /// <summary>
+        /// Create a color based on RGBA values. (0 to 1)
+        /// </summary>
         public Color(float red, float green, float blue, float alpha)
         {
+            if (!red.InRange(0, 1))
+                throw new ArgumentOutOfRangeException(nameof(red), "Must be between 0 and 1.");
+            if (!green.InRange(0, 1))
+                throw new ArgumentOutOfRangeException(nameof(green), "Must be between 0 and 1.");
+            if (!blue.InRange(0, 1))
+                throw new ArgumentOutOfRangeException(nameof(blue), "Must be between 0 and 1.");
+            if (!alpha.InRange(0, 1))
+                throw new ArgumentOutOfRangeException(nameof(alpha), "Must be between 0 and 1.");
+
             red *= 255;
             green *= 255;
             blue *= 255;
             alpha *= 255;
-            A = (byte) alpha;
-            R = (byte) red;
-            G = (byte) green;
-            B = (byte) blue;
+            Value = (int) ((uint) alpha << 24) + (((byte) red) << 16) + (((byte) green) << 8) + ((byte) blue);
         }
 
         public Color(int argb)
         {
-            R = (byte) ((argb >> 16) & 255);
-            G = (byte) ((argb >> 8) & 255);
-            B = (byte) (argb & 255);
-            A = 255;
+            Value = argb;
         }
 
+        /// <summary>
+        /// Create a color based on RGBA values. (0 to 255)
+        /// </summary>
         public Color(int red, int green, int blue, int alpha = 255)
         {
-            A = (byte) alpha;
-            R = (byte) red;
-            G = (byte) green;
-            B = (byte) blue;
+            if (!red.InRange(0, 255))
+                throw new ArgumentOutOfRangeException(nameof(red), "Must be between 0 and 255.");
+            if (!green.InRange(0, 255))
+                throw new ArgumentOutOfRangeException(nameof(green), "Must be between 0 and 255.");
+            if (!blue.InRange(0, 255))
+                throw new ArgumentOutOfRangeException(nameof(blue), "Must be between 0 and 255.");
+            if (!alpha.InRange(0, 255))
+                throw new ArgumentOutOfRangeException(nameof(alpha), "Must be between 0 and 255.");
+
+            Value = (int) ((uint) alpha << 24) + (red << 16) + (green << 8) + blue;
         }
 
         public Color(int alpha, Color color) : this(alpha, color.R, color.G, color.B)
@@ -86,16 +93,9 @@ namespace Pyratron.UI.Types
             Colors = new ReadOnlyDictionary<string, Color>(colors);
         }
 
-        public static bool operator ==(Color left, Color right)
-        {
-            return left.R == right.R && left.G == right.G && left.B == right.B && left.A == right.A;
-        }
-
-        public static bool operator !=(Color left, Color right)
-        {
-            return !Equals(left, right);
-        }
-
+        /// <summary>
+        /// Multiply a color by a float value to return a more transparent version of the color.
+        /// </summary>
         public static Color operator *(Color baseColor, float value)
         {
             return new Color(
@@ -105,26 +105,9 @@ namespace Pyratron.UI.Types
                 (int) Math.Round(value * baseColor.A));
         }
 
-        public byte A { get; }
-        public byte R { get; }
-        public byte G { get; }
-        public byte B { get; }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Color))
-                return false;
-            var c = (Color) obj;
-            return this == c;
-        }
-
-        public override string ToString()
-        {
-            return $"R={R}, G={G}, B={B}, A={A}";
-        }
+        #region Named Colors
 
         public static Color Transparent { get; } = new Color(0, 0, 0, 0);
-
         public static Color AliceBlue { get; } = new Color(240, 248, 255);
         public static Color AntiqueWhite { get; } = new Color(250, 235, 215);
         public static Color Aqua { get; } = new Color(0, 255, 255);
@@ -268,6 +251,24 @@ namespace Pyratron.UI.Types
         public static Color Yellow { get; } = new Color(255, 255, 0);
         public static Color YellowGreen { get; } = new Color(154, 205, 50);
 
+        #endregion
+
+        public override string ToString() => $"R={R}, G={G}, B={B}, A={A}";
+
+        public static bool operator ==(Color left, Color right) => left.Equals(right);
+
+        public static bool operator !=(Color left, Color right) => !Equals(left, right);
+
+        public bool Equals(Color other) => Value == other.Value;
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is Color && Equals((Color)obj);
+        }
+
+        public override int GetHashCode() => Value.GetHashCode();
+
         public static explicit operator Color(string value)
         {
             var parts = value.Split(',');
@@ -289,7 +290,7 @@ namespace Pyratron.UI.Types
 #if DEBUG
                 throw new InvalidCastException("\"" + parts[0] + "\" is not a valid named color.");
 #else
-                return Color.Black;
+                return Black;
 #endif
             }
             // Handle ARGB or RGB colors.
@@ -312,7 +313,7 @@ namespace Pyratron.UI.Types
 #if DEBUG
             throw new InvalidCastException("Not a named color, hex color, or a valid color in R,G,B or R,G,B,A format.");
 #else
-                 return Color.Black;
+            return Black;
 #endif
         }
     }

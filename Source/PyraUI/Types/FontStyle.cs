@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pyratron.UI.Types
+﻿namespace Pyratron.UI.Types
 {
+    /// <summary>
+    /// Represents the styling of text.
+    /// </summary>
     public enum FontStyle
     {
         Regular,
         Bold,
-        Italic,
+        Italic
     }
 }

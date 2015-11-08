@@ -1,7 +1,13 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Pyratron.UI.Types
 {
+    /// <summary>
+    /// Represents a size of a 2D rectangle.
+    /// </summary>
+    [DebuggerDisplay("{Width}x{Height}")]
     public struct Size
     {
         public static readonly Size Zero = new Size();
@@ -10,6 +16,10 @@ namespace Pyratron.UI.Types
 
         public Size(double width, double height)
         {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
             Width = width;
             Height = height;
         }
@@ -19,7 +29,7 @@ namespace Pyratron.UI.Types
         public double Height { get; set; }
 
         public static bool operator ==(Size left, Size right)
-            => Equals(left.Width, right.Width) && Equals(left.Height, right.Height);
+            => Equals(left, right);
 
         public static bool operator !=(Size left, Size right) => !(left == right);
 
@@ -27,16 +37,16 @@ namespace Pyratron.UI.Types
 
         public static Size operator +(Size a, Size b) => new Size(a.Width + b.Width, a.Height = b.Height);
 
+        public static Size operator*(Size size, double factor) => new Size(size.Width * factor, size.Width * factor);
+
+        public static Size operator /(Size size, double factor) => new Size(size.Height / factor, size.Height / factor);
+
+        public bool Equals(Size other) => Width.Equals(other.Width) && Height.Equals(other.Height);
+
         public override bool Equals(object obj)
         {
-            if (!(obj is Size)) return false;
-            var comp = (Size) obj;
-            return Equals(comp.Width, Width) && Equals(comp.Height, Height);
-        }
-
-        public bool Equals(Size other)
-        {
-            return Width.Equals(other.Width) && Height.Equals(other.Height);
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is Size && Equals((Size)obj);
         }
 
         public override int GetHashCode()
@@ -46,6 +56,7 @@ namespace Pyratron.UI.Types
                 return (Width.GetHashCode() * 397) ^ Height.GetHashCode();
             }
         }
+
 
         public override string ToString() => "{Width=" + Width.ToString(CultureInfo.CurrentCulture) + ",Height=" +
                                              Height.ToString(CultureInfo.CurrentCulture) + "}";

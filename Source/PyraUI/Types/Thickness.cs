@@ -13,7 +13,9 @@ namespace Pyratron.UI.Types
         public static readonly Thickness None = new Thickness();
 
         public Thickness(int left, int top, int right, int bottom)
-        {
+        { 
+            if (left < 0 || top < 0 || right < 0 || bottom < 0)
+                throw new ArgumentOutOfRangeException("Values must be greater than 0.");
             Left = left;
             Top = top;
             Right = right;
@@ -22,12 +24,16 @@ namespace Pyratron.UI.Types
 
         public Thickness(int veritical, int horizontal)
         {
+            if (veritical < 0 || horizontal < 0)
+                throw new ArgumentOutOfRangeException("Values must be greater than 0.");
             Top = Bottom = veritical;
             Left = Right = horizontal;
         }
 
         public Thickness(int value)
         {
+            if (value < 0)
+                throw new ArgumentOutOfRangeException("Value must be greater than 0.");
             Left = Top = Right = Bottom = value;
         }
 
@@ -70,10 +76,7 @@ namespace Pyratron.UI.Types
                    (comp.Bottom == Bottom);
         }
 
-        public static bool operator ==(Thickness left, Thickness right) => (left.Left == right.Left
-                                                                            && left.Top == right.Top
-                                                                            && left.Right == right.Right
-                                                                            && left.Bottom == right.Bottom);
+        public static bool operator ==(Thickness left, Thickness right) => left.Equals(right);
 
         public static bool operator !=(Thickness left, Thickness right) => !(left == right);
 

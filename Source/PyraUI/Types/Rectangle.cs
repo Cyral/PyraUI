@@ -11,6 +11,10 @@ namespace Pyratron.UI.Types
 
         public Rectangle(double x, double y, double width, double height)
         {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
             X = x;
             Y = y;
             Width = width;
@@ -19,6 +23,10 @@ namespace Pyratron.UI.Types
 
         public Rectangle(Point location, double width, double height)
         {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than 0.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than 0.");
             X = location.X;
             Y = location.Y;
             Width = width;
@@ -140,8 +148,6 @@ namespace Pyratron.UI.Types
         /// <summary>
         /// Limit the area of this rectangle to the specified bounds.
         /// </summary>
-        /// <param name="bounds"></param>
-        /// <returns></returns>
         public Rectangle FitToBounds(Rectangle bounds)
         {
             var x1 = Math.Max(X, bounds.X);
