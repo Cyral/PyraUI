@@ -3,7 +3,7 @@
   Height="550"
   Width="600">
   ﻿<StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Right">
-        <Border Height="100" Background="#FF03A9F4" CornerRadius="10" Margin="2,2,100,2" Padding="10">
+        <Border Height="100" Background="0,0,0,60" CornerRadius="10" Margin="2,2,100,2" Padding="10">
             <StackPanel>
                 <Border Height="51" Background="#FFFF5177" CornerRadius="2" Margin="50,2" Padding="5" />
                 <Border Height="200" Background="#FF12C700" CornerRadius="2" Margin="100,2,2,2" />

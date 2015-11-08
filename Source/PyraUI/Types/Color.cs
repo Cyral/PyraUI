@@ -278,14 +278,14 @@ namespace Pyratron.UI.Types
             {
                 if (Colors.ContainsKey(parts[0]))
                     return Colors[parts[0]];
-                if (parts[0].StartsWith("#") && (parts[0].Length == 7 || parts[0].Length == 9))
+                if (parts[0].StartsWith("#") && (parts[0].Length == 4 || parts[0].Length == 7 || parts[0].Length == 9))
                 {
                     var hex = parts[0].Substring(1);
+                    if (parts[0].Length == 4) // #F00 => #FF0000
+                        hex = $"{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}";
                     int argb;
                     if (int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out argb))
-                    {
                         return new Color(argb);
-                    }
                 }
 #if DEBUG
                 throw new InvalidCastException("\"" + parts[0] + "\" is not a valid named color.");
@@ -293,7 +293,7 @@ namespace Pyratron.UI.Types
                 return Black;
 #endif
             }
-            // Handle ARGB or RGB colors.
+            // Handle RGBA or RGB colors.
             if (parts.Length == 3)
             {
                 if (int.TryParse(parts[0], out r) &&

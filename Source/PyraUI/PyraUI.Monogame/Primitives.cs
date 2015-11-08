@@ -209,7 +209,7 @@ namespace Pyratron.UI.Monogame
         {
             var size = (int)Math.Ceiling(360 / radius / 3);
             
-            for (var a = start; a < end; a += size)
+            for (var a = start; a < end; a += 1)
             {
                 var heading = MathHelper.ToRadians(a);
 

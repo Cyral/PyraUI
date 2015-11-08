@@ -46,7 +46,7 @@ namespace Pyratron.UI.Monogame
             var rect = new Microsoft.Xna.Framework.Rectangle((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
                 (int) rectangle.Height);
             var texture = GetTexture(name);
-            var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B);
+            var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
             manager.SpriteBatch.Draw(texture, rect, col * (brush.Color.A / 255f));
         }
 
@@ -66,7 +66,7 @@ namespace Pyratron.UI.Monogame
                 {
                     var font = GetFont(Path.Combine(part.Style.ToString(), closest.ToString()));
                     var measure = MeasureTextNoTrim(part.Text, size, part.Style);
-                    var col = new Microsoft.Xna.Framework.Color(part.Color.R, part.Color.G, part.Color.B);
+                    var col = new Microsoft.Xna.Framework.Color(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
                     manager.SpriteBatch.DrawString(font, part.Text, pos,
                         col * (brush.Color.A / 255f), 0,
                         Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
@@ -76,7 +76,7 @@ namespace Pyratron.UI.Monogame
             else
             {
                 var font = GetFont(Path.Combine(style.ToString(), closest.ToString()));
-                var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B);
+                var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
                 manager.SpriteBatch.DrawString(font, text, pos,
                     col * (brush.Color.A / 255f), 0,
                     Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
@@ -93,7 +93,7 @@ namespace Pyratron.UI.Monogame
                 var color = brush as ColorBrush;
                 if (color != null)
                 {
-                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B);
+                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
                
                     primitives.DrawRectangle(rect, col, true, (float)radius);
                 }
@@ -110,7 +110,7 @@ namespace Pyratron.UI.Monogame
                 var color = brush as ColorBrush;
                 if (color != null)
                 {
-                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B);
+                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
                     primitives.DrawRectangle(rect, col, true, (float)radius);
                 }
             }
