@@ -56,13 +56,12 @@ namespace Pyratron.UI
         /// <summary>
         /// Draws a rectangle within the specified area.
         /// </summary>
-        public void DrawRectangle(Rectangle area, Brush brush, Rectangle bounds) => DrawRectangle(area, brush, 0, bounds);
+        public void DrawRectangle(Rectangle area, Brush brush, Thickness border, Rectangle bounds) => DrawRectangle(area, brush, border, 0, bounds);
 
         /// <summary>
         /// Draws a rounded rectangle within the specified area.
         /// </summary>
-        public abstract void DrawRectangle(Rectangle area, Brush brush, double cornerRadius, Rectangle bounds);
-
+        public abstract void DrawRectangle(Rectangle area, Brush brush, Thickness border, double cornerRadius, Rectangle bounds);
 
         /// <summary>
         /// Draws a filled rectangle within the specified area.

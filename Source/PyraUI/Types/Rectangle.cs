@@ -162,5 +162,13 @@ namespace Pyratron.UI.Types
                 ? new Rectangle(x1, y1, x2 - x1, y2 - y1)
                 : Empty;
         }
+
+        /// <summary>
+        /// Remove the specified thickness from the outsides of the rectangle.
+        /// </summary>
+        public Rectangle RemoveBorder(Thickness borderThickness)
+            =>
+                new Rectangle(X + borderThickness.Left, Y + borderThickness.Right, Width - borderThickness.Width,
+                    Height - borderThickness.Height);
     }
 }

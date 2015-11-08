@@ -32,8 +32,8 @@ namespace Pyratron.UI.Controls
 
         public override void Draw(float delta)
         {
-            Manager.Renderer.DrawRectangle(BorderArea, Background, ParentBounds);
-            Manager.Renderer.DrawRectangle(titleLabel.ExtendedArea, Color.DarkGray, ParentBounds);
+            Manager.Renderer.FillRectangle(BorderArea, Background, ParentBounds);
+            Manager.Renderer.FillRectangle(titleLabel.ExtendedArea, Color.DarkGray, ParentBounds);
             base.Draw(delta);
         }
     }

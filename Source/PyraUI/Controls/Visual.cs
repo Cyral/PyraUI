@@ -33,6 +33,9 @@ namespace Pyratron.UI.Controls
         [Browsable(false)]
         public bool IsVisible => Visibility == Visibility.Visible;
 
+        private static readonly Color marginColor = ((Color)"#f4ffa2") * .75f;
+        private static readonly Color paddingColor = ((Color)"#a69ce1")* .75f;
+
         public override Element Parent
         {
             get { return parent; }
@@ -59,9 +62,9 @@ namespace Pyratron.UI.Controls
         {
             if (Manager.DrawDebug)
             {
-                Manager.Renderer.DrawRectangle(ExtendedArea, new Color(225, 225, 225), ParentBounds);
-                Manager.Renderer.DrawRectangle(BorderArea, new Color(240, 240, 240), ParentBounds);
-                Manager.Renderer.DrawRectangle(ContentArea, Color.White, ParentBounds);
+                Manager.Renderer.DrawRectangle(ExtendedArea, marginColor, Margin, ParentBounds);
+                Manager.Renderer.DrawRectangle(BorderArea, paddingColor, Padding, ParentBounds);
+                //Manager.Renderer.DrawRectangle(ContentArea, Color.White, ParentBounds);
             }
 
             DrawChildren(delta);

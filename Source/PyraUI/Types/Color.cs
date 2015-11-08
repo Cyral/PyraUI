@@ -282,7 +282,9 @@ namespace Pyratron.UI.Types
                 {
                     var hex = parts[0].Substring(1);
                     if (parts[0].Length == 4) // #F00 => #FF0000
-                        hex = $"{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}";
+                        hex = $"FF{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}";
+                    if (parts[0].Length == 7) // #FF0000 => #FFFF0000
+                        hex = $"FF{hex[0]}{hex[1]}{hex[2]}{hex[3]}{hex[4]}{hex[5]}";
                     int argb;
                     if (int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out argb))
                         return new Color(argb);

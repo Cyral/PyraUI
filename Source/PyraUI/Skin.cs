@@ -11,9 +11,18 @@ namespace Pyratron.UI
         public abstract object LoadTexture(string name);
         public abstract object LoadFont(string name);
 
-        internal void LoadTextureInternal(string name)
-            => Textures.Add(name, LoadTexture(Path.Combine("Textures", name)));
+        internal object LoadTextureInternal(string name)
+        {
+            var texture = LoadTexture(Path.Combine("Textures", name));
+            Textures.Add(name, texture);
+            return texture;
+        }
 
-        internal void LoadFontInternal(string name) => Fonts.Add(name, LoadFont(Path.Combine("Fonts", name)));
+        internal object LoadFontInternal(string name)
+        {
+            var font = LoadFont(Path.Combine("Fonts", name));
+            Fonts.Add(name, font);
+            return font;
+        }
     }
 }

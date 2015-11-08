@@ -5,11 +5,13 @@ namespace Pyratron.UI.Controls
 {
     internal class Border : Control
     {
-        public Brush Background { get; set; }
+        public Brush Background { get; set; } = Color.Transparent;
 
-        public double CornerRadius { get; set; }
+        public int CornerRadius { get; set; }
 
-        public bool Filled { get; set; } = true;
+        public Thickness BorderThickness { get; set; }
+
+        public Brush BorderBrush { get; set; }
 
         public Border(Manager manager) : base(manager)
         {
@@ -18,10 +20,15 @@ namespace Pyratron.UI.Controls
 
         public override void Draw(float delta)
         {
-             if (Filled)
-                Manager.Renderer.FillRectangle(BorderArea, Background, CornerRadius, ParentBounds);
-             else
-                 Manager.Renderer.DrawRectangle(BorderArea, Background, CornerRadius, ParentBounds);
+            if (!BorderThickness.IsEmpty)
+            {
+                Manager.Renderer.DrawRectangle(BorderArea, BorderBrush, BorderThickness, CornerRadius, ParentBounds);
+                Manager.Renderer.FillRectangle(BorderArea.RemoveBorder(BorderThickness), Background, CornerRadius - BorderThickness.Max,
+                    ParentBounds);
+            }
+            else
+                Manager.Renderer.FillRectangle(BorderArea.RemoveBorder(BorderThickness), Background, CornerRadius,
+                    ParentBounds);
 
             base.Draw(delta);
         }

@@ -14,17 +14,22 @@ namespace Pyratron.UI.Monogame
     {
         public ContentManager Content { get; set; }
         public SpriteBatch SpriteBatch { get; set; }
+        internal readonly int[] CircleSizes = {16, 64};
 
         internal readonly int[] FontSizes = {6, 7, 8, 9, 10, 12, 14, 16, 20, 64};
 
         public override void Load()
         {
-            Renderer = new Renderer(this);
             Skin = new Skin(this);
+            Renderer = new Renderer(this);
 
             foreach (var size in FontSizes)
                 foreach (var style in Enum.GetValues(typeof (FontStyle)))
                     Skin.LoadFontInternal(Path.Combine(style.ToString(), size.ToString()));
+
+            // Load circles used for rendering shapes.
+            foreach (var size in CircleSizes)
+                Skin.LoadTextureInternal(Path.Combine("Shapes" , "circle" + size));
 
             base.Load();
         }

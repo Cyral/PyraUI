@@ -95,6 +95,8 @@ namespace Pyratron.UI.Types
         /// </summary>
         public int Width => Left + Right;
 
+        public double Max => Math.Max(Math.Max(Left, Right), Math.Max(Top, Bottom));
+
         /// <summary>
         /// Add the left and top of the rectangle to the left and top of the thickness.
         /// </summary>

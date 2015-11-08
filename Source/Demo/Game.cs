@@ -16,7 +16,6 @@ namespace Pyratron.UI.Demo
 
         private GraphicsDeviceManager graphics;
 
-        private Primitives primitives;
         public Game()
         {
             graphics = new GraphicsDeviceManager(this)
@@ -41,8 +40,7 @@ namespace Pyratron.UI.Demo
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-            primitives = new Primitives(graphics.GraphicsDevice);
-
+         
             UI.Content = Content;
             UI.SpriteBatch = spriteBatch;
             UI.Load();

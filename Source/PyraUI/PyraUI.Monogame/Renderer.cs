@@ -7,54 +7,49 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Pyratron.UI.Brushes;
 using Pyratron.UI.Types;
-using Color = Pyratron.UI.Types.Color;
+using Color = Microsoft.Xna.Framework.Color;
 using Point = Pyratron.UI.Types.Point;
 using Rectangle = Pyratron.UI.Types.Rectangle;
+using RectangleXNA = Microsoft.Xna.Framework.Rectangle;
 
 namespace Pyratron.UI.Monogame
 {
     public class Renderer : UI.Renderer
     {
-        private readonly Primitives primitives;
         private readonly Manager manager;
         private readonly Texture2D pixel;
 
         public Renderer(Manager manager)
         {
             this.manager = manager;
-
-            primitives = new Primitives(manager.SpriteBatch.GraphicsDevice);
-
             // Create 1x1 texture for rendering rectangles.
             pixel = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, 1);
-            pixel.SetData(new[] {Color.White});
+            pixel.SetData(new[] {Types.Color.White});
         }
 
         public override void BeginDraw()
         {
-          manager.SpriteBatch.Begin();
+            manager.SpriteBatch.Begin();
         }
 
         public override void EndDraw()
         {
-          manager.SpriteBatch.End();
+            manager.SpriteBatch.End();
         }
 
         public override void DrawTexture(string name, Rectangle rectangle, ColorBrush brush, Rectangle bounds)
         {
-            
-            var rect = new Microsoft.Xna.Framework.Rectangle((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
+            var rect = new RectangleXNA((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
                 (int) rectangle.Height);
             var texture = GetTexture(name);
-            var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
-            manager.SpriteBatch.Draw(texture, rect, col * (brush.Color.A / 255f));
+            var col = new Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
+            manager.SpriteBatch.Draw(texture, rect, col);
         }
 
-        public override void DrawString(string text, Point point, ColorBrush brush, int size, FontStyle style, Rectangle bounds,
+        public override void DrawString(string text, Point point, ColorBrush brush, int size, FontStyle style,
+            Rectangle bounds,
             bool ignoreFormatting = false)
         {
-
-       
             var pos = new Vector2((int) Math.Round(point.X), (int) Math.Round(point.Y));
             var closest = GetClosestFontSize(size);
 
@@ -66,7 +61,7 @@ namespace Pyratron.UI.Monogame
                 {
                     var font = GetFont(Path.Combine(part.Style.ToString(), closest.ToString()));
                     var measure = MeasureTextNoTrim(part.Text, size, part.Style);
-                    var col = new Microsoft.Xna.Framework.Color(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
+                    var col = new Color(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
                     manager.SpriteBatch.DrawString(font, part.Text, pos,
                         col * (brush.Color.A / 255f), 0,
                         Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
@@ -76,26 +71,35 @@ namespace Pyratron.UI.Monogame
             else
             {
                 var font = GetFont(Path.Combine(style.ToString(), closest.ToString()));
-                var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
+                var col = new Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
                 manager.SpriteBatch.DrawString(font, text, pos,
                     col * (brush.Color.A / 255f), 0,
                     Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
             }
         }
 
-        public override void DrawRectangle(Rectangle area, Brush brush, double radius, Rectangle bounds)
+        public override void DrawRectangle(Rectangle area, Brush brush, Thickness thickness, double radius, Rectangle bounds)
         {
             area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
-                var rect = new Microsoft.Xna.Framework.Rectangle((int) area.X, (int) area.Y, (int) area.Width,
-                    (int) area.Height);
-                var color = brush as ColorBrush;
-                if (color != null)
+                if (radius > 0)
                 {
-                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
-               
-                    primitives.DrawRectangle(rect, col, true, (float)radius);
+                    FillRectangle(area, brush, radius, bounds);
+                }
+                else
+                {
+                    var brushXNA = brush.ToXNA();
+
+                    var areaXNA = area.ToXNA();
+                    FillRect(new RectangleXNA(areaXNA.X,
+                          areaXNA.Top, areaXNA.Width, thickness.Top), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X,
+                        areaXNA.Top + thickness.Top, thickness.Left, areaXNA.Height - thickness.Top - thickness.Bottom), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.Right - thickness.Right,
+                    areaXNA.Top + thickness.Top, thickness.Right, areaXNA.Height - thickness.Top - thickness.Bottom), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X,
+                         areaXNA.Bottom - thickness.Bottom, areaXNA.Width, thickness.Bottom), brushXNA);
                 }
             }
         }
@@ -105,24 +109,46 @@ namespace Pyratron.UI.Monogame
             area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
-                var rect = new Microsoft.Xna.Framework.Rectangle((int)area.X, (int)area.Y, (int)area.Width,
-                    (int)area.Height);
-                var color = brush as ColorBrush;
-                if (color != null)
+                if (radius > 0)
                 {
-                    var col = new Microsoft.Xna.Framework.Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
-                    primitives.DrawRectangle(rect, col, true, (float)radius);
+                    var corner = (int) Math.Round(radius);
+                    var corner2 = corner * 2;
+                    var areaXNA = area.ToXNA();
+                    var brushXNA = brush.ToXNA();
+
+                    // Draw 5 rectangles (top, bottom, left, right, center)
+                    FillRect(new RectangleXNA(areaXNA.X + corner,
+                        areaXNA.Top, areaXNA.Width - corner2, corner), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X + corner,
+                        areaXNA.Bottom - corner, areaXNA.Width - corner2, corner), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X,
+                        areaXNA.Top + corner, corner, areaXNA.Height - corner2), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.Right - corner,
+                        areaXNA.Y + corner, corner, areaXNA.Height - corner2), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X + corner,
+                        areaXNA.Y + corner, areaXNA.Width - corner2, areaXNA.Height - corner2), brushXNA);
+
+                    // Draw edge corners.
+                    var circle = GetCircleTexture(radius);
+                    FillCorner(new RectangleXNA(areaXNA.X, areaXNA.Y, corner, corner), circle, Corner.TopLeft, brushXNA);
+                    FillCorner(new RectangleXNA(areaXNA.Right - corner, areaXNA.Y, corner, corner), circle,
+                        Corner.TopRight, brushXNA);
+                    FillCorner(new RectangleXNA(areaXNA.X, areaXNA.Bottom - corner, corner, corner), circle,
+                        Corner.BottomLeft, brushXNA);
+                    FillCorner(new RectangleXNA(areaXNA.Right - corner, areaXNA.Bottom - corner, corner, corner), circle,
+                        Corner.BottomRight, brushXNA);
                 }
+                else
+                    manager.SpriteBatch.Draw(pixel, area.ToXNA(), null, brush.ToXNA(), 0, Vector2.Zero,
+                        SpriteEffects.None, 0);
             }
         }
-
-      
 
         public override Size MeasureText(string text, int size, FontStyle style)
         {
             // Remove any extra spaces, possibly created by the space character for invalid characters not included in the spritefont.
             text = text.Trim();
-            var parts = ParseFormattedText(text, Color.Transparent, style);
+            var parts = ParseFormattedText(text, Types.Color.Transparent, style);
 
             double w = 0, h = 0;
             foreach (var part in parts)
@@ -132,6 +158,32 @@ namespace Pyratron.UI.Monogame
                 h = Math.Max(h, measure.Height);
             }
             return new Size(w, h);
+        }
+
+        private void FillRect(RectangleXNA rect, Color color)
+        {
+            manager.SpriteBatch.Draw(pixel, rect, null, color, 0, Vector2.Zero,
+                SpriteEffects.None, 0);
+        }
+
+        private void FillCorner(RectangleXNA rect, Texture2D circle, Corner corner, Color color)
+        {
+            var source = new RectangleXNA(0, 0, circle.Width / 2, circle.Height / 2);
+            switch (corner)
+            {
+                case Corner.TopRight:
+                    source.X = circle.Width / 2;
+                    break;
+                case Corner.BottomLeft:
+                    source.Y = circle.Height / 2;
+                    break;
+                case Corner.BottomRight:
+                    source.Y = circle.Height / 2;
+                    source.X = circle.Width / 2;
+                    break;
+            }
+            manager.SpriteBatch.Draw(circle, rect, source, color, 0, Vector2.Zero,
+                SpriteEffects.None, 0);
         }
 
         /// <summary>
@@ -147,15 +199,16 @@ namespace Pyratron.UI.Monogame
         /// Empty brackets show the current color should be removed, and the last used color will be applied.
         /// (Like a stack)
         /// </remarks>
-        private static IEnumerable<TextRenderProperties> ParseFormattedText(string text, Color color, FontStyle style)
+        private static IEnumerable<TextRenderProperties> ParseFormattedText(string text, Types.Color color,
+            FontStyle style)
         {
             var parts = new List<TextRenderProperties>();
             var sb = new StringBuilder();
             bool inBold = false, inItalic = false;
             var inColor = false;
-            var colors = new Stack<Color>();
+            var colors = new Stack<Types.Color>();
             colors.Push(color);
-            var ignoreColor = color == Color.Transparent; // Transparent signals not to parse colors.
+            var ignoreColor = color == Types.Color.Transparent; // Transparent signals not to parse colors.
             for (var i = 0; i < text.Length; i++)
             {
                 var character = text[i];
@@ -172,11 +225,11 @@ namespace Pyratron.UI.Monogame
                                 colors.Pop();
                             else
                             {
-                                var newColor = (Color) colorStr;
+                                var newColor = (Types.Color) colorStr;
                                 colors.Push(newColor);
                             }
                         }
-                                                    inColor = false;
+                        inColor = false;
                         sb.Clear();
                     }
                     else
@@ -241,16 +294,35 @@ namespace Pyratron.UI.Monogame
             return ret;
         }
 
+        private Texture2D GetCircleTexture(double radius)
+        {
+            var ret = manager.CircleSizes[manager.CircleSizes.Length - 1];
+            foreach (var size in manager.CircleSizes.Where(size => size >= radius * 2))
+            {
+                ret = size;
+                break;
+            }
+            return (Texture2D)manager.Skin.Textures["Shapes\\circle" + ret];
+        }
+
         private Texture2D GetTexture(string name) => manager.Skin.Textures[name] as Texture2D;
         private SpriteFont GetFont(string name) => manager.Skin.Fonts[name] as SpriteFont;
+
+        private enum Corner
+        {
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight
+        }
 
         private class TextRenderProperties
         {
             public string Text { get; }
-            public Color Color { get; }
+            public Types.Color Color { get; }
             public FontStyle Style { get; }
 
-            public TextRenderProperties(string text, Color color, FontStyle style)
+            public TextRenderProperties(string text, Types.Color color, FontStyle style)
             {
                 Text = text;
                 Color = color;
