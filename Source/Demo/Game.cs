@@ -20,7 +20,7 @@ namespace Pyratron.UI.Demo
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferHeight = 768,
+                PreferredBackBufferHeight = 800,
                 PreferredBackBufferWidth = 1024,
                 PreferMultiSampling = true,
                 SynchronizeWithVerticalRetrace = false,

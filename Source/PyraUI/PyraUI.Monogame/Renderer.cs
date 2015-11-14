@@ -18,10 +18,12 @@ namespace Pyratron.UI.Monogame
     {
         private readonly Manager manager;
         private readonly Texture2D pixel;
+        private readonly GraphicsDevice graphics;
 
         public Renderer(Manager manager)
         {
             this.manager = manager;
+            graphics = manager.SpriteBatch.GraphicsDevice;
             // Create 1x1 texture for rendering rectangles.
             pixel = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, 1);
             pixel.SetData(new[] {Types.Color.White});
@@ -36,6 +38,8 @@ namespace Pyratron.UI.Monogame
         {
             manager.SpriteBatch.End();
         }
+
+        public override Size Viewport => new Size(graphics.Viewport.Width, graphics.Viewport.Height);
 
         public override void DrawTexture(string name, Rectangle rectangle, ColorBrush brush, Rectangle bounds)
         {
@@ -80,7 +84,7 @@ namespace Pyratron.UI.Monogame
 
         public override void DrawRectangle(Rectangle area, Brush brush, Thickness thickness, double radius, Rectangle bounds)
         {
-            area = area.FitToBounds(bounds);
+            //area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
                 if (radius > 0)
@@ -106,7 +110,7 @@ namespace Pyratron.UI.Monogame
 
         public override void FillRectangle(Rectangle area, Brush brush, double radius, Rectangle bounds)
         {
-            area = area.FitToBounds(bounds);
+          //area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
                 if (radius > 0)

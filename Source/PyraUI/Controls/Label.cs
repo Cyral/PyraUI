@@ -13,7 +13,8 @@ namespace Pyratron.UI.Controls
             set
             {
                 text = value.Trim();
-                LayoutInvalidated = true;
+                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
 
@@ -33,6 +34,9 @@ namespace Pyratron.UI.Controls
             HorizontalAlignment = HorizontalAlignment.Center;
             VerticalAlignment = VerticalAlignment.Center;
 
+            Height = 20;
+            MinHeight = 16;
+
             Padding = Margin = 0;
         }
 
@@ -41,16 +45,15 @@ namespace Pyratron.UI.Controls
             Text = content;
         }
 
-        public override Size MeasureSelf(Size availableSize)
+        protected override Size MeasureCore(Size availableSize)
         {
-            return Manager.Renderer.MeasureText(Text, FontSize, FontStyle) + Padding;
+            return (Manager.Renderer.MeasureText(Text, FontSize, FontStyle) + Padding).Max(Size);
             //return base.MeasureOverride(availableSize);
         }
 
         public override void Draw(float delta)
         {
-            base.Draw(delta);
-
+           
             // Get size of text.
             var textsize = Manager.Renderer.MeasureText(Text, FontSize, FontStyle);
             // Calculate center for each axis.
@@ -95,7 +98,9 @@ namespace Pyratron.UI.Controls
                     x = center.X;
                     break;
             }
-            Manager.Renderer.DrawString(Text, Position + new Point(x, y), TextColor, FontSize, FontStyle, ParentBounds);
+            Manager.Renderer.DrawString(Text, ContentArea.Point  + new Point(x, y), TextColor, FontSize, FontStyle, ParentBounds);
+            base.Draw(delta);
+
         }
     }
 }

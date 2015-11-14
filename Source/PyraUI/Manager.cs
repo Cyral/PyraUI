@@ -1,53 +1,94 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
-using System.Xml;
-using Pyratron.UI.Brushes;
+using System.Text;
 using Pyratron.UI.Controls;
 using Pyratron.UI.Markup;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI
 {
+    /// <summary>
+    /// Manages the user interface.
+    /// </summary>
     public abstract class Manager
     {
         private static readonly TimeSpan second = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// Master list of all elements.
+        /// List of root level elements.
         /// </summary>
-        public List<Element> Elements { get; } = new List<Element>();
+        public ReadOnlyCollection<Element> Elements { get; private set; }
 
+        /// <summary>
+        /// Renderer to render text, textures, and shapes.
+        /// </summary>
         public Renderer Renderer { get; set; }
 
+        /// <summary>
+        /// UI skin to load and manage assets.
+        /// </summary>
         public Skin Skin { get; set; }
 
-        public MarkupLoader Markup { get; set; }
+        /// <summary>
+        /// Parses XAML into a visual tree.
+        /// </summary>
+        public MarkupParser Markup { get; set; }
 
+        /// <summary>
+        /// Manages a queue of elements to arrange and measure.
+        /// </summary>
+        public LayoutManager Layout { get; set; }
+
+        /// <summary>
+        /// Indicates if debugging information should be rendered.
+        /// </summary>
         public bool DrawDebug { get; set; }
 
         /// <summary>
-        /// The current FPS.
+        /// The average frames per second over the past second.
         /// </summary>
         public int FPS { get; private set; }
 
+        private readonly List<Element> elements = new List<Element>();
         private TimeSpan elapsedTime = TimeSpan.Zero;
         private int totalFrames;
-
         private string xml;
-     
+
         public virtual void Init()
         {
-            Markup = new MarkupLoader(this);
-            xml = Markup.LoadFromXAML(File.ReadAllText("window.xml"), null);
-            foreach (var element in Elements)
-                element.UpdateLayout();
+            Elements = new ReadOnlyCollection<Element>(elements);
+            Layout = new LayoutManager(this);
+            Markup = new MarkupParser(this);
+
+            xml = File.ReadAllText("window.xml");
+
+            // Parse XAML into visual tree.
+            var stopwatch = Stopwatch.StartNew();
+
+            Markup.LoadFromXAML(xml, null);
+            stopwatch.Stop();
+
+            Console.WriteLine("XAML parsed in " + stopwatch.ElapsedMilliseconds + "ms");
+
+            // Run initial layout pass.
+            stopwatch = Stopwatch.StartNew();
+            Layout.UpdateLayout();
+            stopwatch.Stop();
+
+            Console.WriteLine("Layout measured and arranged in " + stopwatch.ElapsedMilliseconds + "ms");
         }
 
-        public virtual void Load()
+        /// <summary>
+        /// Add a root level element to the UI.
+        /// </summary>
+        public void AddRootElement(Element element)
         {
-            Skin.LoadTextureInternal("button");
+            element.Level = 0;
+            element.Parent = null;
+            elements.Add(element);
         }
 
         /// <summary>
@@ -56,23 +97,26 @@ namespace Pyratron.UI
         /// <param name="delta">Seconds elapsed since last frame.</param>
         public virtual void Draw(float delta)
         {
-            //Elements[0].UpdateLayout();
             Renderer.BeginDraw();
-            //Renderer.DrawTexture("button", new Rectangle(50, 50, 150, 150));
+
             // Render all top level elements. (Those with no parent).
             for (var i = 0; i < Elements.Count; i++)
             {
                 var element = Elements[i];
                 var visual = element as Visual;
-                // If the element is a visual, render it.
-                if (element.Parent == null && visual != null)
-                {
-                    visual.Draw(delta);
-                }
-                element.ActualSizePrevious = element.ActualSize;
+                visual?.Draw(delta);
             }
-            Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}", new Point(8, Elements[1].ExtendedArea.Height + 8), Color.Black,
+
+            // Debugging stuff.
+            Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}",
+                new Point(8, Elements[0].ExtendedArea.Height + 8), Color.Black,
                 8, Rectangle.Infinity, true);
+            var sb = new StringBuilder("Visual Tree:");
+            AddToTree(Elements[0], sb);
+            var treeStr = sb.ToString();
+            Renderer.DrawString(treeStr,
+                new Point(Renderer.Viewport.Width - Renderer.MeasureText(treeStr, 8).Width - 8,
+                    Elements[0].ExtendedArea.Height + 8), Color.Black, 8, Rectangle.Infinity, true);
             Renderer.EndDraw();
 
             // Calculate FPS
@@ -86,6 +130,19 @@ namespace Pyratron.UI
             totalFrames++;
         }
 
+        public virtual void Load()
+        {
+            Skin.LoadTextureInternal("button");
+        }
+
+        /// <summary>
+        /// Remove a root level element from the UI.
+        /// </summary>
+        public void RemoveRootElement(Element element)
+        {
+            elements.Remove(element);
+        }
+
         /// <summary>
         /// Updates the UI.
         /// </summary>
@@ -95,10 +152,16 @@ namespace Pyratron.UI
             for (var i = 0; i < Elements.Count; i++)
             {
                 var element = Elements[i];
-                if (element.ActualSize != element.ActualSizePrevious)
-                    element.InvalidateLayout();
                 element.Update(delta);
             }
+        }
+
+        private static void AddToTree(Element element, StringBuilder sb)
+        {
+            sb.Append(Environment.NewLine + new string(' ', element.Level * 3) +
+                      element.ToString().Remove(0, "Pyratron.UI.Controls.".Length));
+            foreach (var child in element.Elements)
+                AddToTree(child, sb);
         }
     }
 }

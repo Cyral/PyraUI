@@ -9,12 +9,9 @@ namespace Pyratron.UI.Types
         public static readonly Rectangle Empty = new Rectangle();
         public static readonly Rectangle Infinity = new Rectangle(0, 0, double.PositiveInfinity, double.PositiveInfinity);
 
+
         public Rectangle(double x, double y, double width, double height)
         {
-            if (width < 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than or equal to 0.");
-            if (height < 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than or equal to 0.");
             X = x;
             Y = y;
             Width = width;
@@ -23,17 +20,23 @@ namespace Pyratron.UI.Types
 
         public Rectangle(Point location, double width, double height)
         {
-            if (width < 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Size must be greater than or equal to 0.");
-            if (height < 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Size must be greater than or equal to 0.");
             X = location.X;
             Y = location.Y;
             Width = width;
             Height = height;
         }
 
+        public Rectangle(Point location, Size size) : this(location.X, location.Y, size.Width, size.Height)
+        {
+        }
+
+        public Rectangle(Size size) : this(Point.Zero, size)
+        {
+        }
+
         public Size Size => new Size(Width, Height);
+
+        public Point Point => new Point(X, Y);
 
         public double X { get; set; }
 
@@ -126,9 +129,9 @@ namespace Pyratron.UI.Types
                                                   (Y < rect.Y + rect.Height);
 
         public override string ToString()
-            => "{X=" + X.ToString(CultureInfo.CurrentCulture) + ",Y=" + Y.ToString(CultureInfo.CurrentCulture) +
+            => "X=" + X.ToString(CultureInfo.CurrentCulture) + ",Y=" + Y.ToString(CultureInfo.CurrentCulture) +
                ",Width=" + Width.ToString(CultureInfo.CurrentCulture) +
-               ",Height=" + Height.ToString(CultureInfo.CurrentCulture) + "}";
+               ",Height=" + Height.ToString(CultureInfo.CurrentCulture);
 
         /// <summary>
         /// Extend the rectangle dimensions by the specified size.
@@ -138,15 +141,22 @@ namespace Pyratron.UI.Types
         public Rectangle Extend(Size size) => new Rectangle(X, Y, Width + size.Width, Height + size.Height);
 
         /// <summary>
+        /// Extend the rectangle to include the specified thickness.
+        /// </summary>
+        public Rectangle Extend(Thickness thickness)
+            =>
+                new Rectangle(0, 0, thickness.Right + thickness.Left + Width,
+                    thickness.Bottom + thickness.Top + Height);
+
+        /// <summary>
         /// Offset the rectangle by the specified point. (Add to the X and Y)
         /// </summary>
         public Rectangle Offset(Point position) => new Rectangle(X + position.X, Y + position.Y, Width, Height);
 
         /// <summary>
-        /// Extend the size to include the specified thickness.
+        /// Offset the rectangle by the specified rectangle coordinates. (Add to the X and Y)
         /// </summary>
-        public Rectangle Extend(Thickness thickness)
-            => new Rectangle(0, 0, thickness.Right + thickness.Left + Width, thickness.Bottom + thickness.Top + Height);
+        public Rectangle Offset(Rectangle rectangle) => new Rectangle(X + rectangle.X, Y + rectangle.Y, Width, Height);
 
         /// <summary>
         /// Limit the area of this rectangle to the specified bounds.
@@ -164,11 +174,24 @@ namespace Pyratron.UI.Types
         }
 
         /// <summary>
-        /// Remove the specified thickness from the outsides of the rectangle.
+        /// Determines if the rectangle is equal to another rectangle within margin of error (because of floating point precision).
+        /// </summary>
+        public bool IsClose(Rectangle rectangle) => Point.IsClose(rectangle.Point) && Size.IsClose(rectangle.Size);
+
+        /// <summary>
+        /// Remove the specified thickness from the outsides of the rectangle in order to move the rectangle further inward. (ADDING to the X and Y values)
         /// </summary>
         public Rectangle RemoveBorder(Thickness borderThickness)
             =>
                 new Rectangle(X + borderThickness.Left, Y + borderThickness.Right, Width - borderThickness.Width,
                     Height - borderThickness.Height);
+
+        /// <summary>
+        /// Remove the specified thickness from the rectangle to make it smaller.
+        /// </summary>
+        public Rectangle Remove(Thickness thickness)
+            =>
+                new Rectangle(X -thickness.Left, Y - thickness.Right, Width -thickness.Width,
+                    Height - thickness.Height);
     }
 }

@@ -109,10 +109,10 @@ namespace Pyratron.UI.Types
 
         public override string ToString()
             =>
-                "{Top=" + Left.ToString(CultureInfo.CurrentCulture) + ",Bottom=" +
+                "Top=" + Left.ToString(CultureInfo.CurrentCulture) + ",Bottom=" +
                 Top.ToString(CultureInfo.CurrentCulture) +
                 ",Left=" + Right.ToString(CultureInfo.CurrentCulture) +
-                ",Right=" + Bottom.ToString(CultureInfo.CurrentCulture) + "}";
+                ",Right=" + Bottom.ToString(CultureInfo.CurrentCulture);
 
         public static explicit operator Thickness(string value)
         {

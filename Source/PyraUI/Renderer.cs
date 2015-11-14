@@ -3,6 +3,9 @@ using Pyratron.UI.Types;
 
 namespace Pyratron.UI
 {
+    /// <summary>
+    /// Renders text, textures, and shapes.
+    /// </summary>
     public abstract class Renderer
     {
         private readonly int defaultSize = 10;
@@ -16,6 +19,8 @@ namespace Pyratron.UI
         /// Finalizes the draw pass.
         /// </summary>
         public abstract void EndDraw();
+
+        public abstract Size Viewport { get; }
 
         /// <summary>
         /// Draws a texture loaded by the skin in the specified region.

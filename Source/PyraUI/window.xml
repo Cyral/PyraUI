@@ -1,16 +1,19 @@
 ﻿<Window
-  Title="MainWindow"
   Height="400"
-  Width="600">
-  ﻿<StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Right">
-        <Border Height="100" Background="#FF03A9F4" CornerRadius="16" Margin="2,2,100,2" Padding="10">
-            <StackPanel>
-                <Border Height="51" Background="#FFFF5177" Margin="50,2" Padding="5" />
-                <Border Height="200" Background="#FF12C700" Margin="100,2,2,2" />
-            </StackPanel>
-        </Border>
-        <Border Height="50" Background="#FFFFB300" CornerRadius="8" Margin="2" HorizontalAlignment="Left" Width="200" />
-        <Border Height="50" Background="#FFE040FB" CornerRadius="3" Margin="10" HorizontalAlignment="Center" Width="200" />
-        <Border Height="50" Background="#FF616161" BorderThickness="3" CornerRadius="8" BorderBrush="#333" HorizontalAlignment="Right" Width="200" />
+  Width="900">
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="200">
+    <StackPanel Width="300" VerticalAlignment="Bottom">
+      <Button Margin="4">Test</Button>
+      <Button Margin="4">Test</Button>
     </StackPanel>
+    <StackPanel Width="100" VerticalAlignment="Center">
+      <Border BorderBrush="#FC8B00" BorderThickness="10" CornerRadius="8">
+        <Button>Test</Button>
+      </Border>
+    </StackPanel>
+    <StackPanel Width="300" VerticalAlignment="Top">
+      <Button Margin="4">Test</Button>
+      <Button Margin="4">Test</Button>
+    </StackPanel>
+  </StackPanel>
 </Window>

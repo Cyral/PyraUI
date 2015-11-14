@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
     /// <summary>
-    /// A UI element that has a position and parent element.
+    /// A UI element that has a position, size, and parent element.
     /// </summary>
     public class Element : Component
     {
@@ -14,115 +13,24 @@ namespace Pyratron.UI.Controls
         {
             Elements = new List<Element>();
 
-            MinWidth = MaxWidth = 0;
-            MaxWidth = MaxHeight = double.PositiveInfinity;
-            Width = double.PositiveInfinity;
-            Height = double.PositiveInfinity;
+            ActualSize = Size.Zero;
 
-            HorizontalAlignment = HorizontalAlignment.Left;
+            Width = Height = 0;
+            MinWidth = MinHeight = 0;
+            MaxWidth = MaxHeight = double.PositiveInfinity;
+
+            HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Top;
 
-            Margin = 10;
-            Padding = 10;
+            PreviousFinalRect = Rectangle.Empty;
+            PreviousAvailableSize = Size.NaN;
+            PreviousDesiredSize = Size.NaN;
 
             FontSize = 10;
             FontStyle = FontStyle.Regular;
             TextColor = Color.Black;
 
             textColorSet = fontSizeSet = fontStyleSet = false;
-        }
-
-        /// <summary>
-        /// Handles inline XML content (such as text between the opening and closing tag).
-        /// </summary>
-        public virtual void AddContent(string content)
-        {
-            // By default, create a label inside this element.
-            Add(new Label(Manager, content));
-        }
-
-        public virtual Size MeasureSelf(Size availableSize)
-        {
-            if (Parent == null) return Size;
-            double w = Width, h = Height;
-
-            // If horizontal alignment is stretch and the width is more than the available size, try and fit it.
-            if (HorizontalAlignment == HorizontalAlignment.Stretch)
-            {
-                if (Width > availableSize.Width)
-                    w = Math.Max(availableSize.Width, MinWidth);
-            }
-            else // If horizontal alignment is not stretch, find the largest child element and use that as the width.
-                w = (IsWidthAuto ? GetMaxChildWidth() : Width) + Padding.Left + Padding.Right;
-
-            // Repeat same process for vertical alignment.
-            if (VerticalAlignment == VerticalAlignment.Stretch)
-            {
-                if (Height > availableSize.Height)
-                    h = Math.Max(availableSize.Height, MinHeight);
-            }
-            else
-                h = (IsHeightAuto ? GetMaxChildHeight() : Height) + Padding.Top + Padding.Bottom;
-            return new Size(w, h);
-        }
-
-        public virtual Point ArrangeChild(Element child)
-        {
-            // Position the child element in the upper left corner of this element, taking into account for margin and padding.
-            return Position + child.Margin + child.Padding;
-        }
-
-        public virtual Point AlignChild(Element child)
-        {
-            var center = new Point((ContentArea.Width / 2) - (child.ExtendedArea.Width / 2),
-                (ContentArea.Height / 2) - (child.ExtendedArea.Height / 2));
-            double x = 0, y = 0;
-
-            // Apply horizontal alignment.
-            if (child.HorizontalAlignment == HorizontalAlignment.Center)
-                x += center.X;
-            if (child.HorizontalAlignment == HorizontalAlignment.Right)
-                x = ContentArea.Width - child.ExtendedArea.Width;
-
-            // Apply vertical alignment.
-            if (child.VerticalAlignment == VerticalAlignment.Center)
-                y += center.Y;
-            if (child.VerticalAlignment == VerticalAlignment.Bottom)
-                y = ContentArea.Height - child.ExtendedArea.Height;
-            return child.Position + new Point(x, y);
-        }
-
-        public virtual void Measure()
-        {
-            // Measure child elements (and their children, and so on).
-            for (var i = 0; i < Elements.Count; i++)
-            {
-                var child = Elements[i];
-                child.Measure();
-            }
-            // Then set the size of this element.
-            ActualSize = MeasureSelf(Parent?.ContentArea.Size.Remove(Margin) ?? Size.Zero);
-        }
-
-        public virtual void Arrange()
-        {
-            if (Parent == null) // Root elements must be positioned manually from the edge of the window.
-                Position = Margin + Padding;
-            for (var i = 0; i < Elements.Count; i++)
-            {
-                var child = Elements[i];
-                // Set the child position.
-                child.Position = ArrangeChild(child);
-                // Align it based on Horizontal and Vertical alignment.
-                child.Position = AlignChild(child);
-                child.Arrange();
-            }
-        }
-
-        public virtual void UpdateLayout()
-        {
-            Measure();
-            Arrange();
         }
 
         /// <summary>
@@ -141,17 +49,107 @@ namespace Pyratron.UI.Controls
                 {
                     // Remove control from prior parent.
                     element.Parent?.Remove(element);
+                    // Reset the level depth.
+                    element.Level = -1;
 
                     element.Manager = Manager;
                     element.Parent = this;
+
                     // Add to this element.
                     Elements.Add(element);
-                    // Add element to master list.
-                    if (!Manager.Elements.Contains(element))
-                        Manager.Elements.Add(element);
-                    UpdateLayout();
+
+                    // Add to layout queue.
+                    Manager.Layout.AddMeasure(element);
+                    Manager.Layout.AddArrange(element);
                 }
             }
+        }
+
+        /// <summary>
+        /// Handles inline XML content (such as text between the opening and closing tag).
+        /// </summary>
+        public virtual void AddContent(string content)
+        {
+            // By default, create a label inside this element.
+            Add(new Label(Manager, content));
+        }
+
+        /// <summary>
+        /// Arrange an element and all child elements.
+        /// </summary>
+        /// <param name="finalRect">The final size that the parent computes for the child element.</param>
+        public void Arrange(Rectangle finalRect)
+        {
+            // If the arrangement is valid and the rectangle is unchanged, return.
+            if (isArrangeValid && finalRect.IsClose(PreviousFinalRect))
+            {
+                Manager.Layout.RemoveArrange(this);
+                return;
+            }
+
+            // If the measure is invalid and the rectangle size is different, measure before continuing.
+            if (!isMeasureValid || !PreviousAvailableSize.IsClose(finalRect.Size))
+                Measure(finalRect.Size);
+
+            // Move to the arrange process.
+            ArrangeCore(finalRect);
+
+            // Keep a record of the last rectangle and remove this element from the layout queue.
+            PreviousFinalRect = finalRect;
+            Manager.Layout.RemoveArrange(this);
+        }
+
+        /// <summary>
+        /// Invalidates the arrangement of the element, adding it to the arrange queue.
+        /// </summary>
+        public void InvalidateArrange()
+        {
+            if (!isArrangeValid && !PreviousFinalRect.IsEmpty)
+                return;
+
+            isArrangeValid = false;
+            Manager.Layout.AddArrange(this);
+        }
+
+        /// <summary>
+        /// Invalidates the measurement of the element, adding it to the measure queue.
+        /// </summary>
+        public void InvalidateMeasure()
+        {
+            if (!isMeasureValid && !PreviousAvailableSize.IsEmpty)
+                return;
+
+            isMeasureValid = false;
+            Manager.Layout.AddMeasure(this);
+        }
+
+        /// <summary>
+        /// Computes a desired size of the element.
+        /// </summary>
+        /// <param name="availableSize">
+        /// The available space that the parent element has allocated to the child.
+        /// </param>
+        public virtual void Measure(Size availableSize)
+        {
+            // If the measure is valid and the previous size is the same, return the previous size.
+            if (isMeasureValid && PreviousAvailableSize.IsClose(availableSize))
+            {
+                Manager.Layout.RemoveMeasure(this);
+                DesiredSize = PreviousDesiredSize;
+                return;
+            }
+
+            // The element will have to be arranged due to the size being changed.
+            InvalidateArrange();
+
+            // Move on to the measure process.
+            DesiredSize = MeasureCore(availableSize);
+
+            // Set the measure as valid and update the previous sizes.
+            isMeasureValid = true;
+            PreviousAvailableSize = availableSize;
+            PreviousDesiredSize = DesiredSize;
+            Manager.Layout.RemoveMeasure(this);
         }
 
         /// <summary>
@@ -170,76 +168,151 @@ namespace Pyratron.UI.Controls
                     element.Parent = null;
                     if (dispose)
                         element.Dispose();
-                    UpdateLayout();
                 }
             }
         }
 
-        protected internal override void Update(float delta)
+        /// <summary>
+        /// Arranges the element.
+        /// </summary>
+        protected virtual void ArrangeCore(Rectangle finalRect)
         {
-            if (LayoutInvalidated)
-            {
-                Parent?.UpdateLayout();
-                LayoutInvalidated = false;
-            }
-            base.Update(delta);
+            // The final size will be equal to the desired size, unless horizontal or vertical alignment is stretch, in which case it will fill the container.
+            var finalWidth = HorizontalAlignment != HorizontalAlignment.Stretch ? DesiredSize.Width : finalRect.Width;
+            var finalHeight = VerticalAlignment != VerticalAlignment.Stretch ? DesiredSize.Height : finalRect.Height;
+            var finalSize = new Size(finalWidth, finalHeight);
+
+            finalSize = finalSize.Remove(Margin); // Remove the margin as it needs to be ignored.
+
+            // If the elements width or height is 0 or NaN, fall back to the measured size.
+            finalSize = Size.Fallback(finalSize).Clamp(MinSize, MaxSize);
+
+            // Arrange all child elements and return a final size.
+            var arrangedSize = ArrangeOverride(finalSize);
+
+            // Get the offset for the element (due to alignment)
+            var alignedOffset = Align(finalRect, arrangedSize.Add(Margin));
+
+            Position = alignedOffset + Margin;
+
+            ActualSize = arrangedSize;
+        }
+
+        /// <summary>
+        /// Positions child elements and determines a size for the element.
+        /// By default, makes each child fill the entire area.
+        /// </summary>
+        protected virtual Size ArrangeOverride(Size finalSize)
+        {
+            foreach (var child in Elements)
+                child.Arrange(new Rectangle(finalSize.Remove(Padding)));
+            return finalSize;
         }
 
         /// <summary>
         /// Releases resources used by the element, removes itself from its parent, and disposes of all children.
         /// </summary>
-        protected internal virtual void Dispose()
+        protected virtual void Dispose()
         {
             Parent.Remove(this, false);
             Parent = null;
-            Manager.Elements.Remove(this);
+            Manager.RemoveRootElement(this);
             foreach (var child in Elements)
                 Remove(child);
             Elements.Clear();
         }
 
         /// <summary>
-        /// Returns the height of all child elements if they were to be stacked on top of each other.
+        /// Measures the element.
         /// </summary>
-        protected internal virtual double GetChildHeight()
+        protected virtual Size MeasureCore(Size availableSize)
         {
-            double h = Padding.Height;
-            if (Elements.Count == 0)
-                return ExtendedArea.Height;
-            for (var i = 0; i < Elements.Count; i++)
-                h += Elements[i].ExtendedArea.Height;
-            return h;
+            // Remove the margin from the size, as it should be ignored for now.
+            availableSize.Remove(Margin);
+
+            // If the width or height is NaN or 0, fall back to the available size, and clamp it within the min and max sizes.
+            availableSize = Size.Fallback(availableSize).Clamp(MinSize, MaxSize);
+
+            // Measure the size of child elements.
+            var measuredSize = MeasureOverride(availableSize);
+
+            measuredSize = Size.Fallback(measuredSize).Clamp(MinSize, MaxSize);
+
+            measuredSize = measuredSize.Add(Margin);
+
+
+            return measuredSize;
         }
 
         /// <summary>
-        /// Returns the width of all child elements if they were to be stacked beside each other.
+        /// Measures the size of all child elements in a specific layout pattern.
+        /// By default, returns the size of the largest child element.
         /// </summary>
-        protected internal virtual double GetChildWidth()
+        protected virtual Size MeasureOverride(Size availableSize)
         {
-            double w = Padding.Width;
-            if (Elements.Count == 0)
-                return ExtendedArea.Width;
-            for (var i = 0; i < Elements.Count; i++)
-                w += Elements[i].ExtendedArea.Width;
-            return w;
+            // By default, return the size of the largest child element.
+            var desired = Size.Zero;
+
+            foreach (var child in Elements)
+            {
+                child.Measure(availableSize);
+                desired = desired.Max(child.DesiredSize);
+            }
+
+            return desired;
         }
 
         /// <summary>
-        /// Returns the extended width of the child element with the greatest width.
+        /// Retuns an offset to the elements position according to its size, container size, and alignment.
         /// </summary>
-        protected internal virtual double GetMaxChildWidth()
-            => Elements.Count == 0 ? ExtendedArea.Width : Elements.Select(t => t.ExtendedArea.Width).Max();
+        private Point Align(Rectangle container, Size size)
+        {
+            if (!double.IsInfinity(size.Width)) // Infinite sizes will be handled elsewhere.
+            {
+                switch (HorizontalAlignment)
+                {
+                    case HorizontalAlignment.Stretch:
+                    case HorizontalAlignment.Center:
+                        container.X = container.Left + (container.Width - size.Width) / 2;
+                        break;
+                    case HorizontalAlignment.Right:
+                        container.X = container.Left + container.Width - size.Width;
+                        break;
+                }
+            }
 
-        /// <summary>
-        /// Returns the extended height of the child element with the greatest height.
-        /// </summary>
-        protected internal virtual double GetMaxChildHeight()
-            => Elements.Count == 0 ? ExtendedArea.Height : Elements.Select(t => t.ExtendedArea.Height).Max();
+            if (!double.IsInfinity(size.Height))
+            {
+                switch (VerticalAlignment)
+                {
+                    case VerticalAlignment.Stretch:
+                    case VerticalAlignment.Center:
+                        container.Y = container.Top + (container.Height - size.Height) / 2;
+                        break;
+                    case VerticalAlignment.Bottom:
+                        container.Y = container.Top + container.Height - size.Height;
+                        break;
+                }
+            }
 
+            return container.Point;
+        }
+
+        protected internal override void Update(float delta)
+        {
+            UpdateChildren(delta);
+        }
+        
         /// <summary>
-        /// Mark this element as invalidated, requiring a Measure and Arrange pass.
+        /// Update all children elements.
         /// </summary>
-        internal virtual void InvalidateLayout() => LayoutInvalidated = true;
+        private void UpdateChildren(float delta)
+        {
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                Elements[i].Update(delta);
+            }
+        }
 
         #region Properties
 
@@ -256,7 +329,8 @@ namespace Pyratron.UI.Controls
             set
             {
                 padding = value;
-                InvalidateLayout();
+                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
 
@@ -269,9 +343,30 @@ namespace Pyratron.UI.Controls
             set
             {
                 margin = value;
-                InvalidateLayout();
+                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
+
+
+        /// <summary>
+        /// The position of the element relative to its parent.
+        /// </summary>
+        internal Point Position { get; private set; }
+
+        /// <summary>
+        /// The absolute position of the element.
+        /// </summary>
+        internal Point AbsolutePosition
+        {
+            get
+            {
+                if (Parent == null)
+                    return Position;
+                return Parent.ContentArea.Point + Position;
+            }
+        }
+
 
         public HorizontalAlignment HorizontalAlignment
         {
@@ -279,7 +374,8 @@ namespace Pyratron.UI.Controls
             set
             {
                 horizontalAlignment = value;
-                InvalidateLayout();
+                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
 
@@ -289,13 +385,10 @@ namespace Pyratron.UI.Controls
             set
             {
                 verticalAlignment = value;
-                InvalidateLayout();
+                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
-
-        public bool IsWidthAuto => double.IsInfinity(Width);
-
-        public bool IsHeightAuto => double.IsInfinity(Height);
 
         public FontStyle FontStyle
         {
@@ -304,7 +397,7 @@ namespace Pyratron.UI.Controls
             {
                 fontStyle = value;
                 fontStyleSet = true;
-                InvalidateLayout();
+                InvalidateMeasure();
             }
         }
 
@@ -317,7 +410,7 @@ namespace Pyratron.UI.Controls
                     throw new ArgumentOutOfRangeException("Font size must be more than 0.");
                 fontSize = value;
                 fontSizeSet = true;
-                InvalidateLayout();
+                InvalidateMeasure();
             }
         }
 
@@ -328,7 +421,6 @@ namespace Pyratron.UI.Controls
             {
                 textColor = value;
                 textColorSet = true;
-                InvalidateLayout();
             }
         }
 
@@ -345,9 +437,8 @@ namespace Pyratron.UI.Controls
                 if (!Equals(value, minWidth))
                 {
                     minWidth = value;
-                    InvalidateLayout();
-                    if (Width < minWidth || IsWidthAuto)
-                        Width = minWidth;
+
+                    InvalidateMeasure();
                 }
             }
         }
@@ -365,9 +456,10 @@ namespace Pyratron.UI.Controls
                 if (!Equals(value, maxWidth))
                 {
                     maxWidth = value;
-                    InvalidateLayout();
+
                     if (Width > maxWidth)
                         Width = maxWidth;
+                    InvalidateMeasure();
                 }
             }
         }
@@ -381,7 +473,7 @@ namespace Pyratron.UI.Controls
             set
             {
                 width = Math.Max(minWidth, Math.Min(value, maxWidth));
-                InvalidateLayout();
+                InvalidateMeasure();
             }
         }
 
@@ -398,9 +490,8 @@ namespace Pyratron.UI.Controls
                 if (!Equals(value, minHeight))
                 {
                     minHeight = value;
-                    InvalidateLayout();
-                    if (Height < minHeight || IsWidthAuto)
-                        Height = minHeight;
+
+                    InvalidateMeasure();
                 }
             }
         }
@@ -418,9 +509,10 @@ namespace Pyratron.UI.Controls
                 if (!Equals(value, maxHeight))
                 {
                     maxHeight = value;
-                    InvalidateLayout();
+
                     if (Height > maxHeight)
                         Height = maxHeight;
+                    InvalidateMeasure();
                 }
             }
         }
@@ -434,114 +526,107 @@ namespace Pyratron.UI.Controls
             set
             {
                 height = Math.Max(minHeight, Math.Min(value, maxHeight));
-                InvalidateLayout();
-            }
-        }
-
-        internal bool LayoutInvalidated { get; set; }
-
-        public double ActualWidth
-        {
-            get { return actualWidth; }
-            set
-            {
-                if ((int) value != (int) ActualWidth)
-                {
-                    actualWidth = value;
-                    // Limit width to parent width.
-                    if (Parent != null)
-                        actualWidth = Math.Min(Parent.ContentArea.Width, actualWidth);
-                }
-            }
-        }
-
-        public double ActualHeight
-        {
-            get { return actualHeight; }
-            set
-            {
-                if ((int) value != (int) ActualHeight)
-                {
-                    actualHeight = value;
-                    // Limit height to parent height.
-                    if (Parent != null)
-                        actualHeight = Math.Min(Parent.ContentArea.Height, actualHeight);
-                }
+                InvalidateMeasure();
             }
         }
 
         /// <summary>
         /// Element's parent. Null if root.
         /// </summary>
-        public virtual Element Parent { get; set; }
+        public virtual Element Parent { get; protected internal set; }
 
-        public Rectangle ParentBounds => Parent?.ContentArea ?? Rectangle.Infinity;
+        public Rectangle ParentBounds => Parent?.ContentArea ?? Rectangle.Empty;
 
         /// <summary>
         /// List of child elements.
         /// </summary>
-        public List<Element> Elements { get; set; }
+        public List<Element> Elements { get; }
 
         public Size Size => new Size(Width, Height);
 
-        public Size ChildSize => new Size(GetChildWidth(), GetChildHeight());
+        public Size MinSize => new Size(MinWidth, MinHeight);
 
-        public Size ActualSize
+        public Size MaxSize => new Size(MaxWidth, MaxHeight);
+
+        /// <summary>
+        /// The actual size of the element.
+        /// </summary>
+        public Size ActualSize { get; protected set; }
+
+        /// <summary>
+        /// The desired size of the element if the size is available.
+        /// </summary>
+        public Size DesiredSize
         {
-            get { return new Size(ActualWidth, ActualHeight); }
-            set
+            get { return desiredSize; }
+            protected set
             {
-                ActualWidth = value.Width;
-                ActualHeight = value.Height;
+                if (!value.IsClose(desiredSize))
+                {
+                    desiredSize = value;
+
+                    // Since the size of this element has changed, the parent must be re-measured.
+                    Parent?.InvalidateMeasure();
+                }
             }
         }
 
+        internal Size PreviousAvailableSize { get; private set; }
+        internal Rectangle PreviousFinalRect { get; private set; }
+        internal Size PreviousDesiredSize { get; private set; }
+
+        private int level = -1;
+
         /// <summary>
-        /// The position of the content area of the element.
+        /// The level the element is in the visual tree.
         /// </summary>
-        public Point Position { get; set; }
+        public int Level
+        {
+            get
+            {
+                if (level == -1)
+                    level = Parent?.Level + 1 ?? 0;
+                return level;
+            }
+            internal set { level = value; }
+        }
+
 
         /// <summary>
         /// Rectangular region of the content area (inside the padding).
         /// </summary>
-        public Rectangle ContentArea
-        {
-            get
-            {
-                return
-                    new Rectangle(Math.Max(0, Margin.Left + Padding.Left), Math.Max(0, Margin.Top + Padding.Top),
-                        Math.Max(0, ActualSize.Width - Padding.Left - Padding.Right),
-                        Math.Max(0, ActualSize.Height - Padding.Bottom - Padding.Top)).Offset(
-                            Position - Margin - Padding);
-            }
-        }
+        public Rectangle ContentArea => new Rectangle(AbsolutePosition + Padding, ActualSize.Remove(Padding));
+
+        /// <summary>
+        /// Indicates if the element is a root level element (having no parent).
+        /// </summary>
+        public bool IsRoot => Parent == null;
 
         /// <summary>
         /// Rectangular region of the element.
         /// </summary>
-        public Rectangle BorderArea
-        {
-            get { return ActualSize.Combine(Margin).Offset(Position - Margin - Padding); }
-        }
+        public Rectangle BorderArea => new Rectangle(AbsolutePosition, ActualSize);
 
         /// <summary>
         /// Rectangular region of the element plus the margin area.
         /// </summary>
-        public Rectangle ExtendedArea
-        {
-            get { return ActualSize.Extend(Margin).Offset(Position - Margin - Padding); }
-        }
+        public Rectangle ExtendedArea => new Rectangle(AbsolutePosition - Margin, ActualSize.Add(Margin));
 
-        public Size ActualSizePrevious { get; set; }
+        /// <summary>
+        /// Indicates if the element has been measured. If false, the element should be re-measured.
+        /// </summary>
+        private bool isMeasureValid;
 
-        private double actualHeight;
-        private double actualWidth;
+        /// <summary>
+        /// Indicates if the element has been arranged. If false, the element should be re-arranged.
+        /// </summary>
+        private bool isArrangeValid;
 
         private int fontSize;
 
         // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
         private bool fontSizeSet, textColorSet, fontStyleSet;
-
+        private Size desiredSize;
         private double height, minHeight, maxHeight, width, minWidth, maxWidth;
         private HorizontalAlignment horizontalAlignment;
         private Thickness margin;

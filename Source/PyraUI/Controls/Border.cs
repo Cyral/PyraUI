@@ -3,7 +3,10 @@ using Pyratron.UI.Types;
 
 namespace Pyratron.UI.Controls
 {
-    internal class Border : Control
+    /// <summary>
+    /// Draws a border and/or background around an element.
+    /// </summary>
+    public class Border : Decorator
     {
         public Brush Background { get; set; } = Color.Transparent;
 
@@ -31,6 +34,21 @@ namespace Pyratron.UI.Controls
                     ParentBounds);
 
             base.Draw(delta);
+        }
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            // Remove the border and padding, measure the element, and then add them back, as they must be ignored.
+            availableSize = availableSize.Remove(BorderThickness).Remove(Padding);
+            var size = base.MeasureOverride(availableSize) + BorderThickness + Padding;
+            return size;
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Child?.Arrange(new Rectangle(BorderThickness, finalSize.Remove(BorderThickness).Remove(Padding)));
+
+            return finalSize;
         }
     }
 }

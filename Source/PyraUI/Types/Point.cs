@@ -18,10 +18,10 @@ namespace Pyratron.UI.Types
 
         public Point(double x, double y)
         {
-            if (!x.IsValid())
-                throw new ArgumentException(nameof(x), "Value must be a valid number.");
-            if (!y.IsValid())
-                throw new ArgumentException(nameof(y), "Value must be a valid number.");
+            //if (!x.IsValid())
+           //     throw new ArgumentException(nameof(x), "Value must be a valid number.");
+           // if (!y.IsValid())
+            //    throw new ArgumentException(nameof(y), "Value must be a valid number.");
 
             X = x;
             Y = y;
@@ -48,6 +48,11 @@ namespace Pyratron.UI.Types
         public static Point operator /(Point point, double factor) => new Point(point.X / factor, point.Y / factor);
 
         public bool Equals(Point other) => X.Equals(other.X) && Y.Equals(other.Y);
+
+        /// <summary>
+        /// Determines if the point is equal to another point within margin of error (because of floating point precision).
+        /// </summary>
+        public bool IsClose(Point point) => X.IsClose(point.X) && Y.IsClose(point.Y);
 
         public override bool Equals(object obj)
         {

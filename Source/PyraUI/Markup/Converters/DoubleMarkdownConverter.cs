@@ -11,7 +11,7 @@ namespace Pyratron.UI.Markup.Converters
         {
             // Auto = Infinity
             return value.Equals("Auto", StringComparison.InvariantCultureIgnoreCase)
-                ? double.PositiveInfinity
+                ? 0
                 : double.Parse(value);
         }
     }

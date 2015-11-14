@@ -45,15 +45,17 @@
     <Compile Include="Brushes\ColorBrush.cs" />
     <Compile Include="Brushes\GradientBrush.cs" />
     <Compile Include="Controls\Border.cs" />
+    <Compile Include="Controls\Decorator.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="LayoutManager.cs" />
     <Compile Include="Markup\Converters\BrushMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\ColorMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\DoubleMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\EnumMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\IMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\ThicknessMarkdownConverter.cs" />
-    <Compile Include="Markup\MarkupLoader.cs" />
+    <Compile Include="Markup\MarkupParser.cs" />
     <Compile Include="Types\Alignment.cs" />
     <Compile Include="Types\Color.cs" />
     <Compile Include="Controls\Button.cs" />
@@ -78,7 +80,6 @@
     <Compile Include="Skin.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="old.xml" />
     <Content Include="window.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
