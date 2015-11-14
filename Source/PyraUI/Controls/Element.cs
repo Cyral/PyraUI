@@ -104,9 +104,6 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public void InvalidateArrange()
         {
-            if (!isArrangeValid && !PreviousFinalRect.IsEmpty)
-                return;
-
             isArrangeValid = false;
             Manager.Layout.AddArrange(this);
         }
@@ -352,7 +349,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// The position of the element relative to its parent.
         /// </summary>
-        internal Point Position { get; private set; }
+        internal Point Position { get; set; }
 
         /// <summary>
         /// The absolute position of the element.
@@ -542,7 +539,15 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public List<Element> Elements { get; }
 
-        public Size Size => new Size(Width, Height);
+        public Size Size
+        {
+            get { return new Size(Width, Height); }
+            set
+            {
+                Width = value.Width;
+                Height = value.Height;
+            }
+        }
 
         public Size MinSize => new Size(MinWidth, MinHeight);
 

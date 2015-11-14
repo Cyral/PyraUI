@@ -1,5 +1,6 @@
 ﻿using System;
 using Pyratron.UI.Types;
+using Pyratron.UI.Types.Input;
 
 namespace Pyratron.UI.Controls
 {
@@ -12,7 +13,7 @@ namespace Pyratron.UI.Controls
             get { return text; }
             set
             {
-                text = value.Trim();
+                text = value;
                 InvalidateMeasure();
                 InvalidateArrange();
             }
@@ -38,6 +39,11 @@ namespace Pyratron.UI.Controls
             MinHeight = 16;
 
             Padding = Margin = 0;
+
+            manager.Input.KeyPress += key =>
+            {
+                Text = manager.Input.AddKeyPress(Text, key);
+            };
         }
 
         public override void AddContent(string content)

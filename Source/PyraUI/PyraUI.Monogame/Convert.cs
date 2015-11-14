@@ -9,6 +9,9 @@ using Pyratron.UI.Brushes;
 
 namespace Pyratron.UI.Monogame
 {
+    /// <summary>
+    /// Converts PyraUI types to XNA types and vice-versa.
+    /// </summary>
     public static class Convert
     {
         public static Rectangle ToXNA(this Types.Rectangle rect)
@@ -27,6 +30,21 @@ namespace Pyratron.UI.Monogame
             if (color != null)
                 return new Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
             return Color.Black;
+        }
+
+        public static Types.Rectangle ToOriginal(this Rectangle rect)
+        {
+            return new Types.Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
+        }
+
+        public static Types.Color ToOriginal(this Color color)
+        {
+            return new Types.Color(color.R, color.G, color.B, color.A);
+        }
+
+        public static Types.Point ToOriginal(this Point point)
+        {
+            return new Types.Point(point.X, point.Y);
         }
     }
 }

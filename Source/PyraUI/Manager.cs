@@ -42,6 +42,8 @@ namespace Pyratron.UI
         /// </summary>
         public LayoutManager Layout { get; set; }
 
+        public InputHandler Input { get; set; }
+
         /// <summary>
         /// Indicates if debugging information should be rendered.
         /// </summary>
@@ -147,8 +149,14 @@ namespace Pyratron.UI
         /// Updates the UI.
         /// </summary>
         /// <param name="delta">Seconds elapsed since last frame.</param>
-        public virtual void Update(float delta)
+        /// <param name="total">Total elapsed seconds.</param>
+        public virtual void Update(float delta, float total)
         {
+            Input.Update(delta, total);
+            //  Elements[0].Margin = new Thickness((int)Input.MousePosition.X, (int)Input.MousePosition.Y, Elements[0].Margin.Right, Elements[0].Margin.Bottom);
+            //  Elements[0].Elements[0].Elements[1].Elements[0].Size = new Size((int)Input.MousePosition.X, (int)Input.MousePosition.Y);
+            Layout.UpdateLayout();
+
             for (var i = 0; i < Elements.Count; i++)
             {
                 var element = Elements[i];

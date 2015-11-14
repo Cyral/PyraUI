@@ -268,7 +268,8 @@ namespace Pyratron.UI.Monogame
                         sb.Append(character);
                 }
             }
-            parts.Add(new TextRenderProperties(sb.ToString(), colors.Peek(), inBold ? FontStyle.Bold : style));
+            if (colors.Count > 0)
+                parts.Add(new TextRenderProperties(sb.ToString(), colors.Peek(), inBold ? FontStyle.Bold : style));
             return parts;
         }
 

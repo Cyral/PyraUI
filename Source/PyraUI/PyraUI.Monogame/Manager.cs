@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Pyratron.UI.Types;
+using Pyratron.UI.Types.Input;
 
 namespace Pyratron.UI.Monogame
 {
@@ -22,6 +23,7 @@ namespace Pyratron.UI.Monogame
         {
             Skin = new Skin(this);
             Renderer = new Renderer(this);
+            Input = new InputHandler(this);
 
             foreach (var size in FontSizes)
                 foreach (var style in Enum.GetValues(typeof (FontStyle)))
@@ -34,10 +36,10 @@ namespace Pyratron.UI.Monogame
             base.Load();
         }
 
-        public override void Update(float delta)
+        public override void Update(float delta, float total)
         {
-            DrawDebug = !Keyboard.GetState().IsKeyUp(Keys.D);
-            base.Update(delta);
+            DrawDebug = Input.IsKeyDown(Key.D);
+            base.Update(delta, total);
         }
     }
 }

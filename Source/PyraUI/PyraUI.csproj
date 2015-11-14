@@ -48,6 +48,7 @@
     <Compile Include="Controls\Decorator.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="InputHandler.cs" />
     <Compile Include="LayoutManager.cs" />
     <Compile Include="Markup\Converters\BrushMarkdownConverter.cs" />
     <Compile Include="Markup\Converters\ColorMarkdownConverter.cs" />
@@ -69,6 +70,8 @@
     <Compile Include="Controls\Window.cs" />
     <Compile Include="States\Visibility.cs" />
     <Compile Include="Types\FontStyle.cs" />
+    <Compile Include="Types\Input\Key.cs" />
+    <Compile Include="Types\Input\MouseButton.cs" />
     <Compile Include="Types\Orientation.cs" />
     <Compile Include="Types\Thickness.cs" />
     <Compile Include="Renderer.cs" />

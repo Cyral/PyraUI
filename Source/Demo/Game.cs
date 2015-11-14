@@ -56,7 +56,7 @@ namespace Pyratron.UI.Demo
             var ks = Keyboard.GetState();
             if (ks.IsKeyDown(Keys.Escape))
                 Exit();
-            UI.Update((float) gameTime.ElapsedGameTime.TotalSeconds);
+            UI.Update((float) gameTime.ElapsedGameTime.TotalSeconds, (float)gameTime.TotalGameTime.TotalSeconds);
             UI.DrawDebug = ks.IsKeyDown(Keys.D);
             base.Update(gameTime);
         }

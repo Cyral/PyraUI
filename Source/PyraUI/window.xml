@@ -6,10 +6,12 @@
       <Button Margin="4">Test</Button>
       <Button Margin="4">Test</Button>
     </StackPanel>
-    <StackPanel Width="100" VerticalAlignment="Center">
+    <StackPanel VerticalAlignment="Center">
+      <Button>Test</Button>
       <Border BorderBrush="#FC8B00" BorderThickness="10" CornerRadius="8">
         <Button>Test</Button>
       </Border>
+      <Button>Test</Button>
     </StackPanel>
     <StackPanel Width="300" VerticalAlignment="Top">
       <Button Margin="4">Test</Button>

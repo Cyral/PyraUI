@@ -52,13 +52,13 @@ namespace Pyratron.UI.Types
             }
         }
 
-        public int Left { get; }
+        public int Left { get; set; }
 
-        public int Top { get; }
+        public int Top { get; set; }
 
-        public int Right { get; }
+        public int Right { get; set; }
 
-        public int Bottom { get; }
+        public int Bottom { get; set; }
 
         [Browsable(false)]
         public bool IsEmpty => Bottom == 0 && Right == 0 && Left == 0 && Top == 0;
