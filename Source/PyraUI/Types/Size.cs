@@ -119,16 +119,8 @@ namespace Pyratron.UI.Types
         /// </summary>
         public Size Min(Size size)
         {
-            double width, height;
-            if (IsWidthEmpty)
-                width = size.Width;
-            else
-                width = size.IsWidthEmpty ? Width : Math.Min(Width, size.Width);
-
-            if (IsHeightEmpty)
-                height = size.Height;
-            else
-                height = size.IsHeightEmpty ? Height : Math.Min(Height, size.Height);
+            var width = size.IsWidthEmpty ? Width : Math.Min(Width, size.Width);
+            var height = size.IsHeightEmpty ? Height : Math.Min(Height, size.Height);
 
             return new Size(width, height);
         }
@@ -138,16 +130,8 @@ namespace Pyratron.UI.Types
         /// </summary>
         public Size Max(Size size)
         {
-            double width, height;
-            if (IsWidthEmpty)
-                width = size.Width;
-            else
-                width = size.IsWidthEmpty ? Width : Math.Max(Width, size.Width);
-
-            if (IsHeightEmpty)
-                height = size.Height;
-            else
-                height = size.IsHeightEmpty ? Height : Math.Max(Height, size.Height);
+            var width = size.IsWidthEmpty ? Width : Math.Max(Width, size.Width);
+            var height = size.IsHeightEmpty ? Height : Math.Max(Height, size.Height);
 
             return new Size(width, height);
         }

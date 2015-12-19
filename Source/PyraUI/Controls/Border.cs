@@ -19,6 +19,7 @@ namespace Pyratron.UI.Controls
         public Border(Manager manager) : base(manager)
         {
             Margin = Padding = 0;
+            MinWidth = 16;
         }
 
         public override void Draw(float delta)

@@ -38,7 +38,6 @@ namespace Pyratron.UI.Monogame
 
         public override void Update(float delta, float total)
         {
-            DrawDebug = Input.IsKeyDown(Key.D);
             base.Update(delta, total);
         }
     }

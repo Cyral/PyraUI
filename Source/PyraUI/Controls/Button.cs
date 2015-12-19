@@ -11,6 +11,7 @@ namespace Pyratron.UI.Controls
       
             Height = 32;
             MinHeight = 20;
+            MinWidth = 32;
         }
 
         public override void Draw(float delta)

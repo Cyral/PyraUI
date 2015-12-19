@@ -9,7 +9,7 @@
     <StackPanel VerticalAlignment="Center">
       <Button>Test</Button>
       <Border BorderBrush="#FC8B00" BorderThickness="10" CornerRadius="8">
-        <Button>Test</Button>
+        <Button FontSize="20">Test</Button>
       </Border>
       <Button>Test</Button>
     </StackPanel>

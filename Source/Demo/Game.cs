@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Pyratron.UI.Monogame;
+using Pyratron.UI.Types.Input;
 
 namespace Pyratron.UI.Demo
 {
@@ -57,7 +58,8 @@ namespace Pyratron.UI.Demo
             if (ks.IsKeyDown(Keys.Escape))
                 Exit();
             UI.Update((float) gameTime.ElapsedGameTime.TotalSeconds, (float)gameTime.TotalGameTime.TotalSeconds);
-            UI.DrawDebug = ks.IsKeyDown(Keys.D);
+            if (UI.Input.IsKeyPressed(Key.F2))
+                UI.DrawDebug = !UI.DrawDebug;
             base.Update(gameTime);
         }
 
