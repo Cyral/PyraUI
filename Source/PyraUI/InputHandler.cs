@@ -139,7 +139,8 @@ namespace Pyratron.UI
             switch (key)
             {
                 case Key.Back: // Backspace.
-                    text = text.Substring(0, text.Length - 1);
+                    if (text.Length != 0)
+                        text = text.Substring(0, text.Length - 1);
                     break;
                 default:
                     if (convertChars.ContainsKey(key))

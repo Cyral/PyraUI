@@ -4,7 +4,7 @@ using System.Linq;
 namespace Pyratron.UI.Controls
 {
     /// <summary>
-    /// A visual UI control that can be interacted with.
+    /// An element that uses a ControlTemplate to define its appearence.
     /// </summary>
     public class Control : Visual
     {
