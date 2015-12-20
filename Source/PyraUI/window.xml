@@ -1,21 +1,8 @@
 ﻿<Window
   Height="400"
   Width="900">
-  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="200">
-    <StackPanel Width="300" VerticalAlignment="Bottom">
-      <Button Margin="4">Test</Button>
-      <Button Margin="4">Test</Button>
-    </StackPanel>
-    <StackPanel VerticalAlignment="Center">
-      <Button>Test</Button>
-      <Border BorderBrush="#FC8B00" BorderThickness="10" CornerRadius="8">
-        <Button FontSize="20">Test</Button>
-      </Border>
-      <Button>Test</Button>
-    </StackPanel>
-    <StackPanel Width="300" VerticalAlignment="Top">
-      <Button Margin="4">Test</Button>
-      <Button Margin="4">Test</Button>
-    </StackPanel>
+  <StackPanel Margin="8" Orientation="Horizontal" Height="200">
+    <Button MinWidth="93">OK</Button>
+    <Button MinWidth="93" Margin="10,0,0,0">Cancel</Button>
   </StackPanel>
 </Window>

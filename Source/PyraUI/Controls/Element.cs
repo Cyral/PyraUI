@@ -256,7 +256,7 @@ namespace Pyratron.UI.Controls
                 desired = desired.Max(child.DesiredSize);
             }
 
-            return desired;
+            return desired + Padding;
         }
 
         /// <summary>
