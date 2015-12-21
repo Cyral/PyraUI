@@ -1,9 +1,12 @@
-﻿namespace Pyratron.UI.Controls
+﻿using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
+
+namespace Pyratron.UI.Controls
 {
     /// <summary>
     /// The most basic form of a UI component.
     /// </summary>
-    public abstract class Component
+    public abstract class Component : DependencyObject
     {
         public abstract int MaxChildren { get; }
 

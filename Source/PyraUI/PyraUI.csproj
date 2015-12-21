@@ -69,10 +69,15 @@
     <Compile Include="Controls\Visual.cs" />
     <Compile Include="Controls\Window.cs" />
     <Compile Include="States\Visibility.cs" />
+    <Compile Include="Types\Properties\DependencyObject.cs" />
+    <Compile Include="Types\Properties\DependencyProperty.cs" />
+    <Compile Include="Types\Properties\DependencyValue.cs" />
     <Compile Include="Types\FontStyle.cs" />
     <Compile Include="Types\Input\Key.cs" />
     <Compile Include="Types\Input\MouseButton.cs" />
     <Compile Include="Types\Orientation.cs" />
+    <Compile Include="Types\Properties\MetadataOption.cs" />
+    <Compile Include="Types\Properties\PropertyMetadata.cs" />
     <Compile Include="Types\Thickness.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="Manager.cs" />
@@ -87,6 +92,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\Primitives\" />
+    <Folder Include="Events\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -14,6 +14,7 @@ namespace Pyratron.UI
 
         private readonly Manager manager;
         private readonly List<Element> measureQueue;
+        private bool firstPass = true;
 
         public LayoutManager(Manager manager)
         {
@@ -40,6 +41,16 @@ namespace Pyratron.UI
                 element.Arrange(element.Parent == null || element.PreviousFinalRect.IsEmpty
                     ? new Rectangle(element.DesiredSize)
                     : element.PreviousFinalRect);
+            }
+
+            if (firstPass)
+            {
+                foreach (var element in manager.Elements.Where(element => element.IsRoot))
+                {
+                    element.InvalidateMeasure();
+                    element.InvalidateArrange();
+                }
+                firstPass = false;
             }
         }
 

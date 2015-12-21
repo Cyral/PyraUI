@@ -1,25 +1,36 @@
-﻿using System;
-using Pyratron.UI.Types;
-using Pyratron.UI.Types.Input;
+﻿using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Controls
 {
     public class Label : Control
     {
-        private string text;
+        public static readonly DependencyProperty<string> TextProperty =
+            DependencyProperty.Register<Element, string>(nameof(Text), "Label Text", new PropertyMetadata(
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange));
 
+        public static readonly DependencyProperty<Alignment> TextAlignmentProperty =
+            DependencyProperty.Register<Element, Alignment>(nameof(TextAlignment), Alignment.Center,
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance));
+
+        /// <summary>
+        /// The label's text.
+        /// </summary>
         public string Text
         {
-            get { return text; }
-            set
-            {
-                text = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(TextProperty); }
+            set { SetValue(TextProperty, value); }
         }
 
-        public Alignment TextAlignment { get; set; }
+        /// <summary>
+        /// Alignment of label text.
+        /// </summary>
+        public Alignment TextAlignment
+        {
+            get { return GetValue(TextAlignmentProperty); }
+            set { SetValue(TextAlignmentProperty, value); }
+        }
 
         public Label(Manager manager, string text) : this(manager)
         {
@@ -28,22 +39,14 @@ namespace Pyratron.UI.Controls
 
         public Label(Manager manager) : base(manager)
         {
-            Text = "Label Text";
-
-            TextAlignment = Alignment.Center;
-
             HorizontalAlignment = HorizontalAlignment.Center;
             VerticalAlignment = VerticalAlignment.Center;
 
-            Height = 20;
-            MinHeight = 16;
+            MinHeight = 20;
 
             Padding = Margin = 0;
 
-            manager.Input.KeyPress += key =>
-            {
-                Text = manager.Input.AddKeyPress(Text, key);
-            };
+            manager.Input.KeyPress += key => { Text = manager.Input.AddKeyPress(Text, key); };
         }
 
         public override void AddContent(string content)
@@ -51,15 +54,8 @@ namespace Pyratron.UI.Controls
             Text = content;
         }
 
-        protected override Size MeasureCore(Size availableSize)
-        {
-            return (Manager.Renderer.MeasureText(Text, FontSize, FontStyle) + Padding).Max(Size);
-            //return base.MeasureOverride(availableSize);
-        }
-
         public override void Draw(float delta)
         {
-           
             // Get size of text.
             var textsize = Manager.Renderer.MeasureText(Text, FontSize, FontStyle);
             // Calculate center for each axis.
@@ -104,9 +100,15 @@ namespace Pyratron.UI.Controls
                     x = center.X;
                     break;
             }
-            Manager.Renderer.DrawString(Text, ContentArea.Point  + new Point(x, y), TextColor, FontSize, FontStyle, ParentBounds);
+            Manager.Renderer.DrawString(Text, ContentArea.Point + new Point(x, y), TextColor, FontSize, FontStyle,
+                ParentBounds);
             base.Draw(delta);
+        }
 
+        protected override Size MeasureCore(Size availableSize)
+        {
+            return (Manager.Renderer.MeasureText(Text, FontSize, FontStyle) + Padding).Max(Size);
+            //return base.MeasureOverride(availableSize);
         }
     }
 }

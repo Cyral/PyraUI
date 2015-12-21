@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Controls
 {
@@ -15,22 +16,9 @@ namespace Pyratron.UI.Controls
 
             ActualSize = Size.Zero;
 
-            Width = Height = 0;
-            MinWidth = MinHeight = 0;
-            MaxWidth = MaxHeight = double.PositiveInfinity;
-
-            HorizontalAlignment = HorizontalAlignment.Stretch;
-            VerticalAlignment = VerticalAlignment.Top;
-
             PreviousFinalRect = Rectangle.Empty;
             PreviousAvailableSize = Size.NaN;
             PreviousDesiredSize = Size.NaN;
-
-            FontSize = 10;
-            FontStyle = FontStyle.Regular;
-            TextColor = Color.Black;
-
-            textColorSet = fontSizeSet = fontStyleSet = false;
         }
 
         /// <summary>
@@ -57,6 +45,7 @@ namespace Pyratron.UI.Controls
 
                     // Add to this element.
                     Elements.Add(element);
+                    element.DependencyParent = this;
 
                     // Add to layout queue.
                     Manager.Layout.AddMeasure(element);
@@ -163,10 +152,16 @@ namespace Pyratron.UI.Controls
                     Elements.Remove(element);
                     // Element no longer has a parent.
                     element.Parent = null;
+                    element.DependencyParent = null;
                     if (dispose)
                         element.Dispose();
                 }
             }
+        }
+
+        protected internal override void Update(float delta)
+        {
+            UpdateChildren(delta);
         }
 
         /// <summary>
@@ -259,6 +254,15 @@ namespace Pyratron.UI.Controls
             return desired + Padding;
         }
 
+        protected override void OnPropertyChanged(DependencyProperty property, object newValue, object oldValue)
+        {
+            // Handle metadata properties when property value is changed.
+            if (property.Metadata.AffectsMeasure)
+                InvalidateMeasure();
+            if (property.Metadata.AffectsArrange)
+                InvalidateArrange();
+        }
+
         /// <summary>
         /// Retuns an offset to the elements position according to its size, container size, and alignment.
         /// </summary>
@@ -295,11 +299,6 @@ namespace Pyratron.UI.Controls
             return container.Point;
         }
 
-        protected internal override void Update(float delta)
-        {
-            UpdateChildren(delta);
-        }
-        
         /// <summary>
         /// Update all children elements.
         /// </summary>
@@ -322,28 +321,24 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Thickness Padding
         {
-            get { return padding; }
-            set
-            {
-                padding = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(PaddingProperty); }
+            set { SetValue(PaddingProperty, value); }
         }
+
+        public static readonly DependencyProperty<Thickness> PaddingProperty =
+            DependencyProperty.Register<Element, Thickness>(nameof(Padding), MetadataOption.IgnoreInheritance);
 
         /// <summary>
         /// The area outside the border.
         /// </summary>
         public Thickness Margin
         {
-            get { return margin; }
-            set
-            {
-                margin = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(MarginProperty); }
+            set { SetValue(MarginProperty, value); }
         }
+
+        public static readonly DependencyProperty<Thickness> MarginProperty =
+            DependencyProperty.Register<Element, Thickness>(nameof(Margin), MetadataOption.IgnoreInheritance);
 
 
         /// <summary>
@@ -364,61 +359,74 @@ namespace Pyratron.UI.Controls
             }
         }
 
-
+        /// <summary>
+        /// The horizontal alignment of the element.
+        /// </summary>
         public HorizontalAlignment HorizontalAlignment
         {
-            get { return horizontalAlignment; }
-            set
-            {
-                horizontalAlignment = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(HorizontalAlignmentProperty); }
+            set { SetValue(HorizontalAlignmentProperty, value); }
         }
 
+        public static readonly DependencyProperty<HorizontalAlignment> HorizontalAlignmentProperty =
+            DependencyProperty.Register<Element, HorizontalAlignment>(nameof(HorizontalAlignment),
+                HorizontalAlignment.Center, MetadataOption.IgnoreInheritance);
+
+        /// <summary>
+        /// The vertical alignment of the element.
+        /// </summary>
         public VerticalAlignment VerticalAlignment
         {
-            get { return verticalAlignment; }
-            set
-            {
-                verticalAlignment = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(VerticalAlignmentProperty); }
+            set { SetValue(VerticalAlignmentProperty, value); }
         }
 
-        public FontStyle FontStyle
-        {
-            get { return fontStyleSet || Parent == null ? fontStyle : Parent.FontStyle; }
-            set
-            {
-                fontStyle = value;
-                fontStyleSet = true;
-                InvalidateMeasure();
-            }
-        }
+        public static readonly DependencyProperty<VerticalAlignment> VerticalAlignmentProperty =
+            DependencyProperty.Register<Element, VerticalAlignment>(nameof(VerticalAlignment), VerticalAlignment.Top,
+                MetadataOption.IgnoreInheritance);
 
+
+        /// <summary>
+        /// The font size.
+        /// </summary>
         public int FontSize
         {
-            get { return fontSizeSet || Parent == null ? fontSize : Parent.FontSize; }
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("Font size must be more than 0.");
-                fontSize = value;
-                fontSizeSet = true;
-                InvalidateMeasure();
-            }
+            get { return GetValue(FontSizeProperty); }
+            set { SetValue(FontSizeProperty, value); }
         }
 
+        public static readonly DependencyProperty<int> FontSizeProperty =
+            DependencyProperty.Register<Element, int>(nameof(FontSize), 10);
+
+
+        /// <summary>
+        /// The font style.
+        /// </summary>
+        public FontStyle FontStyle
+        {
+            get { return GetValue(FontStyleProperty); }
+            set { SetValue(FontStyleProperty, value); }
+        }
+
+        public static readonly DependencyProperty<FontStyle> FontStyleProperty =
+            DependencyProperty.Register<Element, FontStyle>(nameof(FontStyle));
+
+
+        /// <summary>
+        /// The text color.
+        /// </summary>
         public Color TextColor
         {
-            get { return textColorSet || Parent == null ? textColor : Parent.TextColor; }
-            set
-            {
-                textColor = value;
-                textColorSet = true;
-            }
+            get { return GetValue(TextColorProperty); }
+            set { SetValue(TextColorProperty, value); }
+        }
+
+        public static readonly DependencyProperty<Color> TextColorProperty =
+            DependencyProperty.Register<Element, Color>(nameof(TextColor), Color.Black);
+
+        private static object CoerceDiminsion(object value)
+        {
+            return Math.Max(0, (double) value);
         }
 
         /// <summary>
@@ -426,106 +434,78 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public double MinWidth
         {
-            get { return minWidth; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Minimum width must be greater than zero.");
-                if (!Equals(value, minWidth))
-                {
-                    minWidth = value;
-
-                    InvalidateMeasure();
-                }
-            }
+            get { return GetValue(MinWidthProperty); }
+            set { SetValue(MinWidthProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> MinWidthProperty =
+            DependencyProperty.Register<Element, double>(nameof(MinWidth), 0,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// The maximum width.
         /// </summary>
         public double MaxWidth
         {
-            get { return maxWidth; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Maximum width must be greater than zero.");
-                if (!Equals(value, maxWidth))
-                {
-                    maxWidth = value;
-
-                    if (Width > maxWidth)
-                        Width = maxWidth;
-                    InvalidateMeasure();
-                }
-            }
+            get { return GetValue(MaxWidthProperty); }
+            set { SetValue(MaxWidthProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> MaxWidthProperty =
+            DependencyProperty.Register<Element, double>(nameof(MaxWidth), double.PositiveInfinity,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// The target width.
         /// </summary>
         public double Width
         {
-            get { return width; }
-            set
-            {
-                width = Math.Max(minWidth, Math.Min(value, maxWidth));
-                InvalidateMeasure();
-            }
+            get { return GetValue(WidthProperty); }
+            set { SetValue(WidthProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> WidthProperty =
+            DependencyProperty.Register<Element, double>(nameof(Width), 0,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// The minimum height.
         /// </summary>
         public double MinHeight
         {
-            get { return minHeight; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Minimum height must be greater than zero.");
-                if (!Equals(value, minHeight))
-                {
-                    minHeight = value;
-
-                    InvalidateMeasure();
-                }
-            }
+            get { return GetValue(MinHeightProperty); }
+            set { SetValue(MinHeightProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> MinHeightProperty =
+            DependencyProperty.Register<Element, double>(nameof(MinHeight), 0,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// The maximum height.
         /// </summary>
         public double MaxHeight
         {
-            get { return maxHeight; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Maximum height must be greater than zero.");
-                if (!Equals(value, maxHeight))
-                {
-                    maxHeight = value;
-
-                    if (Height > maxHeight)
-                        Height = maxHeight;
-                    InvalidateMeasure();
-                }
-            }
+            get { return GetValue(MaxHeightProperty); }
+            set { SetValue(MaxHeightProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> MaxHeightProperty =
+            DependencyProperty.Register<Element, double>(nameof(MaxHeight), double.PositiveInfinity,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// The target height.
         /// </summary>
         public double Height
         {
-            get { return height; }
-            set
-            {
-                height = Math.Max(minHeight, Math.Min(value, maxHeight));
-                InvalidateMeasure();
-            }
+            get { return GetValue(HeightProperty); }
+            set { SetValue(HeightProperty, value); }
         }
+
+        public static readonly DependencyProperty<double> HeightProperty =
+            DependencyProperty.Register<Element, double>(nameof(Height), 0,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
 
         /// <summary>
         /// Element's parent. Null if root.
@@ -578,7 +558,7 @@ namespace Pyratron.UI.Controls
 
         internal Size PreviousAvailableSize { get; private set; }
         internal Rectangle PreviousFinalRect { get; private set; }
-        internal Size PreviousDesiredSize { get; private set; }
+        private Size PreviousDesiredSize { get; set; }
 
         private int level = -1;
 
@@ -600,7 +580,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Rectangular region of the content area (inside the padding).
         /// </summary>
-        public Rectangle ContentArea => new Rectangle(AbsolutePosition + Padding, ActualSize.Remove(Padding));
+        protected Rectangle ContentArea => new Rectangle(AbsolutePosition + Padding, ActualSize.Remove(Padding));
 
         /// <summary>
         /// Indicates if the element is a root level element (having no parent).
@@ -627,18 +607,7 @@ namespace Pyratron.UI.Controls
         /// </summary>
         private bool isArrangeValid;
 
-        private int fontSize;
-
-        // Indicates if the property was set, if it is not, the value will be retrieved from a parent element.
-        private bool fontSizeSet, textColorSet, fontStyleSet;
         private Size desiredSize;
-        private double height, minHeight, maxHeight, width, minWidth, maxWidth;
-        private HorizontalAlignment horizontalAlignment;
-        private Thickness margin;
-        private Thickness padding;
-        private Color textColor;
-        private VerticalAlignment verticalAlignment;
-        private FontStyle fontStyle;
 
         #endregion
     }

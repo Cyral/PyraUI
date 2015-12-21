@@ -59,30 +59,6 @@ namespace Pyratron.UI
         private int totalFrames;
         private string xml;
 
-        public virtual void Init()
-        {
-            Elements = new ReadOnlyCollection<Element>(elements);
-            Layout = new LayoutManager(this);
-            Markup = new MarkupParser(this);
-
-            xml = File.ReadAllText("window.xml");
-
-            // Parse XAML into visual tree.
-            var stopwatch = Stopwatch.StartNew();
-
-            Markup.LoadFromXAML(xml, null);
-            stopwatch.Stop();
-
-            Console.WriteLine("XAML parsed in " + stopwatch.ElapsedMilliseconds + "ms");
-
-            // Run initial layout pass.
-            stopwatch = Stopwatch.StartNew();
-            Layout.UpdateLayout();
-            stopwatch.Stop();
-
-            Console.WriteLine("Layout measured and arranged in " + stopwatch.ElapsedMilliseconds + "ms");
-        }
-
         /// <summary>
         /// Add a root level element to the UI.
         /// </summary>
@@ -132,6 +108,31 @@ namespace Pyratron.UI
             totalFrames++;
         }
 
+        public virtual void Init()
+        {
+            Elements = new ReadOnlyCollection<Element>(elements);
+            Layout = new LayoutManager(this);
+            Markup = new MarkupParser(this);
+
+            xml = File.ReadAllText("window.xml");
+
+            // Parse XAML into visual tree.
+            var stopwatch = Stopwatch.StartNew();
+
+            Markup.LoadFromXAML(xml, null);
+  
+            stopwatch.Stop();
+
+            Console.WriteLine("XAML parsed in " + stopwatch.ElapsedMilliseconds + "ms");
+
+            // Run initial layout pass.
+            stopwatch = Stopwatch.StartNew();
+            Layout.UpdateLayout();
+            stopwatch.Stop();
+
+            Console.WriteLine("Layout measured and arranged in " + stopwatch.ElapsedMilliseconds + "ms");
+        }
+
         public virtual void Load()
         {
             Skin.LoadTextureInternal("button");
@@ -153,8 +154,8 @@ namespace Pyratron.UI
         public virtual void Update(float delta, float total)
         {
             Input.Update(delta, total);
-            //  Elements[0].Margin = new Thickness((int)Input.MousePosition.X, (int)Input.MousePosition.Y, Elements[0].Margin.Right, Elements[0].Margin.Bottom);
-            //  Elements[0].Elements[0].Elements[1].Elements[0].Size = new Size((int)Input.MousePosition.X, (int)Input.MousePosition.Y);
+            // Elements[0].Margin = new Thickness((int)Input.MousePosition.X, (int)Input.MousePosition.Y, Elements[0].Margin.Right, Elements[0].Margin.Bottom);
+            // Elements[0].Elements[0].Size = new Size((int)Input.MousePosition.X, (int)Input.MousePosition.Y);
             Layout.UpdateLayout();
 
             for (var i = 0; i < Elements.Count; i++)

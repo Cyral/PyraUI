@@ -8,8 +8,6 @@ namespace Pyratron.UI.Controls
         {
             Padding = new Thickness(5, 8);
 
-      
-            Height = 32;
             MinHeight = 20;
             MinWidth = 32;
         }
