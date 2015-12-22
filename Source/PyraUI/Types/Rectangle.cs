@@ -9,7 +9,6 @@ namespace Pyratron.UI.Types
         public static readonly Rectangle Empty = new Rectangle();
         public static readonly Rectangle Infinity = new Rectangle(0, 0, double.PositiveInfinity, double.PositiveInfinity);
 
-
         public Rectangle(double x, double y, double width, double height)
         {
             X = x;
@@ -201,5 +200,7 @@ namespace Pyratron.UI.Types
             =>
                 new Rectangle(X -thickness.Left, Y - thickness.Right, Width -thickness.Width,
                     Height - thickness.Height);
+
+        public Rectangle Min(Rectangle other) => new Rectangle(X, Y, Math.Min(Width, other.Width), Math.Min(Height,other.Height));
     }
 }

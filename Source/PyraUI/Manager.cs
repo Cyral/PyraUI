@@ -168,7 +168,7 @@ namespace Pyratron.UI
         private static void AddToTree(Element element, StringBuilder sb)
         {
             sb.Append(Environment.NewLine + new string(' ', element.Level * 3) +
-                      element.ToString().Remove(0, "Pyratron.UI.Controls.".Length));
+                      element.ToString().Remove(0, "Pyratron.UI.Controls.".Length) + $" {element.LogicalParent}");
             foreach (var child in element.Elements)
                 AddToTree(child, sb);
         }

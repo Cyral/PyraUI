@@ -27,30 +27,29 @@ namespace Pyratron.UI.Controls
         /// <param name="element">The element to add.</param>
         public virtual void Add(Element element)
         {
+            if (element.LogicalParent == null && LogicalParent != null)
+                element.LogicalParent = LogicalParent;
             if (Elements.Count >= MaxChildren)
                 throw new InvalidOperationException("This element may not have any more children. (Maximum: " +
                                                     MaxChildren + ") Try placing it inside a panel.");
-            if (element != null)
+            // If this control doesn't already contain the element.
+            if (!Elements.Contains(element))
             {
-                // If this control doesn't already contain the element.
-                if (!Elements.Contains(element))
-                {
-                    // Remove control from prior parent.
-                    element.Parent?.Remove(element);
-                    // Reset the level depth.
-                    element.Level = -1;
+                // Remove control from prior parent.
+                element.Parent?.Remove(element);
+                // Reset the level depth.
+                element.Level = -1;
 
-                    element.Manager = Manager;
-                    element.Parent = this;
+                element.Manager = Manager;
+                element.Parent = this;
 
-                    // Add to this element.
-                    Elements.Add(element);
-                    element.DependencyParent = this;
+                // Add to this element.
+                Elements.Add(element);
+                element.DependencyParent = this;
 
-                    // Add to layout queue.
-                    Manager.Layout.AddMeasure(element);
-                    Manager.Layout.AddArrange(element);
-                }
+                // Add to layout queue.
+                Manager.Layout.AddMeasure(element);
+                Manager.Layout.AddArrange(element);
             }
         }
 
@@ -60,7 +59,7 @@ namespace Pyratron.UI.Controls
         public virtual void AddContent(string content)
         {
             // By default, create a label inside this element.
-            Add(new Label(Manager, content));
+            Add(new Label(Manager, content) {LogicalParent = this});
         }
 
         /// <summary>
@@ -531,7 +530,22 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public virtual Element Parent { get; protected internal set; }
 
+        public virtual Element LogicalParent
+        {
+            get { return logicalParent; }
+            protected internal set
+            {
+                logicalParent = value;
+                foreach (var child in Elements)
+                {
+                    child.LogicalParent = logicalParent;
+                }
+            }
+        }
+
         public Rectangle ParentBounds => Parent?.Bounds ?? Rectangle.Empty;
+
+        public Rectangle LogicalParentBounds => LogicalParent != null ? LogicalParent.Bounds : ParentBounds;
 
         /// <summary>
         /// List of child elements.
@@ -621,6 +635,7 @@ namespace Pyratron.UI.Controls
         private bool isArrangeValid;
 
         private Size desiredSize;
+        private Element logicalParent;
 
         #endregion
     }

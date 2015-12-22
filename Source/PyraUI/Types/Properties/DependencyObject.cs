@@ -77,8 +77,7 @@ namespace Pyratron.UI.Types.Properties
                 var parentMetadata = property.GetMetadata(DependencyParent.GetType());
                 if (parentMetadata == metadata)
                     return DependencyParent.GetValueCore(property);
-                else
-                    return parentMetadata.DefaultValue;
+                return parentMetadata.DefaultValue;
             }
             return metadata.DefaultValue;
         }

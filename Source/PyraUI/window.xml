@@ -3,9 +3,9 @@
   Width="700">
   <StackPanel>
     This is a test.
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,8" Height="100" TextColor="Red">
       <Button>Okay</Button>
-      <Button Margin="8,0,0,0">Cancel</Button>
+      <Button Margin="8,0,0,0" Height="20">Cancel</Button>
     </StackPanel>
     <Button Margin="0,0,0,8">Test</Button>
     <Button>

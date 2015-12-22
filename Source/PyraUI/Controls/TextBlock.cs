@@ -69,7 +69,7 @@ namespace Pyratron.UI.Controls
                 textSizeInvalidated = false;
             }
             Manager.Renderer.DrawString(Text, Bounds.Point + textAlignOffset, TextColor, FontSize, FontStyle,
-                ParentBounds);
+                LogicalParentBounds);
             lastBorderSize = Bounds;
             base.Draw(delta);
         }

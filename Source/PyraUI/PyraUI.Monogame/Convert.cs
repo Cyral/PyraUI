@@ -16,6 +16,8 @@ namespace Pyratron.UI.Monogame
     {
         public static Rectangle ToXNA(this Types.Rectangle rect)
         {
+            if (rect == Types.Rectangle.Infinity)
+                return new Rectangle(0,0, int.MaxValue, int.MaxValue);
             return new Rectangle((int)Math.Round(rect.X), (int)Math.Round(rect.Y), (int)Math.Round(rect.Width), (int)Math.Round(rect.Height));
         }
 

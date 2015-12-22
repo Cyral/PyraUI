@@ -41,7 +41,7 @@ namespace Pyratron.UI.Demo
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-         
+           
             UI.Content = Content;
             UI.SpriteBatch = spriteBatch;
             UI.Load();

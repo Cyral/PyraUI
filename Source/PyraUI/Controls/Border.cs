@@ -80,14 +80,14 @@ namespace Pyratron.UI.Controls
 
             if (!BorderThickness.IsEmpty)
             {
-                Manager.Renderer.DrawRectangle(Bounds, BorderBrush, BorderThickness, CornerRadius, ParentBounds);
+                Manager.Renderer.DrawRectangle(Bounds, BorderBrush, BorderThickness, CornerRadius, LogicalParentBounds);
                 Manager.Renderer.FillRectangle(Bounds.RemoveBorder(BorderThickness), Background,
                     CornerRadius - (BorderThickness.Min.IsClose(BorderThickness.Max) ? BorderThickness.Min + 1 : 0),
-                    ParentBounds);
+                    LogicalParentBounds);
             }
             else
                 Manager.Renderer.FillRectangle(Bounds.RemoveBorder(BorderThickness), Background, CornerRadius,
-                    ParentBounds);
+                    LogicalParentBounds);
 
             base.Draw(delta);
         }

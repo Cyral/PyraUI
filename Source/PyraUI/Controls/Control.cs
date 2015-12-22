@@ -51,6 +51,7 @@ namespace Pyratron.UI.Controls
 
         public override void Add(Element element)
         {
+            element.LogicalParent = LogicalParent;
             Presenter.Add(element);
         }
 
