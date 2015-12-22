@@ -45,8 +45,10 @@
     <Compile Include="Brushes\ColorBrush.cs" />
     <Compile Include="Brushes\GradientBrush.cs" />
     <Compile Include="Controls\Border.cs" />
+    <Compile Include="Controls\ContentPresenter.cs" />
     <Compile Include="Controls\Decorator.cs" />
     <Compile Include="Controls\Grid.cs" />
+    <Compile Include="Controls\TextBlock.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="InputHandler.cs" />
     <Compile Include="LayoutManager.cs" />

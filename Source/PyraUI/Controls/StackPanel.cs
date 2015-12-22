@@ -45,8 +45,8 @@ namespace Pyratron.UI.Controls
 
                 // Create a rectangle from the point and length of the stretch and stack lengths.
                 var rect = Orientation == Orientation.Vertical
-                    ? new Rectangle(point, stretchLength - Padding.Width, childStackLength - Padding.Height)
-                    : new Rectangle(point, childStackLength - Padding.Width, stretchLength - Padding.Height);
+                    ? new Rectangle(point, stretchLength, childStackLength)
+                    : new Rectangle(point, childStackLength, stretchLength);
 
                 child.Arrange(rect);
 

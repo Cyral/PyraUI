@@ -16,6 +16,14 @@ namespace Pyratron.UI.Controls
 
         }
 
+        public override void AddContent(string content)
+        {
+            Presenter.Add(new TextBlock(Manager)
+            {
+                Text = content,
+            });
+        }
+
         public override void Draw(float delta)
         {
             var thickness = 2;

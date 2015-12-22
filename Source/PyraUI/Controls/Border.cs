@@ -22,6 +22,20 @@ namespace Pyratron.UI.Controls
             DependencyProperty.Register<Border, Brush>(nameof(BorderBrush));
 
         /// <summary>
+        /// The area inside the border.
+        /// </summary>
+        public Thickness Padding
+        {
+            get { return GetValue(PaddingProperty); }
+            set { SetValue(PaddingProperty, value); }
+        }
+
+        public static readonly DependencyProperty<Thickness> PaddingProperty =
+            DependencyProperty.Register<Element, Thickness>(nameof(Padding),
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
+
+
+        /// <summary>
         /// Background color of the border.
         /// </summary>
         public Color Background
@@ -79,7 +93,7 @@ namespace Pyratron.UI.Controls
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            Child?.Arrange(new Rectangle(BorderThickness, finalSize.Remove(BorderThickness).Remove(Padding)));
+            Child?.Arrange(new Rectangle(BorderThickness + Padding, finalSize.Remove(BorderThickness).Remove(Padding)));
 
             return finalSize;
         }

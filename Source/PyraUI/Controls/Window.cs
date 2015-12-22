@@ -48,7 +48,7 @@ namespace Pyratron.UI.Controls
             base.Add(titleLabel);
             contentArea = new StackPanel(manager)
             {
-                Padding = 20,
+                Margin = 20,
             };
             base.Add(contentArea);
             Margin = 16;

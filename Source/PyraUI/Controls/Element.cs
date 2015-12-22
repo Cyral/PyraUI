@@ -85,6 +85,7 @@ namespace Pyratron.UI.Controls
 
             // Keep a record of the last rectangle and remove this element from the layout queue.
             PreviousFinalRect = finalRect;
+            isArrangeValid = true;
             Manager.Layout.RemoveArrange(this);
         }
 
@@ -129,7 +130,7 @@ namespace Pyratron.UI.Controls
             InvalidateArrange();
 
             // Move on to the measure process.
-            DesiredSize = MeasureCore(availableSize);
+            DesiredSize = MeasureCore(availableSize).Min(availableSize);
 
             // Set the measure as valid and update the previous sizes.
             isMeasureValid = true;
@@ -197,7 +198,7 @@ namespace Pyratron.UI.Controls
         protected virtual Size ArrangeOverride(Size finalSize)
         {
             foreach (var child in Elements)
-                child.Arrange(new Rectangle(finalSize.Remove(Padding)));
+                child.Arrange(new Rectangle(finalSize));
             return finalSize;
         }
 
@@ -220,7 +221,7 @@ namespace Pyratron.UI.Controls
         protected virtual Size MeasureCore(Size availableSize)
         {
             // Remove the margin from the size, as it should be ignored for now.
-            availableSize.Remove(Margin);
+            availableSize = availableSize.Remove(Margin);
 
             // If the width or height is NaN or 0, fall back to the available size, and clamp it within the min and max sizes.
             availableSize = Size.Fallback(availableSize).Clamp(MinSize, MaxSize);
@@ -231,7 +232,6 @@ namespace Pyratron.UI.Controls
             measuredSize = Size.Fallback(measuredSize).Clamp(MinSize, MaxSize);
 
             measuredSize = measuredSize.Add(Margin);
-
 
             return measuredSize;
         }
@@ -251,7 +251,7 @@ namespace Pyratron.UI.Controls
                 desired = desired.Max(child.DesiredSize);
             }
 
-            return desired + Padding;
+            return desired;
         }
 
         protected override void OnPropertyChanged(DependencyProperty property, object newValue, object oldValue)
@@ -319,19 +319,6 @@ namespace Pyratron.UI.Controls
         public string Name { get; set; }
 
         /// <summary>
-        /// The area inside the border.
-        /// </summary>
-        public Thickness Padding
-        {
-            get { return GetValue(PaddingProperty); }
-            set { SetValue(PaddingProperty, value); }
-        }
-
-        public static readonly DependencyProperty<Thickness> PaddingProperty =
-            DependencyProperty.Register<Element, Thickness>(nameof(Padding),
-                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
-
-        /// <summary>
         /// The area outside the border.
         /// </summary>
         public Thickness Margin
@@ -359,7 +346,7 @@ namespace Pyratron.UI.Controls
             {
                 if (Parent == null)
                     return Position;
-                return Parent.ContentArea.Point + Position;
+                return Parent.BorderArea.Point + Position;
             }
         }
 
@@ -541,7 +528,7 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public virtual Element Parent { get; protected internal set; }
 
-        public Rectangle ParentBounds => Parent?.ContentArea ?? Rectangle.Empty;
+        public Rectangle ParentBounds => Parent?.BorderArea ?? Rectangle.Empty;
 
         /// <summary>
         /// List of child elements.
@@ -604,12 +591,6 @@ namespace Pyratron.UI.Controls
             }
             internal set { level = value; }
         }
-
-
-        /// <summary>
-        /// Rectangular region of the content area (inside the padding).
-        /// </summary>
-        protected Rectangle ContentArea => new Rectangle(AbsolutePosition + Padding, ActualSize.Remove(Padding));
 
         /// <summary>
         /// Indicates if the element is a root level element (having no parent).
