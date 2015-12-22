@@ -88,14 +88,14 @@ namespace Pyratron.UI
 
             // Debugging stuff.
             Renderer.DrawString($"FPS: {FPS}\nRendered From XML:\n{xml}",
-                new Point(8, Elements[0].ExtendedArea.Height + 8), Color.Black,
+                new Point(8, Elements[0].ExtendedBounds.Height + 8), Color.Black,
                 8, Rectangle.Infinity, true);
             var sb = new StringBuilder("Visual Tree:");
             AddToTree(Elements[0], sb);
             var treeStr = sb.ToString();
             Renderer.DrawString(treeStr,
                 new Point(Renderer.Viewport.Width - Renderer.MeasureText(treeStr, 8).Width - 8,
-                    Elements[0].ExtendedArea.Height + 8), Color.Black, 8, Rectangle.Infinity, true);
+                    Elements[0].ExtendedBounds.Height + 8), Color.Black, 8, Rectangle.Infinity, true);
             Renderer.EndDraw();
 
             // Calculate FPS

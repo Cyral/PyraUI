@@ -4,7 +4,7 @@ using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Controls
 {
-    internal class Window : StackPanel
+    internal class Window : Control
     {
         public static readonly DependencyProperty<string> TitleProperty =
             DependencyProperty.Register<Window, string>(nameof(Title), "Window",
@@ -34,37 +34,47 @@ namespace Pyratron.UI.Controls
 
         private readonly Element contentArea;
 
-        private readonly Label titleLabel;
+        private readonly TextBlock titleLabel;
+        private readonly Border windowBorder, titleBorder;
+        private readonly StackPanel containerPanel;
 
         public Window(Manager manager) : base(manager)
         {
-            titleLabel = new Label(manager, Title)
+            // TODO: Replace with control template.
+            containerPanel = new StackPanel(manager);
+            windowBorder =new Border(manager)
             {
+                BorderThickness = 1,
+                Background = this.Background,
+                BorderBrush = Color.DarkGray,
+            };
+            base.Add(windowBorder);
+            titleBorder = new Border(manager)
+            {
+                Background = Color.DarkGray,
                 Padding = new Thickness(8, 12),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
+            };
+            titleLabel = new TextBlock(manager, Title)
+            {
+                HorizontalAlignment = HorizontalAlignment.Left,
                 TextAlignment = Alignment.TopLeft
             };
-            base.Add(titleLabel);
+            windowBorder.Add(containerPanel);
+            containerPanel.Add(titleBorder);
+            titleBorder.Add(titleLabel);
             contentArea = new StackPanel(manager)
             {
-                Margin = 20,
+                Margin = 8,
             };
-            base.Add(contentArea);
+            containerPanel.Add(contentArea);
             Margin = 16;
         }
 
         public override void Add(Element element)
         {
             contentArea.Add(element);
-        }
-
-        public override void Draw(float delta)
-        {
-            Manager.Renderer.FillRectangle(BorderArea, Background, ParentBounds);
-            Manager.Renderer.DrawRectangle(BorderArea, Color.DarkGray, 1, ParentBounds);
-            Manager.Renderer.FillRectangle(titleLabel.BorderArea, Color.DarkGray, ParentBounds);
-            base.Draw(delta);
         }
 
         protected override void OnPropertyChanged(DependencyProperty property, object newValue, object oldValue)

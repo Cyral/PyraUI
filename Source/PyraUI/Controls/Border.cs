@@ -9,17 +9,17 @@ namespace Pyratron.UI.Controls
     /// </summary>
     public class Border : Decorator
     {
-        public static readonly DependencyProperty<Color> BackgroundProperty =
-            DependencyProperty.Register<Border, Color>(nameof(Background), Color.Transparent);
+        public static readonly DependencyProperty<Brush> BackgroundProperty =
+            DependencyProperty.Register<Border, Brush>(nameof(Background), Color.Transparent, new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         public static readonly DependencyProperty<int> CornderRadiusProperty =
-            DependencyProperty.Register<Border, int>(nameof(CornerRadius));
+            DependencyProperty.Register<Border, int>(nameof(CornerRadius), new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         public static readonly DependencyProperty<Thickness> BorderThicknessProperty =
-            DependencyProperty.Register<Border, Thickness>(nameof(BorderThickness));
+            DependencyProperty.Register<Border, Thickness>(nameof(BorderThickness), new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         public static readonly DependencyProperty<Brush> BorderBrushProperty =
-            DependencyProperty.Register<Border, Brush>(nameof(BorderBrush));
+            DependencyProperty.Register<Border, Brush>(nameof(BorderBrush), new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         /// <summary>
         /// The area inside the border.
@@ -38,7 +38,7 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Background color of the border.
         /// </summary>
-        public Color Background
+        public Brush Background
         {
             get { return GetValue(BackgroundProperty); }
             set { SetValue(BackgroundProperty, value); }
@@ -79,13 +79,13 @@ namespace Pyratron.UI.Controls
         {
             if (!BorderThickness.IsEmpty)
             {
-                Manager.Renderer.DrawRectangle(BorderArea, BorderBrush, BorderThickness, CornerRadius, ParentBounds);
-                Manager.Renderer.FillRectangle(BorderArea.RemoveBorder(BorderThickness), Background,
+                Manager.Renderer.DrawRectangle(Bounds, BorderBrush, BorderThickness, CornerRadius, ParentBounds);
+                Manager.Renderer.FillRectangle(Bounds.RemoveBorder(BorderThickness), Background,
                     CornerRadius - BorderThickness.Max,
                     ParentBounds);
             }
             else
-                Manager.Renderer.FillRectangle(BorderArea.RemoveBorder(BorderThickness), Background, CornerRadius,
+                Manager.Renderer.FillRectangle(Bounds.RemoveBorder(BorderThickness), Background, CornerRadius,
                     ParentBounds);
 
             base.Draw(delta);

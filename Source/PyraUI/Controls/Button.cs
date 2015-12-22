@@ -11,9 +11,21 @@ namespace Pyratron.UI.Controls
             PaddingProperty.OverrideMetadata(typeof(Button), new Thickness(5, 8));
         }
 
+        private Border border;
+
         public Button(Manager manager) : base(manager)
         {
-
+            // Todo: Use content template
+            border = new Border(manager)
+            {
+                BorderThickness = new Thickness(0, 0, 0, 2),
+                Background = Color.DarkGray,
+                BorderBrush =  Color.Gray,
+                CornerRadius =  5,
+            };
+            RemoveDirect(Presenter);
+            AddDirect(border);
+            border.Add(Presenter);
         }
 
         public override void AddContent(string content)
@@ -22,19 +34,6 @@ namespace Pyratron.UI.Controls
             {
                 Text = content,
             });
-        }
-
-        public override void Draw(float delta)
-        {
-            var thickness = 2;
-            var brush = Color.Gray;
-            var background = Color.DarkGray;
-            var radius = 5;
-            Manager.Renderer.DrawRectangle(BorderArea, brush, thickness, radius, ParentBounds);
-            Manager.Renderer.FillRectangle(BorderArea.RemoveBorder(thickness), background, radius - thickness,
-                ParentBounds);
-
-            base.Draw(delta);
         }
     }
 }

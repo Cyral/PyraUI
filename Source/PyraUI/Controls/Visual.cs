@@ -71,11 +71,11 @@ namespace Pyratron.UI.Controls
 
         internal virtual void DrawDebug(float delta)
         {
-            Manager.Renderer.DrawRectangle(ExtendedArea, marginColor, Margin, ParentBounds);
-            Manager.Renderer.DrawRectangle(ExtendedArea, extendedColor, 1, ParentBounds);
-            Manager.Renderer.DrawRectangle(BorderArea, contentColor, 1, ParentBounds);
+            Manager.Renderer.DrawRectangle(ExtendedBounds, marginColor, Margin, ParentBounds);
+            Manager.Renderer.DrawRectangle(ExtendedBounds, extendedColor, 1, ParentBounds);
+            Manager.Renderer.DrawRectangle(Bounds, contentColor, 1, ParentBounds);
 
-            Manager.Renderer.DrawString($"*{ToString().Remove(0, "Pyratron.UI.Controls.".Length)}*", BorderArea.Point + new Point(2, 0), 8, ParentBounds);
+            Manager.Renderer.DrawString($"*{ToString().Remove(0, "Pyratron.UI.Controls.".Length)}*", Bounds.Point + new Point(2, 0), 8, ParentBounds);
             //  Manager.Renderer.DrawString($"_{BorderArea.X},{BorderArea.Y} {BorderArea.Width}x{BorderArea.Height}_", BorderArea.Point + new Point(2, 12), 8, ParentBounds);
             //    Manager.Renderer.DrawString("*Content*: " + BorderArea, BorderArea.Point + new Point(2, 12), 8, ParentBounds);
         }

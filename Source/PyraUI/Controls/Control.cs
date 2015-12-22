@@ -54,6 +54,26 @@ namespace Pyratron.UI.Controls
             Presenter.Add(element);
         }
 
+        public override void Remove(Element element, bool dispose = true)
+        {
+            Presenter.Remove(element, dispose);
+        }
+
+        /// <summary>
+        /// Add an element directly and not to the presenter.
+        /// </summary>
+        internal virtual void AddDirect(Element element)
+        {
+            base.Add(element);
+        }
+        /// <summary>
+        /// Removes an element directly and not from the presenter.
+        /// </summary>
+        internal virtual void RemoveDirect(Element element)
+        {
+            base.Remove(element, false);
+        }
+
         public override void AddContent(string content)
         {
             Presenter.AddContent(content);

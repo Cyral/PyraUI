@@ -42,6 +42,11 @@ namespace Pyratron.UI.Controls
         private Size textSize;
         private Rectangle lastBorderSize;
 
+        public TextBlock(Manager manager, string text) : this(manager)
+        {
+            Text = text;
+        }
+
         public TextBlock(Manager manager) : base(manager)
         {
             HorizontalAlignmentProperty.OverrideMetadata(typeof(TextBlock), HorizontalAlignment.Center);
@@ -57,15 +62,15 @@ namespace Pyratron.UI.Controls
         public override void Draw(float delta)
         {
             // Get text alignment offset.
-            if (textAlignInvalidated || textSizeInvalidated || !lastBorderSize.IsClose(BorderArea))
+            if (textAlignInvalidated || textSizeInvalidated || !lastBorderSize.IsClose(Bounds))
             {
                 textAlignOffset = AlignText(textSize);
                 textAlignInvalidated = false;
                 textSizeInvalidated = false;
             }
-            Manager.Renderer.DrawString(Text, BorderArea.Point + textAlignOffset, TextColor, FontSize, FontStyle,
+            Manager.Renderer.DrawString(Text, Bounds.Point + textAlignOffset, TextColor, FontSize, FontStyle,
                 ParentBounds);
-            lastBorderSize = BorderArea;
+            lastBorderSize = Bounds;
             base.Draw(delta);
         }
 
@@ -82,8 +87,8 @@ namespace Pyratron.UI.Controls
         private Point AlignText(Size textsize)
         {
             // Calculate center for each axis.
-            var center = new Point((BorderArea.Width / 2) - (textsize.Width / 2),
-                (BorderArea.Height / 2) - (textsize.Height / 2));
+            var center = new Point((Bounds.Width / 2) - (textsize.Width / 2),
+                (Bounds.Height / 2) - (textsize.Height / 2));
             var x = 0d;
             var y = 0d;
             switch (TextAlignment)
@@ -92,22 +97,22 @@ namespace Pyratron.UI.Controls
                 case Alignment.TopLeft:
                     break;
                 case Alignment.TopRight:
-                    x = BorderArea.Width - textsize.Width;
+                    x = Bounds.Width - textsize.Width;
                     break;
                 // Bottom.
                 case Alignment.BottomLeft:
-                    y = BorderArea.Height - textsize.Height;
+                    y = Bounds.Height - textsize.Height;
                     break;
                 case Alignment.BottomRight:
-                    y = BorderArea.Height - textsize.Height;
-                    x = BorderArea.Width - textsize.Width;
+                    y = Bounds.Height - textsize.Height;
+                    x = Bounds.Width - textsize.Width;
                     break;
                 // Center.
                 case Alignment.TopCenter:
                     x = center.X;
                     break;
                 case Alignment.BottomCenter:
-                    y = BorderArea.Height - textsize.Height;
+                    y = Bounds.Height - textsize.Height;
                     x = center.X;
                     break;
                 case Alignment.LeftCenter:
@@ -115,7 +120,7 @@ namespace Pyratron.UI.Controls
                     break;
                 case Alignment.RightCenter:
                     y = center.Y;
-                    x = BorderArea.Width - textsize.Width;
+                    x = Bounds.Width - textsize.Width;
                     break;
                 case Alignment.Center:
                     y = center.Y;

@@ -207,8 +207,11 @@ namespace Pyratron.UI.Controls
         /// </summary>
         protected virtual void Dispose()
         {
-            Parent.Remove(this, false);
-            Parent = null;
+            if (Parent != null)
+            {
+                Parent.Remove(this, false);
+                Parent = null;
+            }
             Manager.RemoveRootElement(this);
             foreach (var child in Elements)
                 Remove(child);
@@ -346,7 +349,7 @@ namespace Pyratron.UI.Controls
             {
                 if (Parent == null)
                     return Position;
-                return Parent.BorderArea.Point + Position;
+                return Parent.Bounds.Point + Position;
             }
         }
 
@@ -528,7 +531,7 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public virtual Element Parent { get; protected internal set; }
 
-        public Rectangle ParentBounds => Parent?.BorderArea ?? Rectangle.Empty;
+        public Rectangle ParentBounds => Parent?.Bounds ?? Rectangle.Empty;
 
         /// <summary>
         /// List of child elements.
@@ -600,12 +603,12 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// Rectangular region of the element.
         /// </summary>
-        public Rectangle BorderArea => new Rectangle(AbsolutePosition, ActualSize);
+        public Rectangle Bounds => new Rectangle(AbsolutePosition, ActualSize);
 
         /// <summary>
         /// Rectangular region of the element plus the margin area.
         /// </summary>
-        public Rectangle ExtendedArea => new Rectangle(AbsolutePosition - Margin, ActualSize.Add(Margin));
+        public Rectangle ExtendedBounds => new Rectangle(AbsolutePosition - Margin, ActualSize.Add(Margin));
 
         /// <summary>
         /// Indicates if the element has been measured. If false, the element should be re-measured.

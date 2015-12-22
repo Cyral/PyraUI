@@ -96,7 +96,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controls\Primitives\" />
     <Folder Include="Events\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

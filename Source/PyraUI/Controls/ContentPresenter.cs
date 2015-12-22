@@ -15,7 +15,7 @@ namespace Pyratron.UI.Controls
 
         internal override void DrawDebug(float delta)
         {
-            Manager.Renderer.DrawRectangle(ExtendedArea, paddingColor, Margin, ParentBounds);
+            Manager.Renderer.DrawRectangle(ExtendedBounds, paddingColor, Margin, ParentBounds);
         }
     }
 }
