@@ -31,7 +31,9 @@ namespace Pyratron.UI.Monogame
 
             // Load circles used for rendering shapes.
             foreach (var size in CircleSizes)
-                Skin.LoadTextureInternal(Path.Combine("Shapes" , "circle" + size));
+                Skin.LoadTextureInternal(Path.Combine("Shapes", "circle" + size));
+
+            Skin.LoadTextureInternal("shadow");
 
             base.Load();
         }

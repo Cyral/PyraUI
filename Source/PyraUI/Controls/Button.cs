@@ -9,18 +9,20 @@ namespace Pyratron.UI.Controls
             MinHeightProperty.OverrideMetadata(typeof(Button), 16);
             MinWidthProperty.OverrideMetadata(typeof(Button), 32);
             PaddingProperty.OverrideMetadata(typeof(Button), new Thickness(5, 8));
+            FontStyleProperty.OverrideMetadata(typeof(Button), Types.FontStyle.Bold);
         }
 
         private Border border;
 
         public Button(Manager manager) : base(manager)
         {
+            TextColor = Color.White;
             // Todo: Use content template
             border = new Border(manager)
             {
                 BorderThickness = new Thickness(0, 0, 0, 2),
-                Background = Color.DarkGray,
-                BorderBrush =  Color.Gray,
+                Background = (Color)"#14b9d7",
+                BorderBrush =  (Color)"#3198ab",
                 CornerRadius =  5,
             };
             RemoveDirect(Presenter);

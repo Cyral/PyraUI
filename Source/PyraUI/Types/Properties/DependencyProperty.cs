@@ -63,7 +63,7 @@ namespace Pyratron.UI.Types.Properties
         /// </summary>
         internal Type ObjectType { get; }
 
-        protected PropertyMetadata OwnerMetadata => Metadata[ObjectType];
+        protected internal PropertyMetadata OwnerMetadata => Metadata[ObjectType];
 
         /// <summary>
         /// Invoked when the property value changes, if the validation returns false, an ArgumentException will be thrown.

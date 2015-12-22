@@ -79,6 +79,11 @@ namespace Pyratron.UI
         public abstract void FillRectangle(Rectangle area, Brush brush, double cornerRadius, Rectangle bounds);
 
         /// <summary>
+        /// Stretches a rectangle to fill the bounds and create a shadow effect.
+        /// </summary>
+        public abstract void StretchRectangle(Rectangle area, Color color, Rectangle bounds);
+
+        /// <summary>
         /// Returns the size the text will use when rendered.
         /// </summary>
         public Size MeasureText(string text) => MeasureText(text, defaultSize, FontStyle.Regular);

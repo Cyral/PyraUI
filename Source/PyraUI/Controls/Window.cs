@@ -1,4 +1,5 @@
 ﻿using Pyratron.UI.Brushes;
+using Pyratron.UI.Effects;
 using Pyratron.UI.Types;
 using Pyratron.UI.Types.Properties;
 
@@ -11,7 +12,7 @@ namespace Pyratron.UI.Controls
                 new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         public static readonly DependencyProperty<Brush> BackgroundColorProperty =
-            DependencyProperty.Register<Window, Brush>(nameof(Background), new Color(240, 240, 240),
+            DependencyProperty.Register<Window, Brush>(nameof(Background), (Color)"#ebedf0",
                 new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         /// <summary>
@@ -40,24 +41,32 @@ namespace Pyratron.UI.Controls
 
         public Window(Manager manager) : base(manager)
         {
+            TextColor = (Color)TextColorProperty.OwnerMetadata.DefaultValue;
+            FontStyle = (FontStyle)FontStyleProperty.OwnerMetadata.DefaultValue;
+            FontSize = (int)FontSizeProperty.OwnerMetadata.DefaultValue;
+
             // TODO: Replace with control template.
             containerPanel = new StackPanel(manager);
+            var background = (Color)"#323741";
             windowBorder =new Border(manager)
             {
+                CornerRadius = 5,
                 BorderThickness = 1,
                 Background = this.Background,
-                BorderBrush = Color.DarkGray,
+                BorderBrush = background,
             };
             base.Add(windowBorder);
             titleBorder = new Border(manager)
             {
-                Background = Color.DarkGray,
+                Background = background,
                 Padding = new Thickness(8, 12),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
             };
             titleLabel = new TextBlock(manager, Title)
             {
+                FontStyle = FontStyle.Bold,
+                TextColor = Color.White,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 TextAlignment = Alignment.TopLeft
             };
@@ -70,11 +79,18 @@ namespace Pyratron.UI.Controls
             };
             containerPanel.Add(contentArea);
             Margin = 16;
+
+            Effects.Add(new DropShadowEffect(manager, 12, Color.Black * .2f));
         }
 
         public override void Add(Element element)
         {
             contentArea.Add(element);
+        }
+
+        public override void AddContent(string content)
+        {
+            contentArea.AddContent(content);
         }
 
         protected override void OnPropertyChanged(DependencyProperty property, object newValue, object oldValue)

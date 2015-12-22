@@ -187,6 +187,14 @@ namespace Pyratron.UI.Types
                     Height - borderThickness.Height);
 
         /// <summary>
+        /// Add the specified thickness from the outsides of the rectangle in order to move the rectangle further outward. (SUBTRACTING from the X and Y values)
+        /// </summary>
+        public Rectangle AddBorder(Thickness borderThickness)
+            =>
+                new Rectangle(X - borderThickness.Left, Y - borderThickness.Right, Width + borderThickness.Width,
+                    Height + borderThickness.Height);
+
+        /// <summary>
         /// Remove the specified thickness from the rectangle to make it smaller.
         /// </summary>
         public Rectangle Remove(Thickness thickness)

@@ -77,11 +77,12 @@ namespace Pyratron.UI.Controls
 
         public override void Draw(float delta)
         {
+
             if (!BorderThickness.IsEmpty)
             {
                 Manager.Renderer.DrawRectangle(Bounds, BorderBrush, BorderThickness, CornerRadius, ParentBounds);
                 Manager.Renderer.FillRectangle(Bounds.RemoveBorder(BorderThickness), Background,
-                    CornerRadius - BorderThickness.Max,
+                    CornerRadius - (BorderThickness.Min.IsClose(BorderThickness.Max) ? BorderThickness.Min + 1 : 0),
                     ParentBounds);
             }
             else

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using Pyratron.UI.Effects;
 using Pyratron.UI.States;
 using Pyratron.UI.Types;
 
@@ -29,6 +31,8 @@ namespace Pyratron.UI.Controls
         [Browsable(false)]
         public bool IsVisible => Visibility == Visibility.Visible;
 
+        public List<Effect> Effects { get; private set; }
+
         public override Element Parent
         {
             get { return parent; }
@@ -52,6 +56,7 @@ namespace Pyratron.UI.Controls
 
         public Visual(Manager manager) : base(manager)
         {
+            Effects = new List<Effect>();
             Visibility = Visibility.Visible;
         }
 
@@ -61,12 +66,22 @@ namespace Pyratron.UI.Controls
         /// <param name="delta">Elapsed seconds since the last frame.</param>
         public virtual void Draw(float delta)
         {
+            DrawEffects(delta);
+            
             if (Manager.DrawDebug)
             {
                 DrawDebug(delta);
             }
 
             DrawChildren(delta);
+        }
+
+        private void DrawEffects(float delta)
+        {
+            foreach (var effect in Effects)
+            {
+                effect.Render(ExtendedBounds, Bounds, delta);
+            }
         }
 
         internal virtual void DrawDebug(float delta)
@@ -76,8 +91,8 @@ namespace Pyratron.UI.Controls
             Manager.Renderer.DrawRectangle(Bounds, contentColor, 1, ParentBounds);
 
             Manager.Renderer.DrawString($"*{ToString().Remove(0, "Pyratron.UI.Controls.".Length)}*", Bounds.Point + new Point(2, 0), 8, ParentBounds);
-            //  Manager.Renderer.DrawString($"_{BorderArea.X},{BorderArea.Y} {BorderArea.Width}x{BorderArea.Height}_", BorderArea.Point + new Point(2, 12), 8, ParentBounds);
-            //    Manager.Renderer.DrawString("*Content*: " + BorderArea, BorderArea.Point + new Point(2, 12), 8, ParentBounds);
+            //Manager.Renderer.DrawString($"_{BorderArea.X},{BorderArea.Y} {BorderArea.Width}x{BorderArea.Height}_", BorderArea.Point + new Point(2, 12), 8, ParentBounds);
+            //Manager.Renderer.DrawString("*Content*: " + BorderArea, BorderArea.Point + new Point(2, 12), 8, ParentBounds);
         }
 
         /// <summary>

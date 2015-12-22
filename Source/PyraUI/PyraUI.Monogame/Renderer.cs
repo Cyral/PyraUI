@@ -7,8 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Pyratron.UI.Brushes;
 using Pyratron.UI.Types;
-using Color = Microsoft.Xna.Framework.Color;
+using Color = Pyratron.UI.Types.Color;
 using Point = Pyratron.UI.Types.Point;
+using ColorXNA = Microsoft.Xna.Framework.Color;
 using Rectangle = Pyratron.UI.Types.Rectangle;
 using RectangleXNA = Microsoft.Xna.Framework.Rectangle;
 
@@ -16,9 +17,10 @@ namespace Pyratron.UI.Monogame
 {
     public class Renderer : UI.Renderer
     {
+        public override Size Viewport => new Size(graphics.Viewport.Width, graphics.Viewport.Height);
+        private readonly GraphicsDevice graphics;
         private readonly Manager manager;
         private readonly Texture2D pixel;
-        private readonly GraphicsDevice graphics;
 
         public Renderer(Manager manager)
         {
@@ -26,7 +28,7 @@ namespace Pyratron.UI.Monogame
             graphics = manager.SpriteBatch.GraphicsDevice;
             // Create 1x1 texture for rendering rectangles.
             pixel = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, 1);
-            pixel.SetData(new[] {Types.Color.White});
+            pixel.SetData(new[] {ColorXNA.White});
         }
 
         public override void BeginDraw()
@@ -34,20 +36,33 @@ namespace Pyratron.UI.Monogame
             manager.SpriteBatch.Begin();
         }
 
-        public override void EndDraw()
+        public override void DrawRectangle(Rectangle area, Brush brush, Thickness thickness, double radius,
+            Rectangle bounds)
         {
-            manager.SpriteBatch.End();
-        }
+            //area = area.FitToBounds(bounds);
+            if (area != Rectangle.Empty)
+            {
+                if (radius > 0)
+                {
+                    FillRectangle(area, brush, radius, bounds);
+                }
+                else
+                {
+                    var brushXNA = brush.ToXNA();
 
-        public override Size Viewport => new Size(graphics.Viewport.Width, graphics.Viewport.Height);
-
-        public override void DrawTexture(string name, Rectangle rectangle, ColorBrush brush, Rectangle bounds)
-        {
-            var rect = new RectangleXNA((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
-                (int) rectangle.Height);
-            var texture = GetTexture(name);
-            var col = new Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
-            manager.SpriteBatch.Draw(texture, rect, col);
+                    var areaXNA = area.ToXNA();
+                    FillRect(new RectangleXNA(areaXNA.X,
+                        areaXNA.Top, areaXNA.Width, thickness.Top), brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X,
+                        areaXNA.Top + thickness.Top, thickness.Left, areaXNA.Height - thickness.Top - thickness.Bottom),
+                        brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.Right - thickness.Right,
+                        areaXNA.Top + thickness.Top, thickness.Right, areaXNA.Height - thickness.Top - thickness.Bottom),
+                        brushXNA);
+                    FillRect(new RectangleXNA(areaXNA.X,
+                        areaXNA.Bottom - thickness.Bottom, areaXNA.Width, thickness.Bottom), brushXNA);
+                }
+            }
         }
 
         public override void DrawString(string text, Point point, ColorBrush brush, int size, FontStyle style,
@@ -65,7 +80,7 @@ namespace Pyratron.UI.Monogame
                 {
                     var font = GetFont(Path.Combine(part.Style.ToString(), closest.ToString()));
                     var measure = MeasureTextNoTrim(part.Text, size, part.Style);
-                    var col = new Color(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
+                    var col = new Microsoft.Xna.Framework.Color(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
                     manager.SpriteBatch.DrawString(font, part.Text, pos,
                         col * (brush.Color.A / 255f), 0,
                         Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
@@ -75,42 +90,30 @@ namespace Pyratron.UI.Monogame
             else
             {
                 var font = GetFont(Path.Combine(style.ToString(), closest.ToString()));
-                var col = new Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
+                var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
                 manager.SpriteBatch.DrawString(font, text, pos,
                     col * (brush.Color.A / 255f), 0,
                     Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
             }
         }
 
-        public override void DrawRectangle(Rectangle area, Brush brush, Thickness thickness, double radius, Rectangle bounds)
+        public override void DrawTexture(string name, Rectangle rectangle, ColorBrush brush, Rectangle bounds)
         {
-            //area = area.FitToBounds(bounds);
-            if (area != Rectangle.Empty)
-            {
-                if (radius > 0)
-                {
-                    FillRectangle(area, brush, radius, bounds);
-                }
-                else
-                {
-                    var brushXNA = brush.ToXNA();
+            var rect = new RectangleXNA((int) rectangle.X, (int) rectangle.Y, (int) rectangle.Width,
+                (int) rectangle.Height);
+            var texture = GetTexture(name);
+            var col = new Microsoft.Xna.Framework.Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
+            manager.SpriteBatch.Draw(texture, rect, col);
+        }
 
-                    var areaXNA = area.ToXNA();
-                    FillRect(new RectangleXNA(areaXNA.X,
-                          areaXNA.Top, areaXNA.Width, thickness.Top), brushXNA);
-                    FillRect(new RectangleXNA(areaXNA.X,
-                        areaXNA.Top + thickness.Top, thickness.Left, areaXNA.Height - thickness.Top - thickness.Bottom), brushXNA);
-                    FillRect(new RectangleXNA(areaXNA.Right - thickness.Right,
-                    areaXNA.Top + thickness.Top, thickness.Right, areaXNA.Height - thickness.Top - thickness.Bottom), brushXNA);
-                    FillRect(new RectangleXNA(areaXNA.X,
-                         areaXNA.Bottom - thickness.Bottom, areaXNA.Width, thickness.Bottom), brushXNA);
-                }
-            }
+        public override void EndDraw()
+        {
+            manager.SpriteBatch.End();
         }
 
         public override void FillRectangle(Rectangle area, Brush brush, double radius, Rectangle bounds)
         {
-          //area = area.FitToBounds(bounds);
+            //area = area.FitToBounds(bounds);
             if (area != Rectangle.Empty)
             {
                 if (radius > 0)
@@ -152,7 +155,7 @@ namespace Pyratron.UI.Monogame
         {
             // Remove any extra spaces, possibly created by the space character for invalid characters not included in the spritefont.
             text = text.Trim();
-            var parts = ParseFormattedText(text, Types.Color.Transparent, style);
+            var parts = ParseFormattedText(text, Color.Transparent, style);
 
             double w = 0, h = 0;
             foreach (var part in parts)
@@ -164,13 +167,38 @@ namespace Pyratron.UI.Monogame
             return new Size(w, h);
         }
 
-        private void FillRect(RectangleXNA rect, Color color)
+        public override void StretchRectangle(Rectangle area, Color color, Rectangle bounds)
         {
-            manager.SpriteBatch.Draw(pixel, rect, null, color, 0, Vector2.Zero,
-                SpriteEffects.None, 0);
+            var shadow =
+                (Texture2D) manager.Skin.Textures["shadow"];
+            var a = area.ToXNA();
+            var b = bounds.ToXNA();
+            var half = shadow.Width / 2;
+            var col = color.ToXNA();
+
+            FillRectangle(area, color, area);
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(b.X, b.Y, a.X - b.X, a.Y - b.Y),
+                new RectangleXNA(0, 0, half, half), col);
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(b.X, a.Y + a.Height, a.X - b.X, a.Y - b.Y),
+                new RectangleXNA(0, half, half, half), col);
+
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(a.X + a.Width, b.Y, a.X - b.X, a.Y - b.Y),
+                new RectangleXNA(half, 0, half, half), col);
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(a.X + a.Width, a.Y + a.Height, a.X - b.X, a.Y - b.Y),
+                new RectangleXNA(half, half, half, half), col);
+
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(a.X, b.Y, a.Width, a.Y - b.Y),
+                new RectangleXNA(half, 0, 1, half), col);
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(a.X, a.Y + a.Height, a.Width, a.Y - b.Y),
+                new RectangleXNA(half, half, 1, half), col);
+
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(b.X, a.Y, a.X - b.X, a.Height),
+                new RectangleXNA(0, half, half, 1), col);
+            manager.SpriteBatch.Draw(shadow, new RectangleXNA(a.X + a.Width, a.Y, a.X - b.X, a.Height),
+                new RectangleXNA(half, half, half, 1), col);
         }
 
-        private void FillCorner(RectangleXNA rect, Texture2D circle, Corner corner, Color color)
+        private void FillCorner(RectangleXNA rect, Texture2D circle, Corner corner, Microsoft.Xna.Framework.Color color)
         {
             var source = new RectangleXNA(0, 0, circle.Width / 2, circle.Height / 2);
             switch (corner)
@@ -190,6 +218,53 @@ namespace Pyratron.UI.Monogame
                 SpriteEffects.None, 0);
         }
 
+        private void FillRect(RectangleXNA rect, Microsoft.Xna.Framework.Color color)
+        {
+            manager.SpriteBatch.Draw(pixel, rect, null, color, 0, Vector2.Zero,
+                SpriteEffects.None, 0);
+        }
+
+        private Texture2D GetCircleTexture(double radius)
+        {
+            var ret = manager.CircleSizes[manager.CircleSizes.Length - 1];
+            foreach (var size in manager.CircleSizes.Where(size => size >= radius * 2))
+            {
+                ret = size;
+                break;
+            }
+            return (Texture2D) manager.Skin.Textures["Shapes\\circle" + ret];
+        }
+
+        /// <summary>
+        /// Find the font size that is closest to the specified value.
+        /// </summary>
+        /// <remarks>
+        /// MonoGame does not support vector fonts, so many common font sizes are included with PyraUI.
+        /// If a size is not included, the next highest size will be chosen and scaled down.
+        /// </remarks>
+        private int GetClosestFontSize(int fontsize)
+        {
+            var ret = manager.FontSizes[manager.FontSizes.Length - 1];
+            foreach (var size in manager.FontSizes.Where(size => size >= fontsize))
+            {
+                ret = size;
+                break;
+            }
+            return ret;
+        }
+
+        private SpriteFont GetFont(string name) => manager.Skin.Fonts[name] as SpriteFont;
+
+        private Texture2D GetTexture(string name) => manager.Skin.Textures[name] as Texture2D;
+
+        private Size MeasureTextNoTrim(string text, int size, FontStyle style)
+        {
+            var closest = GetClosestFontSize(size);
+            var scale = size / (float) closest;
+            var measure = GetFont(Path.Combine(style.ToString(), closest.ToString())).MeasureString(text);
+            return new Size((int) (Math.Round(measure.X * scale)), (int) (Math.Round(measure.Y * scale)));
+        }
+
         /// <summary>
         /// Parse formatted text into separate parts.
         /// </summary>
@@ -203,16 +278,16 @@ namespace Pyratron.UI.Monogame
         /// Empty brackets show the current color should be removed, and the last used color will be applied.
         /// (Like a stack)
         /// </remarks>
-        private static IEnumerable<TextRenderProperties> ParseFormattedText(string text, Types.Color color,
+        private static IEnumerable<TextRenderProperties> ParseFormattedText(string text, Color color,
             FontStyle style)
         {
             var parts = new List<TextRenderProperties>();
             var sb = new StringBuilder();
             bool inBold = false, inItalic = false;
             var inColor = false;
-            var colors = new Stack<Types.Color>();
+            var colors = new Stack<Color>();
             colors.Push(color);
-            var ignoreColor = color == Types.Color.Transparent; // Transparent signals not to parse colors.
+            var ignoreColor = color == Color.Transparent; // Transparent signals not to parse colors.
             for (var i = 0; i < text.Length; i++)
             {
                 var character = text[i];
@@ -229,7 +304,7 @@ namespace Pyratron.UI.Monogame
                                 colors.Pop();
                             else
                             {
-                                var newColor = (Types.Color) colorStr;
+                                var newColor = (Color) colorStr;
                                 colors.Push(newColor);
                             }
                         }
@@ -273,46 +348,6 @@ namespace Pyratron.UI.Monogame
             return parts;
         }
 
-        private Size MeasureTextNoTrim(string text, int size, FontStyle style)
-        {
-            var closest = GetClosestFontSize(size);
-            var scale = size / (float) closest;
-            var measure = GetFont(Path.Combine(style.ToString(), closest.ToString())).MeasureString(text);
-            return new Size((int) (Math.Round(measure.X * scale)), (int) (Math.Round(measure.Y * scale)));
-        }
-
-        /// <summary>
-        /// Find the font size that is closest to the specified value.
-        /// </summary>
-        /// <remarks>
-        /// MonoGame does not support vector fonts, so many common font sizes are included with PyraUI.
-        /// If a size is not included, the next highest size will be chosen and scaled down.
-        /// </remarks>
-        private int GetClosestFontSize(int fontsize)
-        {
-            var ret = manager.FontSizes[manager.FontSizes.Length - 1];
-            foreach (var size in manager.FontSizes.Where(size => size >= fontsize))
-            {
-                ret = size;
-                break;
-            }
-            return ret;
-        }
-
-        private Texture2D GetCircleTexture(double radius)
-        {
-            var ret = manager.CircleSizes[manager.CircleSizes.Length - 1];
-            foreach (var size in manager.CircleSizes.Where(size => size >= radius * 2))
-            {
-                ret = size;
-                break;
-            }
-            return (Texture2D)manager.Skin.Textures["Shapes\\circle" + ret];
-        }
-
-        private Texture2D GetTexture(string name) => manager.Skin.Textures[name] as Texture2D;
-        private SpriteFont GetFont(string name) => manager.Skin.Fonts[name] as SpriteFont;
-
         private enum Corner
         {
             TopLeft,
@@ -324,10 +359,10 @@ namespace Pyratron.UI.Monogame
         private class TextRenderProperties
         {
             public string Text { get; }
-            public Types.Color Color { get; }
+            public Color Color { get; }
             public FontStyle Style { get; }
 
-            public TextRenderProperties(string text, Types.Color color, FontStyle style)
+            public TextRenderProperties(string text, Color color, FontStyle style)
             {
                 Text = text;
                 Color = color;

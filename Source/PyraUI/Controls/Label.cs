@@ -43,8 +43,11 @@ namespace Pyratron.UI.Controls
 
         public Label(Manager manager, string text) : this(manager)
         {
-            textBlock = new TextBlock(manager);
-            Presenter.Add(textBlock);
+            if (textBlock == null)
+            {
+                textBlock = new TextBlock(manager);
+                Presenter.Add(textBlock);
+            }
             Text = text;
         }
 
@@ -63,11 +66,16 @@ namespace Pyratron.UI.Controls
 
         public Label(Manager manager) : base(manager)
         {
-         
+
         }
 
         public override void AddContent(string content)
         {
+            if (textBlock == null)
+            {
+                textBlock = new TextBlock(Manager);
+                Presenter.Add(textBlock);
+            }
             Text = content;
         }
     }
