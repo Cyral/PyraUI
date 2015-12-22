@@ -7,6 +7,7 @@ using System.Text;
 using Pyratron.UI.Controls;
 using Pyratron.UI.Markup;
 using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI
 {

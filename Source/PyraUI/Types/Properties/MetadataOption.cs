@@ -39,6 +39,6 @@ namespace Pyratron.UI.Types.Properties
         /// <summary>
         /// This element will not inherit values from its parents.
         /// </summary>
-        IgnoreInheritance = All & ~Inherits,
+        IgnoreInheritance = Inherits & ~Inherits,
     }
 }

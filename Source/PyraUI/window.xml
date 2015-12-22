@@ -2,11 +2,12 @@
   Height="400"
   Width="900">
   <StackPanel>
-  <StackPanel Margin="8" FontStyle="Bold" Orientation="Horizontal" FontSize="20">
-    <Button MinWidth="93" FontSize="64">OK</Button>
+    <Border Background="Red" CornerRadius="5">
+    <StackPanel FontStyle="Bold" Orientation="Horizontal" FontSize="16">
+      <Button>Testing 123</Button>
+      <Button FontSize="20">Cancel</Button>
+    </StackPanel>
+    </Border>
     <Button MinWidth="93">OK</Button>
-    <Button MinWidth="93" Margin="10,0,0,0" FontSize="40">Cancel</Button>
-  </StackPanel>
-  <Button MinWidth="93">OK</Button>
   </StackPanel>
 </Window>

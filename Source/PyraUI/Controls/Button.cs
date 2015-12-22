@@ -4,12 +4,16 @@ namespace Pyratron.UI.Controls
 {
     internal class Button : Control
     {
+        static Button()
+        {
+            MinHeightProperty.OverrideMetadata(typeof(Button), 16);
+            MinWidthProperty.OverrideMetadata(typeof(Button), 32);
+            PaddingProperty.OverrideMetadata(typeof(Button), new Thickness(5, 8));
+        }
+
         public Button(Manager manager) : base(manager)
         {
-            Padding = new Thickness(5, 8);
 
-            MinHeight = 20;
-            MinWidth = 32;
         }
 
         public override void Draw(float delta)

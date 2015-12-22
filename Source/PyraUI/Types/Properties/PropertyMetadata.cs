@@ -5,7 +5,7 @@
     /// </summary>
     public class PropertyMetadata
     {
-        public MetadataOption Options { get; private set; }
+        public MetadataOption Options { get; internal set; }
 
         /// <summary>
         /// The default value to be used if no defined values are found in the tree.
@@ -15,7 +15,7 @@
         /// <summary>
         /// Invoked when the property value changes.
         /// </summary>
-        public PropertyChangedCallback PropertyChanged { get; set; }
+        internal PropertyChangedCallback PropertyChanged { get; }
 
         /// <summary>
         /// Invoked when the property value changes, giving the opportunity to correct (coerce) the value. (Such as keeping it
@@ -24,7 +24,7 @@
         /// <remarks>
         /// Use this when an invalid value can be corrected. (For example, a value below the minimum value on a slider)
         /// </remarks>
-        public CoerceValueCallback CoerceValue { get; set; }
+        internal CoerceValueCallback CoerceValue { get; }
 
 
         /// <summary>
@@ -93,7 +93,7 @@
         internal object OnCoerceValue(object value) => CoerceValue == null ? value : CoerceValue.Invoke(value);
 
 
-        internal void OnValueChanged(object newValue, object oldValue) => PropertyChanged?.Invoke(newValue, oldValue);
+        internal void OnValueChanged(DependencyObject sender, object newValue, object oldValue) => PropertyChanged?.Invoke(sender, newValue, oldValue);
 
 
         private void SetFlag(MetadataOption option, bool value)
@@ -106,6 +106,6 @@
 
         public delegate object CoerceValueCallback(object value);
 
-        public delegate object PropertyChangedCallback(object newValue, object oldValue);
+        public delegate void PropertyChangedCallback(DependencyObject sender, object newValue, object oldValue);
     }
 }

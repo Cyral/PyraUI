@@ -1,5 +1,6 @@
 ﻿using System;
 using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Controls
 {
@@ -8,21 +9,16 @@ namespace Pyratron.UI.Controls
     /// </summary>
     public class StackPanel : Panel
     {
-        /// <summary>
-        /// The direction controls will stack.
-        /// </summary>
+        public static readonly DependencyProperty<Orientation> OrientationProperty =
+            DependencyProperty.Register<StackPanel, Orientation>(nameof(Orientation), Orientation.Vertical,
+                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure |
+                                     MetadataOption.AffectsArrange));
+
         public Orientation Orientation
         {
-            get { return orientation; }
-            set
-            {
-                orientation = value;
-                InvalidateMeasure();
-                InvalidateArrange();
-            }
+            get { return GetValue(OrientationProperty); }
+            set { SetValue(OrientationProperty, value); }
         }
-
-        private Orientation orientation;
 
         public StackPanel(Manager manager, Orientation orientation) : base(manager)
         {

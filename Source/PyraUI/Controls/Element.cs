@@ -256,10 +256,12 @@ namespace Pyratron.UI.Controls
 
         protected override void OnPropertyChanged(DependencyProperty property, object newValue, object oldValue)
         {
+            var type = GetType();
+            var metadata = property.GetMetadata(type);
             // Handle metadata properties when property value is changed.
-            if (property.Metadata.AffectsMeasure)
+            if (metadata.AffectsMeasure)
                 InvalidateMeasure();
-            if (property.Metadata.AffectsArrange)
+            if (metadata.AffectsArrange)
                 InvalidateArrange();
         }
 
@@ -326,7 +328,8 @@ namespace Pyratron.UI.Controls
         }
 
         public static readonly DependencyProperty<Thickness> PaddingProperty =
-            DependencyProperty.Register<Element, Thickness>(nameof(Padding), MetadataOption.IgnoreInheritance);
+            DependencyProperty.Register<Element, Thickness>(nameof(Padding),
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
 
         /// <summary>
         /// The area outside the border.
@@ -338,7 +341,8 @@ namespace Pyratron.UI.Controls
         }
 
         public static readonly DependencyProperty<Thickness> MarginProperty =
-            DependencyProperty.Register<Element, Thickness>(nameof(Margin), MetadataOption.IgnoreInheritance);
+            DependencyProperty.Register<Element, Thickness>(nameof(Margin),
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
 
 
         /// <summary>
@@ -370,7 +374,8 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<HorizontalAlignment> HorizontalAlignmentProperty =
             DependencyProperty.Register<Element, HorizontalAlignment>(nameof(HorizontalAlignment),
-                HorizontalAlignment.Center, MetadataOption.IgnoreInheritance);
+                HorizontalAlignment.Stretch,
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
 
         /// <summary>
         /// The vertical alignment of the element.
@@ -382,8 +387,8 @@ namespace Pyratron.UI.Controls
         }
 
         public static readonly DependencyProperty<VerticalAlignment> VerticalAlignmentProperty =
-            DependencyProperty.Register<Element, VerticalAlignment>(nameof(VerticalAlignment), VerticalAlignment.Top,
-                MetadataOption.IgnoreInheritance);
+            DependencyProperty.Register<Element, VerticalAlignment>(nameof(VerticalAlignment), VerticalAlignment.Stretch,
+                MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange);
 
 
         /// <summary>
@@ -424,9 +429,21 @@ namespace Pyratron.UI.Controls
         public static readonly DependencyProperty<Color> TextColorProperty =
             DependencyProperty.Register<Element, Color>(nameof(TextColor), Color.Black);
 
+        /// <summary>
+        /// Make sure Width/Height values are above 0.
+        /// </summary>
         private static object CoerceDiminsion(object value)
         {
             return Math.Max(0, (double) value);
+        }
+
+        /// <summary>
+        /// Make sure Width/Height values are above 0.
+        /// </summary>
+        private static bool ValidateDiminsion(object value)
+        {
+            var val = (double) value;
+            return !double.IsInfinity(val) && !double.IsNaN(val);
         }
 
         /// <summary>
@@ -440,7 +457,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> MinWidthProperty =
             DependencyProperty.Register<Element, double>(nameof(MinWidth), 0,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion), ValidateDiminsion);
 
         /// <summary>
         /// The maximum width.
@@ -453,7 +472,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> MaxWidthProperty =
             DependencyProperty.Register<Element, double>(nameof(MaxWidth), double.PositiveInfinity,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion));
 
         /// <summary>
         /// The target width.
@@ -466,7 +487,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> WidthProperty =
             DependencyProperty.Register<Element, double>(nameof(Width), 0,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion), ValidateDiminsion);
 
         /// <summary>
         /// The minimum height.
@@ -479,7 +502,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> MinHeightProperty =
             DependencyProperty.Register<Element, double>(nameof(MinHeight), 0,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion), ValidateDiminsion);
 
         /// <summary>
         /// The maximum height.
@@ -492,7 +517,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> MaxHeightProperty =
             DependencyProperty.Register<Element, double>(nameof(MaxHeight), double.PositiveInfinity,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion));
 
         /// <summary>
         /// The target height.
@@ -505,7 +532,9 @@ namespace Pyratron.UI.Controls
 
         public static readonly DependencyProperty<double> HeightProperty =
             DependencyProperty.Register<Element, double>(nameof(Height), 0,
-                new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange, CoerceDiminsion));
+                new PropertyMetadata(
+                    MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure | MetadataOption.AffectsArrange,
+                    CoerceDiminsion), ValidateDiminsion);
 
         /// <summary>
         /// Element's parent. Null if root.

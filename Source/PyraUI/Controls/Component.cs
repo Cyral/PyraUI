@@ -16,6 +16,14 @@ namespace Pyratron.UI.Controls
         }
 
         /// <summary>
+        /// Initializes the component.
+        /// </summary>
+        protected internal virtual void Init()
+        {
+
+        }
+
+        /// <summary>
         /// Updates the component.
         /// </summary>
         /// <param name="delta">Elapsed seconds since the last frame.</param>
