@@ -70,7 +70,7 @@ namespace Pyratron.UI.Types.Properties
             // If the value exists in the dictionary, use it, otherwise search for it in the tree.
             object value;
             if (FindValueFromDictionary(metadata, property, out value)) return value;
-            if (metadata.Inherits && DependencyParent != null)
+            if (!property.Attached && metadata.Inherits && DependencyParent != null)
             {
                 // The value didn't exist in the dictionary, but if the metadata is marked as inheritable, try and find the value further up the tree.
                 // If the metadata is different, meaning it was overridden by a more specific type, then return the default value of that type.

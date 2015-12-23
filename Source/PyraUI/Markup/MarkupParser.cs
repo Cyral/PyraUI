@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Xml;
 using Pyratron.UI.Controls;
 using Pyratron.UI.Markup.Converters;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Markup
 {
@@ -61,38 +63,56 @@ namespace Pyratron.UI.Markup
         {
             foreach (XmlNode node in nodes)
             {
+                // Create an instance of the control.
                 var control = CreateControlInstance(node, parent);
                 if (control == null) continue;
-                                control.LogicalParent = parent;
+                control.LogicalParent = parent;
 
-                var props = TypeDescriptor.GetProperties(control.GetType());
-
-                // Set attributes.
                 if (node.Attributes != null)
                 {
+                    // Get all the dependency properties (and those inherited) of the control.
+                    var props = DependencyProperty.GetProperties(control.GetType());
+                    List<DependencyProperty> parentProps = null;
+
+                    // For each xml property, try and find a dependency property to set.
                     foreach (XmlAttribute xmlProperty in node.Attributes)
                     {
                         var propertyName = xmlProperty.Name;
-                        var propertyDescriptor = props[propertyName];
 
-                        if (propertyDescriptor != null)
+                        var prop = props.FirstOrDefault(p => p.Name == propertyName);
+                        if (prop != null)
                         {
-                            object value = null;
-                            // Convert the attribute to a value using a converter or Convert.ChangeType.
-                            var found = false;
-                            for (var i = 0; i < converters.Count; i++)
+                            if (prop.Attached)
+                                throw new InvalidOperationException("Attached property cannot be set on the parent.");
+                            // Convert the string value to the dependency property type.
+                            var value = ConvertValue(xmlProperty.Value, prop.ValueType);
+                            control.SetValue(prop, value);
+                        }
+                        // Attached properties.
+                        else if (propertyName.Contains(".") && parent != null)
+                        {
+                            if (parentProps == null) // Get parent properties only when needed and only once.
+                                parentProps = DependencyProperty.GetProperties(parent.GetType());
+                            var parts = propertyName.Split('.');
+                            if (parts.Length == 2)
                             {
-                                var converter = converters[i];
-                                if (converter.CanConvert(propertyDescriptor.PropertyType))
+                                var parentName = parts[0];
+                                propertyName = parts[1];
+                                var parentType = parent.GetType();
+
+                                if (parentType.Name == parentName)
                                 {
-                                    value = converter.Convert(propertyDescriptor.PropertyType, xmlProperty.Value);
-                                    found = true;
-                                    break;
+                                    prop = parentProps.FirstOrDefault(p => p.Attached && p.Name == propertyName);
+                                    if (prop != null)
+                                    {
+                                        var value = ConvertValue(xmlProperty.Value, prop.ValueType);
+                                        control.SetValue(prop, value);
+                                    }
+
                                 }
+                                else
+                                    throw new InvalidOperationException("No parent found matching " + parentName);
                             }
-                            if (!found)
-                                value = Convert.ChangeType(xmlProperty.Value, propertyDescriptor.PropertyType);
-                            propertyDescriptor.SetValue(control, value);
                         }
                     }
                 }
@@ -106,6 +126,26 @@ namespace Pyratron.UI.Markup
                 }
                 LoadNode(node.ChildNodes, control);
             }
+        }
+
+        private object ConvertValue(string unconverted, Type type)
+        {
+            object value = null;
+            // Convert the attribute to a value using a converter or Convert.ChangeType.
+            var found = false;
+            for (var i = 0; i < converters.Count; i++)
+            {
+                var converter = converters[i];
+                if (converter.CanConvert(type))
+                {
+                    value = converter.Convert(type, unconverted);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                value = Convert.ChangeType(unconverted, type);
+            return value;
         }
     }
 }

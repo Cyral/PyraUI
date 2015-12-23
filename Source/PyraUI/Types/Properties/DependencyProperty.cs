@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,8 +12,8 @@ namespace Pyratron.UI.Types.Properties
     public class DependencyProperty<TValue> : DependencyProperty
     {
         internal DependencyProperty(string name, Type owner, PropertyMetadata metadata,
-            ValidateValueCallback validateValueCallback = null)
-            : base(name, owner, metadata, validateValueCallback)
+            ValidateValueCallback validateValueCallback = null, bool attached = false)
+            : base(name, owner, typeof(TValue), metadata, validateValueCallback, attached)
         {
         }
 
@@ -63,6 +64,16 @@ namespace Pyratron.UI.Types.Properties
         /// </summary>
         internal Type ObjectType { get; }
 
+        /// <summary>
+        /// The type the value is.
+        /// </summary>
+        internal Type ValueType { get; }
+
+        /// <summary>
+        /// Indicates if this is an attached property.
+        /// </summary>
+        public bool Attached { get; private set; }
+
         protected internal PropertyMetadata OwnerMetadata => Metadata[ObjectType];
 
         /// <summary>
@@ -80,15 +91,32 @@ namespace Pyratron.UI.Types.Properties
 
         private List<Type> metadataCache; // List of sorted metadata types.
 
-        protected DependencyProperty(string name, Type owner, PropertyMetadata metadata,
-            ValidateValueCallback validateValueCallback)
+        private static Dictionary<Type, List<DependencyProperty>> typeProperties = new Dictionary<Type, List<DependencyProperty>>();
+
+        protected DependencyProperty(string name, Type owner, Type valueType, PropertyMetadata metadata,
+            ValidateValueCallback validateValueCallback, bool attached)
         {
+            Attached = attached;
             Metadata = new Dictionary<Type, PropertyMetadata>();
             metadataCache = new List<Type>();
             Name = name;
             ObjectType = owner;
+            ValueType = valueType;
             Metadata.Add(ObjectType, metadata);
             ValidateValue = validateValueCallback;
+
+            if (!typeProperties.ContainsKey(owner))
+                typeProperties[owner] = new List<DependencyProperty>();
+            typeProperties[owner].Add(this);
+        }
+
+        public static List<DependencyProperty> GetProperties(Type owner)
+        {
+            var types = typeProperties.Where(type => type.Key == owner || owner.IsSubclassOf(type.Key)).ToList();
+            var properties = new List<DependencyProperty>();
+            foreach (var type in types)
+                properties.AddRange(type.Value);
+            return properties;
         }
 
         public PropertyMetadata GetMetadata(Type forType)
@@ -116,7 +144,7 @@ namespace Pyratron.UI.Types.Properties
             if (metadata == null)
                 metadata = new PropertyMetadata(DefaultMetadataOptions);
             metadata.DefaultValue = defaultValue;
-            return new DependencyProperty<TValue>(name, objType, metadata, validateValueCallback);
+            return new DependencyProperty<TValue>(name, objType, metadata, validateValueCallback, false);
         }
 
         /// <summary>
@@ -144,6 +172,53 @@ namespace Pyratron.UI.Types.Properties
             where TObject : DependencyObject
         {
             return Register<TObject, TValue>(name, default(TValue), metadata);
+        }
+
+        /// <summary>
+        /// Register a new attached DependencyProperty.
+        /// </summary>
+        /// <typeparam name="TObject">The type of DependencyObject the property applies to.</typeparam>
+        /// <typeparam name="TValue">The type of value the property is.</typeparam>
+        /// <param name="name">The name of this property.</param>
+        /// <param name="defaultValue">The default value to be used if no value is defined.</param>
+        /// <param name="metadata">Metadata associated with the property.</param>
+        /// <param name="validateValueCallback">Callback to validate the property when changed.</param>
+        public static DependencyProperty<TValue> RegisterAttached<TObject, TValue>(string name, TValue defaultValue,
+            PropertyMetadata metadata, ValidateValueCallback validateValueCallback = null)
+            where TObject : DependencyObject
+        {
+            var objType = typeof(TObject);
+            if (metadata == null)
+                metadata = new PropertyMetadata(DefaultMetadataOptions);
+            metadata.DefaultValue = defaultValue;
+            return new DependencyProperty<TValue>(name, objType, metadata, validateValueCallback, true);
+        }
+
+        /// <summary>
+        /// Register a new attached DependencyProperty.
+        /// </summary>
+        /// <typeparam name="TObject">The type of DependencyObject the property applies to.</typeparam>
+        /// <typeparam name="TValue">The type of value the property is.</typeparam>
+        /// <param name="name">The name of this property.</param>
+        /// <param name="defaultValue">The default value to be used if no value is defined.</param>
+        public static DependencyProperty<TValue> RegisterAttached<TObject, TValue>(string name,
+            TValue defaultValue = default(TValue))
+            where TObject : DependencyObject
+        {
+            return RegisterAttached<TObject, TValue>(name, defaultValue, null);
+        }
+
+        /// <summary>
+        /// Register a new attached DependencyProperty.
+        /// </summary>
+        /// <typeparam name="TObject">The type of DependencyObject the property applies to.</typeparam>
+        /// <typeparam name="TValue">The type of value the property is.</typeparam>
+        /// <param name="name">The name of this property.</param>
+        /// <param name="metadata">Metadata associated with the property.</param>
+        public static DependencyProperty<TValue> RegisterAttached<TObject, TValue>(string name, PropertyMetadata metadata)
+            where TObject : DependencyObject
+        {
+            return RegisterAttached<TObject, TValue>(name, default(TValue), metadata);
         }
 
         public override string ToString()
