@@ -39,12 +39,13 @@ namespace Pyratron.UI.Controls
         private readonly Border windowBorder, titleBorder;
         private readonly StackPanel containerPanel;
 
+        static Window()
+        {
+            FontStyleProperty.OverrideMetadata(typeof(Button), (FontStyle)FontStyleProperty.OwnerMetadata.DefaultValue);
+            TextColorProperty.OverrideMetadata(typeof(Button), (Color)TextColorProperty.OwnerMetadata.DefaultValue);
+        }
         public Window(Manager manager) : base(manager)
         {
-            TextColor = (Color)TextColorProperty.OwnerMetadata.DefaultValue;
-            FontStyle = (FontStyle)FontStyleProperty.OwnerMetadata.DefaultValue;
-            FontSize = (int)FontSizeProperty.OwnerMetadata.DefaultValue;
-
             // TODO: Replace with control template.
             containerPanel = new StackPanel(manager);
             var background = (Color)"#323741";
