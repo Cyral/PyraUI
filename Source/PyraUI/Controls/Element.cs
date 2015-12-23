@@ -266,6 +266,10 @@ namespace Pyratron.UI.Controls
                 InvalidateMeasure();
             if (metadata.AffectsArrange)
                 InvalidateArrange();
+            if (metadata.AffectsParentArrange)
+                Parent?.InvalidateArrange();
+            if (metadata.AffectsParentMeasure)
+                Parent?.InvalidateMeasure();
         }
 
         /// <summary>

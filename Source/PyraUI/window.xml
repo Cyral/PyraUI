@@ -1,8 +1,48 @@
 ﻿<Window
-  Height="400"
-  Width="700">
-  <Canvas Width="400" Height="300">
-    <Button Canvas.Right="64" Canvas.Top="64">Hello</Button>
-    <Button>Hello</Button>
-  </Canvas>
+  Height="450"
+  Width="1000">
+  <Label FontSize="16">Panel Tests:</Label>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <StackPanel Width="100" Margin="8">
+      <Label>StackPanel</Label>
+      <Border Background="Red" CornerRadius="5" Margin="2" Height="32" />
+      <Border Background="Green" CornerRadius="5" Margin="2" Height="32" />
+      <Border Background="Blue" CornerRadius="5" Margin="2" Height="32" />
+    </StackPanel>
+    <StackPanel Width="100" Margin="8">
+      <Label>DockPanel</Label>
+      <DockPanel Width="100" Height="108">
+        <Border DockPanel.Dock="Top" Background="Red" CornerRadius="5" Margin="2" Height="32" />
+        <Border DockPanel.Dock="Bottom" Background="Green" CornerRadius="5" Margin="2" Height="32" />
+        <Border DockPanel.Dock="Left" Background="Blue" CornerRadius="5" Margin="2" Width="32" />
+        <Border DockPanel.Dock="Right" Background="Yellow" CornerRadius="5" Margin="2" Width="32" />
+        <Border Background="Pink" CornerRadius="5" Margin="2" />
+      </DockPanel>
+    </StackPanel>
+    <StackPanel Width="100" Margin="8">
+      <Label>WrapPanel</Label>
+      <WrapPanel Width="100" Height="108">
+        <Border Background="Red" CornerRadius="5" Margin="2" Height="32" Width="32" />
+        <Border Background="Green" CornerRadius="5" Margin="2" Height="48" Width="48" />
+        <Border Background="Blue" CornerRadius="5" Margin="2" Height="24" Width="24" />
+        <Border Background="Yellow" CornerRadius="5" Margin="2" Height="32" Width="32" />
+        <Border Background="Pink" CornerRadius="5" Margin="2" Height="40" Width="40" />
+      </WrapPanel>
+    </StackPanel>
+    <StackPanel Width="100" Margin="8">
+      <Label>Canvas</Label>
+      <Canvas Width="100" Height="108">
+        <Border Background="Red" CornerRadius="5" Margin="2" Width="48" Height="48" />
+        <Border Canvas.Left="24" Canvas.Top="24" Background="Green" CornerRadius="5" Margin="2" Width="48" Height="48" />
+        <Border Canvas.Left="48" Canvas.Top="48" Background="Blue" CornerRadius="5" Margin="2" Width="48" Height="48" />
+      </Canvas>
+    </StackPanel>
+  </StackPanel>
+  <Label FontSize="16">Control Tests:</Label>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <Button MinWidth="100" Margin="0,0,8,0">Ok</Button>
+    <Button MinWidth="100">Cancel</Button>
+  </StackPanel>
+  <Label Padding="4">_[Red]Text_ *[Blue]Styles*</Label>
+  <TextBlock>Test</TextBlock>
 </Window>

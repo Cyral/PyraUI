@@ -67,6 +67,7 @@ namespace Pyratron.UI.Markup
                 var control = CreateControlInstance(node, parent);
                 if (control == null) continue;
                 control.LogicalParent = parent;
+                control.Parent = parent;
 
                 if (node.Attributes != null)
                 {
@@ -121,9 +122,7 @@ namespace Pyratron.UI.Markup
                 if (parent == null)
                     manager.AddRootElement(control);
                 else
-                {
                     parent.Add(control);
-                }
                 LoadNode(node.ChildNodes, control);
             }
         }

@@ -22,7 +22,7 @@ namespace Pyratron.UI.Demo
             graphics = new GraphicsDeviceManager(this)
             {
                 PreferredBackBufferHeight = 800,
-                PreferredBackBufferWidth = 1024,
+                PreferredBackBufferWidth = 1366,
                 PreferMultiSampling = true,
                 SynchronizeWithVerticalRetrace = false,
                 PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8, // Important!
