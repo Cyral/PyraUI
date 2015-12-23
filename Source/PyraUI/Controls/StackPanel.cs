@@ -75,13 +75,13 @@ namespace Pyratron.UI.Controls
             return CreateSize(stackLength, stretchLength);
         }
 
-        private Point CreatePoint(double mainLength, double crossLength) => Orientation == Orientation.Vertical
-            ? new Point(crossLength, mainLength)
-            : new Point(mainLength, crossLength);
+        private Point CreatePoint(double stackLength, double stretchLength) => Orientation == Orientation.Vertical
+            ? new Point(stretchLength, stackLength)
+            : new Point(stackLength, stretchLength);
 
-        private Size CreateSize(double mainLength, double crossLength) => Orientation == Orientation.Vertical
-            ? new Size(crossLength, mainLength)
-            : new Size(mainLength, crossLength);
+        private Size CreateSize(double stackLength, double stretchLength) => Orientation == Orientation.Vertical
+            ? new Size(stretchLength, stackLength)
+            : new Size(stackLength, stretchLength);
 
         private double GetStackSize(Size size) => Orientation == Orientation.Vertical ? size.Height : size.Width;
 

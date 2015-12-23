@@ -7,7 +7,15 @@
       <Button>Okay</Button>
       <Button Margin="8,0,0,0" MinWidth="100">Cancel</Button>
     </StackPanel>
-    <Label>Test2.</Label>
+    <WrapPanel Width="200" Orientation="Horizontal" FontSize="8">
+      <Button>Test 1</Button>
+      <Button>Test 2</Button>
+      <Button>Test 3</Button>
+      <Button>Test 4</Button>
+      <Button>Test 5</Button>
+      <Button>Test 6</Button>
+      <Button>Test 7</Button>
+    </WrapPanel>
     <Button>
       <StackPanel>
         <Label>This a custom button content.</Label>
@@ -17,6 +25,6 @@
         </Window>
       </StackPanel>
     </Button>
-    <Label>Test3.</Label>
+    <Label>Test.</Label>
   </StackPanel>
 </Window>
