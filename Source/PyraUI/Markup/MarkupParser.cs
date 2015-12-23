@@ -63,7 +63,7 @@ namespace Pyratron.UI.Markup
             {
                 var control = CreateControlInstance(node, parent);
                 if (control == null) continue;
-                control.LogicalParent = parent;
+                                control.LogicalParent = parent;
 
                 var props = TypeDescriptor.GetProperties(control.GetType());
 

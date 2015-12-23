@@ -26,12 +26,9 @@ namespace Pyratron.UI.Monogame
             return new Color(color.R, color.G, color.B, color.A);
         }
 
-        public static Color ToXNA(this Brush brush)
+        public static Color ToXNA(this ColorBrush brush)
         {
-            var color = brush as ColorBrush;
-            if (color != null)
-                return new Color(color.Color.R, color.Color.G, color.Color.B, color.Color.A);
-            return Color.Black;
+           return new Color(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
         }
 
         public static Types.Rectangle ToOriginal(this Rectangle rect)

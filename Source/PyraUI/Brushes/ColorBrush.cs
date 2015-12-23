@@ -1,4 +1,6 @@
-﻿using Pyratron.UI.Types;
+﻿using Pyratron.UI.Effects;
+using Pyratron.UI.Types;
+using Pyratron.UI.Types.Properties;
 
 namespace Pyratron.UI.Brushes
 {
@@ -7,11 +9,18 @@ namespace Pyratron.UI.Brushes
     /// </summary>
     public class ColorBrush : Brush
     {
-        public Color Color { get; set; }
+        public Color Color
+        {
+            get { return GetValue(ColorProperty); }
+            set { SetValue(ColorProperty, value); }
+        }
+
+        public static readonly DependencyProperty<Color> ColorProperty =
+          DependencyProperty.Register<DropShadowEffect, Color>(nameof(ColorBrush), Color.Black);
 
         public ColorBrush()
         {
-            Color = Color.Black;
+
         }
 
         public ColorBrush(Color color)

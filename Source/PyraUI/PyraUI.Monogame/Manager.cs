@@ -21,7 +21,7 @@ namespace Pyratron.UI.Monogame
 
         public override void Load()
         {
-            SpriteBatch.GraphicsDevice.RasterizerState = new RasterizerState() { ScissorTestEnable = true };
+            SpriteBatch.GraphicsDevice.RasterizerState = new RasterizerState() { ScissorTestEnable = true, MultiSampleAntiAlias = true };
             Skin = new Skin(this);
             Renderer = new Renderer(this);
             Input = new InputHandler(this);

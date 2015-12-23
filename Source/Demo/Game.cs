@@ -25,6 +25,7 @@ namespace Pyratron.UI.Demo
                 PreferredBackBufferWidth = 1024,
                 PreferMultiSampling = true,
                 SynchronizeWithVerticalRetrace = false,
+                PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8, // Important!
             };
             IsMouseVisible = true;
             IsFixedTimeStep = false;

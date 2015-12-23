@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pyratron.UI.Brushes;
 using Pyratron.UI.Types;
 using Pyratron.UI.Types.Properties;
 
@@ -409,14 +410,14 @@ namespace Pyratron.UI.Controls
         /// <summary>
         /// The text color.
         /// </summary>
-        public Color TextColor
+        public Brush TextColor
         {
             get { return GetValue(TextColorProperty); }
             set { SetValue(TextColorProperty, value); }
         }
 
-        public static readonly DependencyProperty<Color> TextColorProperty =
-            DependencyProperty.Register<Element, Color>(nameof(TextColor), Color.Black);
+        public static readonly DependencyProperty<Brush> TextColorProperty =
+            DependencyProperty.Register<Element, Brush>(nameof(TextColor), (ColorBrush)Color.Black);
 
         /// <summary>
         /// Make sure Width/Height values are above 0.

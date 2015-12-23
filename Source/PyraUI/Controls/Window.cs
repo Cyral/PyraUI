@@ -11,8 +11,8 @@ namespace Pyratron.UI.Controls
             DependencyProperty.Register<Window, string>(nameof(Title), "Window",
                 new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
-        public static readonly DependencyProperty<Brush> BackgroundColorProperty =
-            DependencyProperty.Register<Window, Brush>(nameof(Background), (Color)"#ebedf0",
+        public static readonly DependencyProperty<Brush> BackgroundProperty =
+            DependencyProperty.Register<Window, Brush>(nameof(Background), (ColorBrush)"#ebedf0",
                 new PropertyMetadata(MetadataOption.IgnoreInheritance));
 
         /// <summary>
@@ -29,8 +29,8 @@ namespace Pyratron.UI.Controls
         /// </summary>
         public Brush Background
         {
-            get { return GetValue(BackgroundColorProperty); }
-            set { SetValue(BackgroundColorProperty, value); }
+            get { return GetValue(BackgroundProperty); }
+            set { SetValue(BackgroundProperty, value); }
         }
 
         private readonly Element contentArea;
@@ -41,11 +41,9 @@ namespace Pyratron.UI.Controls
 
         static Window()
         {
-            FontStyleProperty.OverrideMetadata(typeof(Button), (FontStyle)FontStyleProperty.OwnerMetadata.DefaultValue);
-            TextColorProperty.OverrideMetadata(typeof(Button), (Color)TextColorProperty.OwnerMetadata.DefaultValue);
         }
         public Window(Manager manager) : base(manager)
-        {
+        { 
             // TODO: Replace with control template.
             containerPanel = new StackPanel(manager);
             var background = (Color)"#323741";
@@ -53,7 +51,7 @@ namespace Pyratron.UI.Controls
             {
                 CornerRadius = 5,
                 BorderThickness = 1,
-                Background = this.Background,
+                Background = Background,
                 BorderBrush = background,
             };
             base.Add(windowBorder);
@@ -99,6 +97,10 @@ namespace Pyratron.UI.Controls
             if (property == TitleProperty)
             {
                 titleLabel.Text = (string) newValue;
+            }
+            if (property == BackgroundProperty)
+            {
+                windowBorder.Background = (Brush) newValue;
             }
             base.OnPropertyChanged(property, newValue, oldValue);
         }

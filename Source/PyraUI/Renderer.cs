@@ -50,13 +50,13 @@ namespace Pyratron.UI
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public void DrawString(string text, Point point, ColorBrush color, int size, Rectangle bounds, bool ignoreFormatting = false)
-            => DrawString(text, point, color, size, FontStyle.Regular, bounds, ignoreFormatting);
+        public void DrawString(string text, Point point, Brush brush, int size, Rectangle bounds, bool ignoreFormatting = false)
+            => DrawString(text, point, brush, size, FontStyle.Regular, bounds, ignoreFormatting);
 
         /// <summary>
         /// Draws a string at the specified point.
         /// </summary>
-        public abstract void DrawString(string text, Point point, ColorBrush color, int size, FontStyle style, Rectangle bounds,bool ignoreFormatting = false);
+        public abstract void DrawString(string text, Point point, Brush brush, int size, FontStyle style, Rectangle bounds,bool ignoreFormatting = false);
 
         /// <summary>
         /// Draws a rectangle within the specified area.

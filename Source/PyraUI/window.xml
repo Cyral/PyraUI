@@ -3,11 +3,10 @@
   Width="700">
   <StackPanel>
     This is a test.
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,8" Height="100" TextColor="Red">
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,8" Height="50">
       <Button>Okay</Button>
-      <Button Margin="8,0,0,0" Height="20" Width="100">Cancel</Button>
+      <Button Margin="8,0,0,0" MinWidth="100">Cancel</Button>
     </StackPanel>
-    <Button Margin="0,0,0,8">Test</Button>
     <Button>
       <StackPanel>
         <Label>This a custom button content.</Label>

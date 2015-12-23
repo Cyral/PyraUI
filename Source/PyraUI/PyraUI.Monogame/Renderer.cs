@@ -8,8 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Pyratron.UI.Brushes;
 using Pyratron.UI.Types;
 using Color = Pyratron.UI.Types.Color;
-using Point = Pyratron.UI.Types.Point;
 using ColorXNA = Microsoft.Xna.Framework.Color;
+using Point = Pyratron.UI.Types.Point;
 using Rectangle = Pyratron.UI.Types.Rectangle;
 using RectangleXNA = Microsoft.Xna.Framework.Rectangle;
 
@@ -18,14 +18,49 @@ namespace Pyratron.UI.Monogame
     public class Renderer : UI.Renderer
     {
         public override Size Viewport => new Size(graphics.Viewport.Width, graphics.Viewport.Height);
+        private readonly AlphaTestEffect alphaTextEffect;
+        private readonly Dictionary<GradientBrush, Texture2D> gradientCache;
         private readonly GraphicsDevice graphics;
         private readonly Manager manager;
+        private readonly List<Rectangle> stencilAreas; 
+        private readonly DepthStencilState maskStencil, renderStencil;
         private readonly Texture2D pixel;
 
         public Renderer(Manager manager)
         {
+            // Cache of gradients.
+            gradientCache = new Dictionary<GradientBrush, Texture2D>();
+            stencilAreas = new List<Rectangle>();
             this.manager = manager;
             graphics = manager.SpriteBatch.GraphicsDevice;
+
+            // Create stencils for drawing masked sprites.
+            var matrix = Matrix.CreateOrthographicOffCenter(0,
+                graphics.PresentationParameters.BackBufferWidth,
+                graphics.PresentationParameters.BackBufferHeight,
+                0, 0, 1
+                );
+            alphaTextEffect = new AlphaTestEffect(graphics)
+            {
+                Projection = matrix
+            };
+            maskStencil = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.Always,
+                StencilPass = StencilOperation.Replace,
+                ReferenceStencil = 1,
+                DepthBufferEnable = false,
+            };
+            renderStencil = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.LessEqual,
+                StencilPass = StencilOperation.Keep,
+                ReferenceStencil = 1,
+                DepthBufferEnable = false,
+            };
+
             // Create 1x1 texture for rendering rectangles.
             pixel = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, 1);
             pixel.SetData(new[] {ColorXNA.White});
@@ -33,7 +68,8 @@ namespace Pyratron.UI.Monogame
 
         public override void BeginDraw()
         {
-            manager.SpriteBatch.Begin(SpriteSortMode.Immediate, rasterizerState: manager.SpriteBatch.GraphicsDevice.RasterizerState);
+            manager.SpriteBatch.Begin(SpriteSortMode.Immediate,
+                rasterizerState: manager.SpriteBatch.GraphicsDevice.RasterizerState);
         }
 
         public override void DrawRectangle(Rectangle area, Brush brush, Thickness thickness, double radius,
@@ -48,25 +84,23 @@ namespace Pyratron.UI.Monogame
                 }
                 else
                 {
-                    var brushXNA = brush.ToXNA();
-
                     var areaXNA = area.ToXNA();
                     FillRect(new RectangleXNA(areaXNA.X,
-                        areaXNA.Top, areaXNA.Width, thickness.Top), brushXNA);
+                        areaXNA.Top, areaXNA.Width, thickness.Top), brush);
                     FillRect(new RectangleXNA(areaXNA.X,
                         areaXNA.Top + thickness.Top, thickness.Left, areaXNA.Height - thickness.Top - thickness.Bottom),
-                        brushXNA);
+                        brush);
                     FillRect(new RectangleXNA(areaXNA.Right - thickness.Right,
                         areaXNA.Top + thickness.Top, thickness.Right, areaXNA.Height - thickness.Top - thickness.Bottom),
-                        brushXNA);
+                        brush);
                     FillRect(new RectangleXNA(areaXNA.X,
-                        areaXNA.Bottom - thickness.Bottom, areaXNA.Width, thickness.Bottom), brushXNA);
+                        areaXNA.Bottom - thickness.Bottom, areaXNA.Width, thickness.Bottom), brush);
                 }
             }
             ResetClipArea();
         }
 
-        public override void DrawString(string text, Point point, ColorBrush brush, int size, FontStyle style,
+        public override void DrawString(string text, Point point, Brush brush, int size, FontStyle style,
             Rectangle bounds,
             bool ignoreFormatting = false)
         {
@@ -74,30 +108,49 @@ namespace Pyratron.UI.Monogame
             var pos = new Vector2((int) Math.Round(point.X), (int) Math.Round(point.Y));
             var closest = GetClosestFontSize(size);
 
-            var parts = ParseFormattedText(text, brush.Color, style);
+            var colorBrush = brush as ColorBrush;
+            var gradientBrush = brush as GradientBrush;
+            var defaultColor = Color.Black;
+            if (colorBrush != null)
+                defaultColor = colorBrush.Color;
 
-            if (!ignoreFormatting)
+            if (gradientBrush != null)
             {
+                UseMaskStencil(bounds);
+            }
+
+            if (!ignoreFormatting) // If formatting is enabled, parse it and render each part.
+            {
+                var parts = ParseFormattedText(text, defaultColor, style);
                 foreach (var part in parts)
                 {
                     var font = GetFont(Path.Combine(part.Style.ToString(), closest.ToString()));
                     var measure = MeasureTextNoTrim(part.Text, size, part.Style);
-                    var col = new ColorXNA(part.Color.R, part.Color.G, part.Color.B, brush.Color.A);
+                    var col = new ColorXNA(part.Color.R, part.Color.G, part.Color.B, defaultColor.A);
 
                     manager.SpriteBatch.DrawString(font, part.Text, pos,
-                        col * (brush.Color.A / 255f), 0,
+                        col * (defaultColor.A / 255f), 0,
                         Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
                     pos = new Vector2(pos.X + (float) measure.Width, pos.Y);
                 }
             }
-            else
+            else // Draw plain string
             {
                 var font = GetFont(Path.Combine(style.ToString(), closest.ToString()));
-                var col = new ColorXNA(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
+                var col = new ColorXNA(defaultColor.R, defaultColor.G, defaultColor.B, defaultColor.A);
                 manager.SpriteBatch.DrawString(font, text, pos,
-                    col * (brush.Color.A / 255f), 0,
+                    col * (defaultColor.A / 255f), 0,
                     Vector2.Zero, size / (float) closest, SpriteEffects.None, 0);
             }
+
+            // If using a gradient brush, draw a gradient over the mask.
+            if (gradientBrush != null)
+            {
+                UseRenderStencil();
+                DrawGradient(bounds, gradientBrush);
+                EndStencil();
+            }
+
             ResetClipArea();
         }
 
@@ -108,16 +161,6 @@ namespace Pyratron.UI.Monogame
             var texture = GetTexture(name);
             var col = new ColorXNA(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A);
             manager.SpriteBatch.Draw(texture, rect, col);
-        }
-
-        private void SetClipArea(Rectangle bounds)
-        {
-            manager.SpriteBatch.GraphicsDevice.ScissorRectangle = bounds.ToXNA();
-        }
-
-        private void ResetClipArea()
-        {
-            manager.SpriteBatch.GraphicsDevice.ScissorRectangle = new RectangleXNA(0,0, (int)Viewport.Width, (int)Viewport.Height);
         }
 
         public override void EndDraw()
@@ -135,33 +178,59 @@ namespace Pyratron.UI.Monogame
                     var corner = (int) Math.Round(radius);
                     var corner2 = corner * 2;
                     var areaXNA = area.ToXNA();
-                    var brushXNA = brush.ToXNA();
+
+                    var gradientBrush = brush as GradientBrush;
+                    if (gradientBrush != null)
+                    {
+                        UseMaskStencil(area);
+                    }
 
                     // Draw 5 rectangles (top, bottom, left, right, center)
                     FillRect(new RectangleXNA(areaXNA.X + corner,
-                        areaXNA.Top, areaXNA.Width - corner2, corner), brushXNA);
+                        areaXNA.Top, areaXNA.Width - corner2, corner), brush);
                     FillRect(new RectangleXNA(areaXNA.X + corner,
-                        areaXNA.Bottom - corner, areaXNA.Width - corner2, corner), brushXNA);
+                        areaXNA.Bottom - corner, areaXNA.Width - corner2, corner), brush);
                     FillRect(new RectangleXNA(areaXNA.X,
-                        areaXNA.Top + corner, corner, areaXNA.Height - corner2), brushXNA);
+                        areaXNA.Top + corner, corner, areaXNA.Height - corner2), brush);
                     FillRect(new RectangleXNA(areaXNA.Right - corner,
-                        areaXNA.Y + corner, corner, areaXNA.Height - corner2), brushXNA);
+                        areaXNA.Y + corner, corner, areaXNA.Height - corner2), brush);
                     FillRect(new RectangleXNA(areaXNA.X + corner,
-                        areaXNA.Y + corner, areaXNA.Width - corner2, areaXNA.Height - corner2), brushXNA);
+                        areaXNA.Y + corner, areaXNA.Width - corner2, areaXNA.Height - corner2), brush);
 
                     // Draw edge corners.
                     var circle = GetCircleTexture(radius);
-                    FillCorner(new RectangleXNA(areaXNA.X, areaXNA.Y, corner, corner), circle, Corner.TopLeft, brushXNA);
+                    FillCorner(new RectangleXNA(areaXNA.X, areaXNA.Y, corner, corner), circle, Corner.TopLeft,
+                        brush);
                     FillCorner(new RectangleXNA(areaXNA.Right - corner, areaXNA.Y, corner, corner), circle,
-                        Corner.TopRight, brushXNA);
+                        Corner.TopRight, brush);
                     FillCorner(new RectangleXNA(areaXNA.X, areaXNA.Bottom - corner, corner, corner), circle,
-                        Corner.BottomLeft, brushXNA);
-                    FillCorner(new RectangleXNA(areaXNA.Right - corner, areaXNA.Bottom - corner, corner, corner), circle,
-                        Corner.BottomRight, brushXNA);
+                        Corner.BottomLeft, brush);
+                    FillCorner(new RectangleXNA(areaXNA.Right - corner, areaXNA.Bottom - corner, corner, corner),
+                        circle,
+                        Corner.BottomRight, brush);
+
+                    // If using a gradient brush, draw a gradient over the mask.
+                    if (gradientBrush != null)
+                    {
+                        UseRenderStencil();
+                        DrawGradient(area, gradientBrush);
+                        EndStencil();
+                    }
                 }
                 else
-                    manager.SpriteBatch.Draw(pixel, area.ToXNA(), null, brush.ToXNA(), 0, Vector2.Zero,
-                        SpriteEffects.None, 0);
+                {
+                    var colorBrush = brush as ColorBrush;
+                    var gradientBrush = brush as GradientBrush;
+                    if (colorBrush != null)
+                    {
+                        manager.SpriteBatch.Draw(pixel, area.ToXNA(), null, colorBrush.ToXNA(), 0, Vector2.Zero,
+                            SpriteEffects.None, 0);
+                    }
+                    if (gradientBrush != null)
+                    {
+                        DrawGradient(area, gradientBrush);
+                    }
+                }
             }
             ResetClipArea();
         }
@@ -213,8 +282,49 @@ namespace Pyratron.UI.Monogame
                 new RectangleXNA(half, half, half, 1), col);
         }
 
-        private void FillCorner(RectangleXNA rect, Texture2D circle, Corner corner, ColorXNA color)
+        /// <summary>
+        /// Draw a gradient over the specified area. To draw in a custom area (such as rounded rectangles), use a mask.
+        /// </summary>
+        private void DrawGradient(Rectangle area, GradientBrush gradientBrush)
         {
+            Texture2D gradientTexture;
+            // Create new gradient texture if it is not cached.
+            if (!gradientCache.TryGetValue(gradientBrush, out gradientTexture))
+            {
+                var total = 15;
+                gradientTexture = new Texture2D(manager.SpriteBatch.GraphicsDevice, 1, total);
+                var start = gradientBrush.Start.ToXNA();
+                var end = gradientBrush.End.ToXNA();
+                var colors = new ColorXNA[total];
+                // Add the start and end colors to the start and end, then add colors in betweeen.
+                // The default way XNA/Monogame handles just two colors will only make 1/3rd of the result
+                // a gradient, so we need to add some colors in between for better interpolation.
+                colors[0] = start;
+                for (var i = 1; i < total - 1; i++)
+                {
+                    colors[i] = ColorXNA.Lerp(start, end, (float) i / (total - 2));
+                }
+                colors[total - 1] = end;
+                gradientTexture.SetData(colors);
+                gradientCache.Add(gradientBrush, gradientTexture);
+            }
+            manager.SpriteBatch.Draw(gradientTexture, area.ToXNA(), null, ColorXNA.White, 0, Vector2.Zero,
+                SpriteEffects.None, 0);
+        }
+
+        private void EndStencil()
+        {
+            EndDraw();
+            BeginDraw();
+        }
+
+        private void FillCorner(RectangleXNA rect, Texture2D circle, Corner corner, Brush brush)
+        {
+            var colorBrush = brush as ColorBrush;
+            var color = ColorXNA.Black;
+            if (colorBrush != null)
+                color = colorBrush.Color.ToXNA();
+
             var source = new RectangleXNA(0, 0, circle.Width / 2, circle.Height / 2);
             switch (corner)
             {
@@ -233,8 +343,13 @@ namespace Pyratron.UI.Monogame
                 SpriteEffects.None, 0);
         }
 
-        private void FillRect(RectangleXNA rect, ColorXNA color)
+        private void FillRect(RectangleXNA rect, Brush brush)
         {
+            var colorBrush = brush as ColorBrush;
+            var color = ColorXNA.Black;
+            if (colorBrush != null)
+
+                color = colorBrush.Color.ToXNA();
             manager.SpriteBatch.Draw(pixel, rect, null, color, 0, Vector2.Zero,
                 SpriteEffects.None, 0);
         }
@@ -361,6 +476,40 @@ namespace Pyratron.UI.Monogame
             if (colors.Count > 0)
                 parts.Add(new TextRenderProperties(sb.ToString(), colors.Peek(), inBold ? FontStyle.Bold : style));
             return parts;
+        }
+
+        private void ResetClipArea()
+        {
+            manager.SpriteBatch.GraphicsDevice.ScissorRectangle = new RectangleXNA(0, 0, (int) Viewport.Width,
+                (int) Viewport.Height);
+        }
+
+        private void SetClipArea(Rectangle bounds)
+        {
+            manager.SpriteBatch.GraphicsDevice.ScissorRectangle = bounds.ToXNA();
+        }
+
+        private void UseMaskStencil(Rectangle area)
+        {
+            // If the mask area doesn't overlap any previous areas, it is safe to reuse the area without clearing the buffer.
+            if (stencilAreas.Any(x => x.Intersects(area)))
+            {
+                graphics.Clear(ClearOptions.Stencil, ColorXNA.White, 0, 0);
+                stencilAreas.Clear();
+                stencilAreas.Add(area);
+            }
+            else if (!stencilAreas.Any(x => x.Equals(area)))
+                stencilAreas.Add(area);
+            EndDraw();
+            manager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, maskStencil,
+                manager.SpriteBatch.GraphicsDevice.RasterizerState, alphaTextEffect);
+        }
+
+        private void UseRenderStencil()
+        {
+            EndDraw();
+            manager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, renderStencil,
+                manager.SpriteBatch.GraphicsDevice.RasterizerState, alphaTextEffect);
         }
 
         private enum Corner
