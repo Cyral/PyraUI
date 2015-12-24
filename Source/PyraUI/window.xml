@@ -21,7 +21,7 @@
     </StackPanel>
     <StackPanel Width="100" Margin="8">
       <Label>WrapPanel</Label>
-      <WrapPanel Width="100" Height="108">
+      <WrapPanel Width="100" Height="108" Orientation="Vertical">
         <Border Background="Red" CornerRadius="5" Margin="2" Height="32" Width="32" />
         <Border Background="Green" CornerRadius="5" Margin="2" Height="48" Width="48" />
         <Border Background="Blue" CornerRadius="5" Margin="2" Height="24" Width="24" />

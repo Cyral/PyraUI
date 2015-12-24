@@ -13,7 +13,7 @@ namespace Pyratron.UI.Controls
     public class WrapPanel : Panel
     {
         public static readonly DependencyProperty<Orientation> OrientationProperty =
-            DependencyProperty.Register<StackPanel, Orientation>(nameof(Orientation), Orientation.Vertical,
+            DependencyProperty.Register<Panel, Orientation>(nameof(Orientation), Orientation.Horizontal,
                 new PropertyMetadata(MetadataOption.IgnoreInheritance | MetadataOption.AffectsMeasure |
                                      MetadataOption.AffectsArrange));
 
